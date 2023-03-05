@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.GridPane?>
+
+<GridPane
+    xmlns:fx="http://javafx.com/fxml/1"
+    fx:controller="com.mycompany.controllers.SetBaseEditorController"
+    hgap="5" vgap="5">
+    <padding>
+        <Insets top="5" bottom="5" left="5" right="5" />
+    </padding>
+        
+    <Label fx:id="workingSetsLbl" text="Working sets:"
+        GridPane.columnIndex="0" GridPane.rowIndex="0" />
+    
+    <Label fx:id="repetitionsLbl" text="Repetitions:"
+        GridPane.columnIndex="0" GridPane.rowIndex="1" />
+    
+    <Label fx:id="workingWeightLbl" text="Working weight:"
+        GridPane.columnIndex="0" GridPane.rowIndex="2" />
+    
+    <TextField fx:id="workingSetsTF"
+        GridPane.columnIndex="1" GridPane.rowIndex="0" />
+    
+    <TextField fx:id="repetitionsTF"
+        GridPane.columnIndex="1" GridPane.rowIndex="1" />
+    
+    <TextField fx:id="workingWeightTF"
+        GridPane.columnIndex="1" GridPane.rowIndex="2" />
+    
+    <HBox
+        GridPane.columnIndex="0" GridPane.rowIndex="3"
+        GridPane.columnSpan="2" spacing="5">
+        <Button text="OK" onAction="#submit" />
+        <Button text="Cancel" onAction="#cancel" />
+    </HBox>
+</GridPane>

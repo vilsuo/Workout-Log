@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+
+<BorderPane
+    xmlns:fx="http://javafx.com/fxml/1"
+    fx:controller="com.mycompany.controllers.SetBaseListController">
+    <top>
+        <Label fx:id="exerciseNameLbl" />
+    </top>
+    <center>
+        <ListView fx:id="setBaseList" />
+    </center>
+    <bottom>
+        <HBox spacing="5">
+            <padding>
+                <Insets top="10" bottom="10" left="10" right="10" />
+            </padding>
+            <Button text="New..." onAction="#newSetBase" />
+            <Button text="Edit..." onAction="#editSetBase" fx:id="editButton" />
+            <Button text="Remove..." onAction="#removeSetBase" fx:id="removeButton" />
+        </HBox>
+    </bottom>
+</BorderPane>
