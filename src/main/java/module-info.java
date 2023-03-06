@@ -1,6 +1,7 @@
 module com.mycompany {
     requires javafx.controls;
     requires javafx.fxml;
+    requires java.base;
     
     opens com.mycompany.controllers to javafx.fxml;
     

@@ -32,7 +32,6 @@ public class SetBaseEditorController {
     }
 
     public void initialize() {
-        
         setBaseProperty().addListener((obs, oldSetBase, newSetBase) -> {
             if (newSetBase != null) {
                 workingSetsTF.setText(String.valueOf(newSetBase.getWorkingSets()));
@@ -58,7 +57,6 @@ public class SetBaseEditorController {
                 submit();
             }
         });
-        
     }
 
     @FXML
@@ -84,14 +82,13 @@ public class SetBaseEditorController {
         }
         
         close();
-        
     }
     
     @FXML
     private void cancel() {
         close();
     }
-
+    
     private void close() {
         workingSetsTF.getScene().getWindow().hide();
     }

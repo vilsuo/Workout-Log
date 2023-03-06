@@ -30,8 +30,7 @@ public class SetBase {
         workingSetsProperty().set(workingSets);
     }
     
-    
-    public final IntegerProperty repetitionsProperty() {
+    public IntegerProperty repetitionsProperty() {
         return repetitions;
     }
     
@@ -43,8 +42,7 @@ public class SetBase {
         repetitionsProperty().set(repetitions);
     }
     
-    
-    public final DoubleProperty workingWeightProperty() {
+    public DoubleProperty workingWeightProperty() {
         return workingWeight;
     }
     
@@ -55,7 +53,6 @@ public class SetBase {
     public final void setWorkingWeight(final double workingWeight) {
         workingWeightProperty().set(workingWeight);
     }
-    
     
     @Override
     public String toString() {
