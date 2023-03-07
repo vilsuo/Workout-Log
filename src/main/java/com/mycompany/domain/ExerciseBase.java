@@ -1,34 +1,36 @@
 
 package com.mycompany.domain;
 
-import com.mycompany.domain.types.Exercise;
 import javafx.beans.Observable;
 import javafx.beans.property.SimpleListProperty;
-import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.util.Callback;
 
 public class ExerciseBase {
     
-    private final SimpleObjectProperty<Exercise> exerciseName;
+    private SimpleStringProperty exerciseName;
     private SimpleListProperty<SetBase> sets;
 
-    public ExerciseBase(Exercise exerciseName) {
-        this.exerciseName = new SimpleObjectProperty<>(exerciseName);
+    public ExerciseBase(String exerciseName) {
+        this.exerciseName = new SimpleStringProperty(exerciseName);
         
         // list created so it fires updates if SetBase changes:
-        Callback<SetBase, Observable[]> extractor = (SetBase setBase) -> new Observable[] {
-            setBase.workingSetsProperty(),
-            setBase.repetitionsProperty(),
-            setBase.workingWeightProperty()
-        };
+        Callback<SetBase, Observable[]> extractor =
+            (SetBase setBase) -> new Observable[] {
+                setBase.workingSetsProperty(),
+                setBase.repetitionsProperty(),
+                setBase.workingWeightProperty()
+            };
         
-        ObservableList<SetBase> observableList = FXCollections.observableArrayList(extractor);
+        ObservableList<SetBase> observableList =
+            FXCollections.observableArrayList(extractor);
+        
         sets = new SimpleListProperty<>(observableList);
     }
     
-    public ExerciseBase(Exercise exerciseName, SetBase set) {
+    public ExerciseBase(String exerciseName, SetBase set) {
         this(exerciseName);
         addSet(set);
     }
@@ -51,22 +53,22 @@ public class ExerciseBase {
     }
     
     
-    public SimpleObjectProperty<Exercise> exerciseNameProperty() {
+    public SimpleStringProperty exerciseNameProperty() {
         return this.exerciseName;
     }
     
-    public final Exercise getExerciseName() {
+    public final String getExerciseName() {
         return exerciseName.get();
     }
     
-    public final void setExerciseName(Exercise exerciseName) {
+    public final void setExerciseName(String exerciseName) {
         this.exerciseName.set(exerciseName);
     }
     
     
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder(this.exerciseName.get().label);
+        StringBuilder sb = new StringBuilder(this.exerciseName.get());
         
         for (SetBase setBase : sets.get()) {
             sb.append("\n");

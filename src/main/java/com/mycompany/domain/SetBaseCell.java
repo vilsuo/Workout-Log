@@ -1,6 +1,7 @@
 
 package com.mycompany.domain;
 
+import com.mycompany.utilities.LocalDragboard;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.ListCell;
@@ -9,6 +10,11 @@ import javafx.scene.input.DragEvent;
 import javafx.scene.input.Dragboard;
 import javafx.scene.input.TransferMode;
 
+/**
+ * Supports drag and drop -feature
+ * 
+ * onDragDropped inefficient: whole list is replaced
+ */
 public class SetBaseCell extends ListCell<SetBase> {
     
     public SetBaseCell() {
@@ -46,8 +52,8 @@ public class SetBaseCell extends ListCell<SetBase> {
             content.putString(getItem().toString());
             db.setContent(content);
             
-            // 2. Put the real data in a custom dragboard
-            // TODO change other events to track this instead of dragboard
+            // 2. Put the real data in a custom dragboard, since the dragboard
+            // does not support custum classes
             LocalDragboard.getInstance().putValue(SetBase.class, getItem());
             
             event.consume();
@@ -76,7 +82,7 @@ public class SetBaseCell extends ListCell<SetBase> {
             is provided by the getDragboard() method.
             */
             if ((event.getGestureSource() != thisCell) &&
-                    event.getDragboard().hasString())
+                    LocalDragboard.getInstance().hasType(SetBase.class))
             {
                 event.acceptTransferModes(TransferMode.MOVE);
             }
@@ -90,7 +96,7 @@ public class SetBaseCell extends ListCell<SetBase> {
         */
         setOnDragEntered(event -> {
             if ((event.getGestureSource() != thisCell) &&
-                    event.getDragboard().hasString())
+                    LocalDragboard.getInstance().hasType(SetBase.class))
             {
                 setOpacity(0.3);
             }
@@ -102,7 +108,7 @@ public class SetBaseCell extends ListCell<SetBase> {
         */
         setOnDragExited(event -> {
             if ((event.getGestureSource() != thisCell) &&
-                    event.getDragboard().hasString())
+                    LocalDragboard.getInstance().hasType(SetBase.class))
             {
                 setOpacity(1);
             }

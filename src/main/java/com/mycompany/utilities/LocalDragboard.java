@@ -1,5 +1,5 @@
 
-package com.mycompany.domain;
+package com.mycompany.utilities;
 
 import java.util.HashMap;
 import java.util.Map;

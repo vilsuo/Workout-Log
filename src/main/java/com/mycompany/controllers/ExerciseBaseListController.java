@@ -3,7 +3,6 @@ package com.mycompany.controllers;
 
 import com.mycompany.domain.ExerciseBase;
 import com.mycompany.domain.SetBase;
-import com.mycompany.domain.types.Exercise;
 import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
 import javafx.collections.FXCollections;
@@ -35,12 +34,12 @@ public class ExerciseBaseListController {
         
         ObservableList<ExerciseBase> exerciseBases = FXCollections.observableArrayList(extractor);
          
-        ExerciseBase bench = new ExerciseBase(Exercise.BENCH_PRESS);
+        ExerciseBase bench = new ExerciseBase("Bench Press");
         bench.addSet(new SetBase(1, 5, 75));
         bench.addSet(new SetBase(1, 3, 80));
         bench.addSet(new SetBase(5, 5, 85));
         
-        ExerciseBase squat = new ExerciseBase(Exercise.BARBELL_SQUAT);
+        ExerciseBase squat = new ExerciseBase("Barbell Squat");
         squat.addSet(new SetBase(1, 2, 3));
         squat.addSet(new SetBase(2, 3, 4));
         squat.addSet(new SetBase(3, 4, 5));
@@ -56,48 +55,55 @@ public class ExerciseBaseListController {
         
         // edit and remove buttons are disabled if an item is not selected in the listview
         editButton.disableProperty().bind(
-                Bindings.isNull(exerciseBaseList.getSelectionModel().selectedItemProperty()));
+            Bindings.isNull(
+                exerciseBaseList.getSelectionModel().selectedItemProperty()
+            )
+        );
         
         removeButton.disableProperty().bind(
-                Bindings.isNull(exerciseBaseList.getSelectionModel().selectedItemProperty()));
+            Bindings.isNull(
+                exerciseBaseList.getSelectionModel().selectedItemProperty()
+            )
+        );
     }
     
     @FXML
     private void newExerciseBase() throws Exception {
-        /*
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/SetBaseList.fxml"));
+        String resource = "/fxml/ExerciseBaseCreator.fxml";
+        FXMLLoader loader = new FXMLLoader(getClass().getResource(resource));
         Parent root = loader.load();
-
-        SetBaseListController controller = loader.getController();
         
-        controller.exerciseBaseProperty().addListener((obs, oldExerciseBase, newExerciseBase) -> {
-            if (newExerciseBase != null) {
-                exerciseBaseList.getItems().add(newExerciseBase);
+        ExerciseBaseCreatorController controller = loader.getController();
+        
+        controller.exerciseBaseProperty().addListener(
+            (obs, oldExerciseBase, newExerciseBase) -> {
+                if (newExerciseBase != null) {
+                    exerciseBaseList.getItems().add(newExerciseBase);
+                }
             }
-        });
+        );
 
-        showEditorWindow(root);
-        */
+        showWindow(root);
     }
     
     @FXML
     private void editExerciseBase() throws Exception {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/SetBaseList.fxml"));
+        String resource = "/fxml/SetBaseList.fxml";
+        FXMLLoader loader = new FXMLLoader(getClass().getResource(resource));
         Parent root = loader.load();
-
         SetBaseListController controller = loader.getController();
 
-        ExerciseBase selectedItem = exerciseBaseList.getSelectionModel().getSelectedItem();
+        ExerciseBase selectedItem = exerciseBaseList.getSelectionModel()
+                                                    .getSelectedItem();
         controller.setExerciseBase(selectedItem);
         
-        showSetBaseListWindow(root);
+        showWindow(root);
     }
     
     @FXML
     private void removeExerciseBase() throws Exception {
-        // remove button is active only if selected index is valid
-        final int selectedIdx = exerciseBaseList.getSelectionModel().getSelectedIndex();
-        
+        final int selectedIdx = exerciseBaseList.getSelectionModel()
+                                                .getSelectedIndex();
         int newSelectedIndex =
             (selectedIdx == exerciseBaseList.getItems().size() - 1)
                 ? selectedIdx - 1
@@ -113,7 +119,7 @@ public class ExerciseBaseListController {
         }
     }
     
-    private void showSetBaseListWindow(Parent root) {
+    private void showWindow(Parent root) {
         Stage stage = new Stage();
         stage.initOwner(exerciseBaseList.getScene().getWindow());
         stage.initModality(Modality.APPLICATION_MODAL); 

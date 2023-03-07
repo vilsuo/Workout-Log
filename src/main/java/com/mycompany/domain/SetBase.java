@@ -59,6 +59,6 @@ public class SetBase {
     
     @Override
     public String toString() {
-        return workingSets.get() + "*" + repetitions.get() + " @" + workingWeight.get();
+        return workingSets.get() + " x " + repetitions.get() + " @" + workingWeight.get();
     }
 }

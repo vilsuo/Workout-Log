@@ -20,9 +20,9 @@
         <ListView fx:id="exerciseBaseList" />
         
         <HBox spacing="5">
-            <Button text="New..." onAction="#newExerciseBase" />
-            <Button text="Edit..." onAction="#editExerciseBase" fx:id="editButton" />
-            <Button text="Remove..." onAction="#removeExerciseBase" fx:id="removeButton" />
+            <Button text="New" onAction="#newExerciseBase" />
+            <Button text="Edit" onAction="#editExerciseBase" fx:id="editButton" />
+            <Button text="Remove" onAction="#removeExerciseBase" fx:id="removeButton" />
         </HBox>
     </children>
 </VBox>
