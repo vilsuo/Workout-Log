@@ -41,9 +41,14 @@ public class ExerciseBaseListController {
         bench.addSet(new SetBase(5, 5, 85));
         
         ExerciseBase squat = new ExerciseBase(Exercise.BARBELL_SQUAT);
-        squat.addSet(new SetBase(1, 5, 75));
-        squat.addSet(new SetBase(1, 3, 85));
-        squat.addSet(new SetBase(10, 3, 95));
+        squat.addSet(new SetBase(1, 2, 3));
+        squat.addSet(new SetBase(2, 3, 4));
+        squat.addSet(new SetBase(3, 4, 5));
+        squat.addSet(new SetBase(4, 5, 6));
+        squat.addSet(new SetBase(5, 6, 7));
+        squat.addSet(new SetBase(6, 7, 8));
+        squat.addSet(new SetBase(7, 8, 9));
+        squat.addSet(new SetBase(8, 9, 10));
         
         exerciseBases.addAll(bench, squat);
         
@@ -85,7 +90,7 @@ public class ExerciseBaseListController {
         ExerciseBase selectedItem = exerciseBaseList.getSelectionModel().getSelectedItem();
         controller.setExerciseBase(selectedItem);
         
-        showSetBaseListWindow(root, selectedItem.getExercise().label);
+        showSetBaseListWindow(root);
     }
     
     @FXML
@@ -102,17 +107,18 @@ public class ExerciseBaseListController {
         
         if (newSelectedIndex >= 0) {
             exerciseBaseList.getSelectionModel().select(newSelectedIndex);
+            
         } else {
             exerciseBaseList.getSelectionModel().clearSelection();
         }
     }
     
-    private void showSetBaseListWindow(Parent root, String title) {
-        Scene scene = new Scene(root);
+    private void showSetBaseListWindow(Parent root) {
         Stage stage = new Stage();
-        //stage.setTitle(exerciseNameLbl.getText());
         stage.initOwner(exerciseBaseList.getScene().getWindow());
         stage.initModality(Modality.APPLICATION_MODAL); 
+        
+        Scene scene = new Scene(root);
         stage.setScene(scene);
         stage.showAndWait();
     }

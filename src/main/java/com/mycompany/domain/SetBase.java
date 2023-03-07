@@ -8,54 +8,57 @@ import javafx.beans.property.SimpleIntegerProperty;
 
 public class SetBase {
     
-    private final IntegerProperty workingSets = new SimpleIntegerProperty();
-    private final IntegerProperty repetitions = new SimpleIntegerProperty();
-    private final DoubleProperty workingWeight = new SimpleDoubleProperty();
+    private final IntegerProperty workingSets;
+    private final IntegerProperty repetitions;
+    private final DoubleProperty workingWeight;
 
     public SetBase(int workingSets, int repetitions, double workingWeight) {
-        setWorkingSets(workingSets);
-        setRepetitions(repetitions);
-        setWorkingWeight(workingWeight);
+        this.workingSets = new SimpleIntegerProperty(workingSets);
+        this.repetitions = new SimpleIntegerProperty(repetitions);
+        this.workingWeight = new SimpleDoubleProperty(workingWeight);
     }
     
-    public final IntegerProperty workingSetsProperty() {
+    public IntegerProperty workingSetsProperty() {
         return workingSets;
     }
     
     public final int getWorkingSets() {
-        return workingSetsProperty().get();
+        return workingSets.get();
     }
     
-    public final void setWorkingSets(final int workingSets) {
-        workingSetsProperty().set(workingSets);
+    public final void setWorkingSets(int workingSets) {
+        this.workingSets.set(workingSets);
     }
+    
     
     public IntegerProperty repetitionsProperty() {
         return repetitions;
     }
     
     public final int getRepetitions() {
-        return repetitionsProperty().get();
+        return repetitions.get();
     }
     
-    public final void setRepetitions(final int repetitions) {
-        repetitionsProperty().set(repetitions);
+    public final void setRepetitions(int repetitions) {
+        this.repetitions.set(repetitions);
     }
+    
     
     public DoubleProperty workingWeightProperty() {
         return workingWeight;
     }
     
     public final double getWorkingWeight() {
-        return workingWeightProperty().get();
+        return workingWeight.get();
     }
     
-    public final void setWorkingWeight(final double workingWeight) {
-        workingWeightProperty().set(workingWeight);
+    public final void setWorkingWeight(double workingWeight) {
+        this.workingWeight.set(workingWeight);
     }
+    
     
     @Override
     public String toString() {
-        return getWorkingSets() + "*" + getRepetitions() + " @" + getWorkingWeight();
+        return workingSets.get() + "*" + repetitions.get() + " @" + workingWeight.get();
     }
 }

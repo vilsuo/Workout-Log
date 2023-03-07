@@ -23,6 +23,7 @@ public class ExerciseBase {
             setBase.repetitionsProperty(),
             setBase.workingWeightProperty()
         };
+        
         ObservableList<SetBase> observableList = FXCollections.observableArrayList(extractor);
         sets = new SimpleListProperty<>(observableList);
     }
@@ -36,6 +37,7 @@ public class ExerciseBase {
         sets.get().add(set);
     }
     
+    
     public SimpleListProperty<SetBase> setsProperty() {
         return sets;
     }    
@@ -44,19 +46,29 @@ public class ExerciseBase {
         return sets.get();
     }
     
-    public final Exercise getExercise() {
+    public final void setSets(final ObservableList<SetBase> sets) {
+        this.sets.set(sets);
+    }
+    
+    
+    public SimpleObjectProperty<Exercise> exerciseNameProperty() {
+        return this.exerciseName;
+    }
+    
+    public final Exercise getExerciseName() {
         return exerciseName.get();
     }
     
-    public final void setSets(final ObservableList<SetBase> sets) {
-        setsProperty().set(sets);
+    public final void setExerciseName(Exercise exerciseName) {
+        this.exerciseName.set(exerciseName);
     }
+    
     
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder(this.exerciseName.get().label);
         
-        for (SetBase setBase : sets) {
+        for (SetBase setBase : sets.get()) {
             sb.append("\n");
             sb.append(setBase);
         }

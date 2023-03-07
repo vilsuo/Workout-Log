@@ -2,6 +2,7 @@ package com.mycompany.controllers;
 
 import com.mycompany.domain.ExerciseBase;
 import com.mycompany.domain.SetBase;
+import com.mycompany.domain.SetBaseCell;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -35,14 +36,15 @@ public class SetBaseListController {
     }
 
     public void initialize() {
+        setBaseList.setCellFactory(param -> new SetBaseCell());
+        
         exerciseBase.addListener((obs, oldExerciseBase, newExerciseBase) -> {
             if (newExerciseBase != null) {
                 setBaseList.setItems(newExerciseBase.getSets());
-                exerciseNameLbl.setText(newExerciseBase.getExercise().label);
+                exerciseNameLbl.setText(newExerciseBase.getExerciseName().label);
             }
         });
         
-        // edit and remove buttons are disabled if an item is not selected in the listview
         editButton.disableProperty().bind(
                 Bindings.isNull(setBaseList.getSelectionModel().selectedItemProperty()));
         
@@ -94,17 +96,19 @@ public class SetBaseListController {
         
         if (newSelectedIndex >= 0) {
             setBaseList.getSelectionModel().select(newSelectedIndex);
+            
         } else {
             setBaseList.getSelectionModel().clearSelection();
         }
     }
 
     private void showEditorWindow(Parent root) {
-        Scene scene = new Scene(root);
         Stage stage = new Stage();
         stage.setTitle(exerciseNameLbl.getText());
         stage.initOwner(setBaseList.getScene().getWindow());
-        stage.initModality(Modality.APPLICATION_MODAL); 
+        stage.initModality(Modality.APPLICATION_MODAL);
+        
+        Scene scene = new Scene(root);
         stage.setScene(scene);
         stage.showAndWait();
     }
