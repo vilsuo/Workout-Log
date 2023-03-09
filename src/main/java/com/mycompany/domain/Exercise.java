@@ -3,12 +3,18 @@ package com.mycompany.domain;
 
 public class Exercise {
     
+    private final int id;
     private String name;
     private String category;
 
-    public Exercise(String name, String category) {
+    public Exercise(int id, String name, String category) {
+        this.id = id;
         this.name = name;
         this.category = category;
+    }
+
+    public int getId() {
+        return id;
     }
 
     public String getName() {
@@ -26,5 +32,9 @@ public class Exercise {
     public void setCategory(String category) {
         this.category = category;
     }
-    
+
+    @Override
+    public String toString() {
+        return "Exercise{" + "id=" + id + ", name=" + name + ", category=" + category + '}';
+    }
 }
