@@ -11,7 +11,7 @@ public class InputValidatorTest {
     
     private final String[] decimalEdgeCases = {".9", ".0", ".729", "1.", "600.", "2023."};
     
-    private final String[] invalidInputs = {"1", "", " ", ".", "-0", "-116", "-1.5", " 1", " 17.5", "1,0", "h", "18i7"};
+    private final String[] invalidInputs = {"", " ", ".", "-0", "-116", "-1.5", " 1", " 17.5", "1,0", "h", "18i7"};
     
     @Test
     void nonNegativeIntegerTest() {
