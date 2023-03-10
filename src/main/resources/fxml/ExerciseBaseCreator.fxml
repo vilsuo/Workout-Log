@@ -32,5 +32,9 @@
         GridPane.columnSpan="2" spacing="5">
         <Button text="OK" onAction="#submit" fx:id="okButton" />
         <Button text="Cancel" onAction="#cancel" />
+        <Button text="Edit" onAction="#edit" />
     </HBox>
+    
+    <Button fx:id="listAllButton" onAction="#listAll"
+        GridPane.columnIndex="0" GridPane.rowIndex="4" />
 </GridPane>

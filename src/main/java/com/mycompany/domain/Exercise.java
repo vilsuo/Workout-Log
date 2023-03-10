@@ -1,40 +1,81 @@
 
 package com.mycompany.domain;
 
+import javafx.beans.Observable;
+import javafx.beans.property.SimpleListProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.util.Callback;
+
 public class Exercise {
     
-    private final int id;
-    private String name;
-    private String category;
+    private SimpleStringProperty exerciseName;
+    private SimpleListProperty<SetBase> sets;
 
-    public Exercise(int id, String name, String category) {
-        this.id = id;
-        this.name = name;
-        this.category = category;
-    }
-
-    public int getId() {
-        return id;
-    }
-
-    public String getName() {
-        return name;
+    public Exercise(String exerciseName) {
+        this.exerciseName = new SimpleStringProperty(exerciseName);
+        
+        // list created so it fires updates if SetBase changes:
+        Callback<SetBase, Observable[]> extractor =
+            (SetBase setBase) -> new Observable[] {
+                setBase.workingSetsProperty(),
+                setBase.repetitionsProperty(),
+                setBase.workingWeightProperty()
+            };
+        
+        ObservableList<SetBase> observableList =
+            FXCollections.observableArrayList(extractor);
+        
+        sets = new SimpleListProperty<>(observableList);
     }
     
-    public void setName(String name) {
-        this.name = name;
+    public Exercise(String exerciseName, SetBase set) {
+        this(exerciseName);
+        addSet(set);
     }
-
-    public String getCategory() {
-        return category;
+    
+    public void addSet(SetBase set) {
+        sets.get().add(set);
     }
-
-    public void setCategory(String category) {
-        this.category = category;
+    
+    
+    public SimpleListProperty<SetBase> setsProperty() {
+        return sets;
+    }    
+    
+    public final ObservableList<SetBase> getSets() {
+        return sets.get();
     }
-
+    
+    public final void setSets(final ObservableList<SetBase> sets) {
+        this.sets.set(sets);
+    }
+    
+    
+    public SimpleStringProperty exerciseNameProperty() {
+        return this.exerciseName;
+    }
+    
+    public final String getExerciseName() {
+        return exerciseName.get();
+    }
+    
+    public final void setExerciseName(String exerciseName) {
+        this.exerciseName.set(exerciseName);
+    }
+    
+    
     @Override
     public String toString() {
-        return "Exercise{" + "id=" + id + ", name=" + name + ", category=" + category + '}';
+        StringBuilder sb = new StringBuilder(this.exerciseName.get());
+        
+        for (SetBase setBase : sets.get()) {
+            sb.append("\n");
+            sb.append(setBase);
+        }
+        sb.append("\n");
+        
+        return sb.toString();
     }
 }

@@ -1,8 +1,8 @@
 package com.mycompany.controllers;
 
-import com.mycompany.domain.ExerciseBase;
+import com.mycompany.domain.Exercise;
 import com.mycompany.domain.SetBase;
-import com.mycompany.domain.SetBaseCell;
+import com.mycompany.controls.SetBaseCell;
 import java.util.Optional;
 import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
@@ -41,14 +41,14 @@ public class SetBaseListController {
     private final ButtonType noButton = new ButtonType("No");
     private final ButtonType backButton = new ButtonType("Back");
     
-    private final ObjectProperty<ExerciseBase> exerciseBase =
+    private final ObjectProperty<Exercise> exerciseBase =
         new SimpleObjectProperty<>();
     
-    public ObjectProperty<ExerciseBase> exerciseBaseProperty() {
+    public ObjectProperty<Exercise> exerciseBaseProperty() {
         return exerciseBase;
     }
     
-    public final void setExerciseBase(ExerciseBase exerciseBase) {
+    public final void setExerciseBase(Exercise exerciseBase) {
         exerciseBaseProperty().set(exerciseBase);
     }
     

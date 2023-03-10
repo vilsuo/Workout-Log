@@ -1,6 +1,8 @@
 package com.mycompany.controllers;
 
-import com.mycompany.domain.ExerciseBase;
+import com.mycompany.dao.ExerciseInfoDaoImpl;
+import com.mycompany.domain.ExerciseInfo;
+import com.mycompany.domain.Exercise;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -23,11 +25,13 @@ public class ExerciseBaseCreatorController {
     
     @FXML private Button okButton;
 
-    private final ObjectProperty<ExerciseBase> exerciseBase = new SimpleObjectProperty<>();
+    private final ObjectProperty<Exercise> exerciseBase = new SimpleObjectProperty<>();
     
-    public ObjectProperty<ExerciseBase> exerciseBaseProperty() {
+    public ObjectProperty<Exercise> exerciseBaseProperty() {
         return exerciseBase;
     }
+    
+    private ExerciseInfoDaoImpl database = new ExerciseInfoDaoImpl("jdbc:h2:./todo-database");
     
     private Map<String, List<String>> createCategories() {
         Map<String, List<String>> categoryMap = new HashMap<>();
@@ -56,7 +60,6 @@ public class ExerciseBaseCreatorController {
     }
     
     public void initialize() {
-        
         ObservableMap<String, List<String>> observableMap =
             FXCollections.observableMap(
                 createCategories()
@@ -97,10 +100,26 @@ public class ExerciseBaseCreatorController {
     }
     
     @FXML
+    private void edit() {
+        
+    }
+    
+    // temporary...
+    @FXML
+    private void listAll() {
+        try {
+            database.getExerciseInfos()
+                    .forEach(exercise -> System.out.println(exercise));
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+    }
+    
+    @FXML
     private void submit() {
         String exerciseName = exerciseBaseCB.getSelectionModel()
                                             .getSelectedItem().toString();
-        exerciseBase.set(new ExerciseBase(exerciseName));
+        exerciseBase.set(new Exercise(exerciseName));
         
         close();
     }

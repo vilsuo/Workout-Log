@@ -1,6 +1,7 @@
 
-package com.mycompany.domain;
+package com.mycompany.controls;
 
+import com.mycompany.domain.SetBase;
 import com.mycompany.utilities.LocalDragboard;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;

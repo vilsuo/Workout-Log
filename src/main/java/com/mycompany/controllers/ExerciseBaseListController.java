@@ -1,7 +1,7 @@
 
 package com.mycompany.controllers;
 
-import com.mycompany.domain.ExerciseBase;
+import com.mycompany.domain.Exercise;
 import com.mycompany.domain.SetBase;
 import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
@@ -22,24 +22,24 @@ public class ExerciseBaseListController {
     
     //@FXML private Label dayNameLbl;
     
-    @FXML private ListView<ExerciseBase> exerciseBaseList;
+    @FXML private ListView<Exercise> exerciseBaseList;
     
     @FXML private Button editButton;
     @FXML private Button removeButton;
     
     public void initialize() {
-        Callback<ExerciseBase, Observable[]> extractor = (ExerciseBase ExerciseBase) -> new Observable[] {
+        Callback<Exercise, Observable[]> extractor = (Exercise ExerciseBase) -> new Observable[] {
             ExerciseBase.setsProperty()
         };
         
-        ObservableList<ExerciseBase> exerciseBases = FXCollections.observableArrayList(extractor);
+        ObservableList<Exercise> exerciseBases = FXCollections.observableArrayList(extractor);
          
-        ExerciseBase bench = new ExerciseBase("Bench Press");
+        Exercise bench = new Exercise("Bench Press");
         bench.addSet(new SetBase(1, 5, 75));
         bench.addSet(new SetBase(1, 3, 80));
         bench.addSet(new SetBase(5, 5, 85));
         
-        ExerciseBase squat = new ExerciseBase("Barbell Squat");
+        Exercise squat = new Exercise("Barbell Squat");
         squat.addSet(new SetBase(1, 2, 3));
         squat.addSet(new SetBase(2, 3, 4));
         squat.addSet(new SetBase(3, 4, 5));
@@ -93,7 +93,7 @@ public class ExerciseBaseListController {
         Parent root = loader.load();
         SetBaseListController controller = loader.getController();
 
-        ExerciseBase selectedItem = exerciseBaseList.getSelectionModel()
+        Exercise selectedItem = exerciseBaseList.getSelectionModel()
                                                     .getSelectedItem();
         controller.setExerciseBase(selectedItem);
         
