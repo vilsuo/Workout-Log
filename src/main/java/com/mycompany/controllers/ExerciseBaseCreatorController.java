@@ -108,7 +108,7 @@ public class ExerciseBaseCreatorController {
     @FXML
     private void listAll() {
         try {
-            database.getExerciseInfos()
+            database.getItems()
                     .forEach(exercise -> System.out.println(exercise));
         } catch (Exception e) {
             System.out.println(e.getMessage());

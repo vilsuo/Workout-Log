@@ -34,51 +34,95 @@ public class ExerciseInfoEditorController {
     @FXML private TextField categoryTF;
     
     @FXML private Button addButton;
+    @FXML private Button deleteButton;
     
     private ObservableList<ExerciseInfo> exerciseInfos;
 
     public void initialize() {
-        // implements cell editing
+        setUpTableViewColumns();
+        setUpTableViewData();
+        
+        // disable add button if a textfield is empty or contain only whitespaces
+        BooleanBinding textFieldsFilled = new BooleanBinding() {
+            {
+                super.bind(nameTF.textProperty(), categoryTF.textProperty());
+            }
+
+            @Override
+            protected boolean computeValue() {
+                return (nameTF.getText().isBlank()
+                        || categoryTF.getText().isBlank());
+            }
+        };
+        addButton.disableProperty().bind(textFieldsFilled);
+        deleteButton.disableProperty().bind(exerciseInfoTV.getSelectionModel().selectedItemProperty().isNull());
+    }
+    
+    private void setUpTableViewColumns() {
         nameColumn.setCellFactory(param -> new ExerciseInfoEditingCell());
         nameColumn.setOnEditCommit(new EventHandler<TableColumn.CellEditEvent<ExerciseInfo, String>>() {
-            
             @Override
             public void handle(TableColumn.CellEditEvent<ExerciseInfo, String> event) {
-                // check white space...
+                String newName = event.getNewValue();
                 
-                // check if new value already exists...
+                if (newName.isBlank()) {
+                    showErrorAlert("Field '" + nameColumn.getText() + "' can not be blank!");
+                    exerciseInfoTV.refresh();
+                    return;
+                    
+                } else if (isExerciseNameTaken(newName)) {
+                    showErrorAlert("Exercise with name a '" + newName + "' already exists!");
+                    return;
+                }
                 
-                event.getTableView()
-                     .getItems()
-                     .get(event.getTablePosition().getRow())
-                     .setName(event.getNewValue());
+                try {
+                    ExerciseInfo edited = event.getTableView().getItems()
+                                        .get(event.getTablePosition().getRow());
                 
-                // update to database...
-                System.out.println("edited name");
+                    database.updateName(edited.getId(), newName);
+                    edited.setName(newName);
+                    
+                } catch (Exception e){
+                    // log: update name was not successful...
+                    System.out.println("update name was not successful");
+                }
             }
         });
         
         categoryColumn.setCellFactory(param -> new ExerciseInfoEditingCell());
         categoryColumn.setOnEditCommit(new EventHandler<TableColumn.CellEditEvent<ExerciseInfo, String>>() {
-            
             @Override
             public void handle(TableColumn.CellEditEvent<ExerciseInfo, String> event) {
-                // check white space...
+                String newCategory = event.getNewValue();
+                if (newCategory.isBlank()) {
+                    showErrorAlert("Field '" + categoryColumn.getText() + "' can not be blank!");
+                    exerciseInfoTV.refresh();
+                    return;
+                }
                 
-                // check if new value already exists...
+                try {
+                    ExerciseInfo edited = event.getTableView().getItems()
+                                        .get(event.getTablePosition().getRow());
                 
-                event.getTableView()
-                     .getItems()
-                     .get(event.getTablePosition().getRow())
-                     .setCategory(event.getNewValue());
-                
-                // update to database...
-                System.out.println("edited category");
+                    database.updateCategory(edited.getId(), newCategory);
+                    edited.setCategory(newCategory);
+                    
+                } catch (Exception e){
+                    // log: update category was not successful...
+                    System.out.println("update category was not successful");
+                }
             }
         });
-        
-        exerciseInfos = FXCollections.observableList(getData());
-        
+    }
+    
+    private void setUpTableViewData() {
+        Callback<ExerciseInfo, Observable[]> extractor =
+            (ExerciseInfo exerciseInfo) -> new Observable[] {
+                exerciseInfo.idProperty(),
+                exerciseInfo.nameProperty(),
+                exerciseInfo.categoryProperty()
+            };
+        exerciseInfos = FXCollections.observableList(getData(), extractor);
         exerciseInfoTV.setItems(exerciseInfos);
         
         // temporary...
@@ -88,64 +132,61 @@ public class ExerciseInfoEditorController {
                 
                 while (change.next()) {
                     if (change.wasUpdated()) {
-                        // update to database?
-                       System.out.println("update!");
-                       
+                        System.out.println("update in list!");
+                    } else if (change.wasAdded()) {
+                        System.out.println("addition in list!");
                     }
                 }
             }
         });
-        
-        // disable add button if a textfield is empty or contain only whitespaces
-        BooleanBinding textFieldsFilled = new BooleanBinding() {
-            {
-                super.bind(nameTF.textProperty(),categoryTF.textProperty());
-            }
-
-            @Override
-            protected boolean computeValue() {
-                return (nameTF.getText().isBlank()
-                        || categoryTF.getText().isBlank());
-            }
-        };
-        
-        addButton.disableProperty().bind(textFieldsFilled);
     }
     
-    // make this smarter?
     private List<ExerciseInfo> getData() {
         List<ExerciseInfo> data = new ArrayList<>();
         try {
             database = new ExerciseInfoDaoImpl(databasePath);
-            data = database.getExerciseInfos();
-        } catch (Exception e) {
+            data = database.getItems();
             
+        } catch (Exception e) {
+            // log: loading database was not successful...
+            System.out.println("loading database was not successful");
         }
-        
         return data;
+    }
+    
+    private boolean isExerciseNameTaken(String exerciseName) {
+        long count = exerciseInfoTV.getItems().stream()
+                                .map(exerciseInfo -> exerciseInfo.getName())
+                                .filter(name -> name.equals(exerciseName))
+                                .count();
+        return (count != 0);
+    }
+    
+    @FXML
+    private void delete() {
+        // TODO
     }
     
     @FXML
     private void add() {
-        // function dispabled if name or category is black
+        // function disabled if name or category is black
         String name = nameTF.getText();
         String catecory = categoryTF.getText();
         
         try {
-            int generatedKey = database.addExerciseInfo(name, catecory);
+            int generatedKey = database.create(name, catecory);
             if (generatedKey != -1) {
                 exerciseInfos.add(new ExerciseInfo(generatedKey, name, catecory));
-                System.out.println("added index: " + generatedKey);
+                
+                nameTF.clear();
+                categoryTF.clear();
                 
             } else {
-                // show error dialog
-                showErrorAlert("Exercise already exists!");
+                showErrorAlert("Exercise with name a '" + name + "' already exists!");
             }
             
-            nameTF.clear();
-            categoryTF.clear();
-            
         } catch (Exception e) {
+            // log: adding was not successful...
             System.out.println("Error in add(): " + e.getMessage());
         }
     }
@@ -162,7 +203,7 @@ public class ExerciseInfoEditorController {
     private void list() {
         try {
             System.out.println("Listing all ExerciseInfos in the database:");
-            database.getExerciseInfos().forEach(
+            database.getItems().forEach(
                 exerciseInfo -> System.out.println(exerciseInfo)
             );
             

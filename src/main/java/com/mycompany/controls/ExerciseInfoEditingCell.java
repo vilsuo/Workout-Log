@@ -5,6 +5,7 @@ import com.mycompany.domain.ExerciseInfo;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TextField;
+import javafx.scene.input.KeyCode;
 
 
 public class ExerciseInfoEditingCell extends TableCell<ExerciseInfo, String> {
@@ -28,7 +29,7 @@ public class ExerciseInfoEditingCell extends TableCell<ExerciseInfo, String> {
     @Override
     public void cancelEdit() {
         super.cancelEdit();
-
+        
         setText((String) getItem());
         setGraphic(null);
     }
@@ -57,12 +58,14 @@ public class ExerciseInfoEditingCell extends TableCell<ExerciseInfo, String> {
     private void createTextField() {
         textField = new TextField(getString());
         textField.setMinWidth(this.getWidth() - this.getGraphicTextGap()* 2);
-        textField.focusedProperty().addListener(
-            (ObservableValue<? extends Boolean> arg0, 
-            Boolean arg1, Boolean arg2) -> {
-                if (!arg2) {
-                    commitEdit(textField.getText());
-                }
+        
+        textField.setOnKeyPressed(t -> {
+            if (t.getCode() == KeyCode.ENTER) {
+                commitEdit(textField.getText());
+                
+            } else if (t.getCode() == KeyCode.ESCAPE) {
+                cancelEdit();
+            }
         });
     }
 
