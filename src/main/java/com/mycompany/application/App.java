@@ -20,8 +20,8 @@ public class App extends Application {
     @Override
     public void start(Stage primaryStage) {
         try {
-            //Parent root = (Parent)FXMLLoader.load(getClass().getResource("/fxml/ExerciseBaseList.fxml"));
-            Parent root = (Parent)FXMLLoader.load(getClass().getResource("/fxml/ExerciseInfoEditor.fxml"));
+            Parent root = (Parent)FXMLLoader.load(getClass().getResource("/fxml/ExerciseBaseList.fxml"));
+            //Parent root = (Parent)FXMLLoader.load(getClass().getResource("/fxml/ExerciseInfoEditor.fxml"));
             Scene scene = new Scene(root);
             primaryStage.setScene(scene);
             primaryStage.show();
@@ -34,5 +34,4 @@ public class App extends Application {
     public static void main(String[] args) {
         launch(args);
     }
-    
 }

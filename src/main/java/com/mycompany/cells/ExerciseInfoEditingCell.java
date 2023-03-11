@@ -1,8 +1,7 @@
 
-package com.mycompany.controls;
+package com.mycompany.cells;
 
 import com.mycompany.domain.ExerciseInfo;
-import javafx.beans.value.ObservableValue;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;

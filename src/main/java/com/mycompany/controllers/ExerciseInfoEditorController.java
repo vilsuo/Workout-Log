@@ -3,19 +3,19 @@ package com.mycompany.controllers;
 
 import com.mycompany.dao.ExerciseInfoDaoImpl;
 import com.mycompany.domain.ExerciseInfo;
-import com.mycompany.controls.ExerciseInfoEditingCell;
+import com.mycompany.cells.ExerciseInfoEditingCell;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import javafx.beans.Observable;
 import javafx.beans.binding.BooleanBinding;
-import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.FXCollections;
-import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
@@ -37,13 +37,16 @@ public class ExerciseInfoEditorController {
     @FXML private Button deleteButton;
     
     private ObservableList<ExerciseInfo> exerciseInfos;
+    
+    private final ButtonType yesButton = new ButtonType("Yes");
+    private final ButtonType noButton = new ButtonType("No");
+    private final ButtonType backButton = new ButtonType("Back");
 
     public void initialize() {
         setUpTableViewColumns();
         setUpTableViewData();
         
-        // disable add button if a textfield is empty or contain only whitespaces
-        BooleanBinding textFieldsFilled = new BooleanBinding() {
+        BooleanBinding textFieldsNotFilled = new BooleanBinding() {
             {
                 super.bind(nameTF.textProperty(), categoryTF.textProperty());
             }
@@ -54,8 +57,14 @@ public class ExerciseInfoEditorController {
                         || categoryTF.getText().isBlank());
             }
         };
-        addButton.disableProperty().bind(textFieldsFilled);
-        deleteButton.disableProperty().bind(exerciseInfoTV.getSelectionModel().selectedItemProperty().isNull());
+        
+        // disable 'add' if entry is blank
+        addButton.disableProperty().bind(textFieldsNotFilled);
+        
+        // disable 'delete' if no items are selected
+        deleteButton.disableProperty().bind(
+            exerciseInfoTV.getSelectionModel().selectedItemProperty().isNull()
+        );
     }
     
     private void setUpTableViewColumns() {
@@ -66,12 +75,16 @@ public class ExerciseInfoEditorController {
                 String newName = event.getNewValue();
                 
                 if (newName.isBlank()) {
-                    showErrorAlert("Field '" + nameColumn.getText() + "' can not be blank!");
+                    showErrorAlert(
+                        "Field '" + nameColumn.getText() + "' can not be blank!"
+                    );
                     exerciseInfoTV.refresh();
                     return;
                     
                 } else if (isExerciseNameTaken(newName)) {
-                    showErrorAlert("Exercise with name a '" + newName + "' already exists!");
+                    showErrorAlert(
+                        "Exercise with name a '" + newName + "' already exists!"
+                    );
                     return;
                 }
                 
@@ -95,7 +108,9 @@ public class ExerciseInfoEditorController {
             public void handle(TableColumn.CellEditEvent<ExerciseInfo, String> event) {
                 String newCategory = event.getNewValue();
                 if (newCategory.isBlank()) {
-                    showErrorAlert("Field '" + categoryColumn.getText() + "' can not be blank!");
+                    showErrorAlert(
+                        "Field '" + categoryColumn.getText() + "' can not be blank!"
+                    );
                     exerciseInfoTV.refresh();
                     return;
                 }
@@ -124,21 +139,6 @@ public class ExerciseInfoEditorController {
             };
         exerciseInfos = FXCollections.observableList(getData(), extractor);
         exerciseInfoTV.setItems(exerciseInfos);
-        
-        // temporary...
-        exerciseInfos.addListener(new ListChangeListener() {
-            @Override
-            public void onChanged(ListChangeListener.Change change) {
-                
-                while (change.next()) {
-                    if (change.wasUpdated()) {
-                        System.out.println("update in list!");
-                    } else if (change.wasAdded()) {
-                        System.out.println("addition in list!");
-                    }
-                }
-            }
-        });
     }
     
     private List<ExerciseInfo> getData() {
@@ -163,31 +163,48 @@ public class ExerciseInfoEditorController {
     }
     
     @FXML
-    private void delete() {
-        // TODO
-    }
-    
-    @FXML
     private void add() {
-        // function disabled if name or category is black
         String name = nameTF.getText();
         String catecory = categoryTF.getText();
-        
         try {
             int generatedKey = database.create(name, catecory);
             if (generatedKey != -1) {
-                exerciseInfos.add(new ExerciseInfo(generatedKey, name, catecory));
+                exerciseInfos.add(
+                    new ExerciseInfo(generatedKey, name, catecory)
+                );
                 
                 nameTF.clear();
                 categoryTF.clear();
                 
             } else {
-                showErrorAlert("Exercise with name a '" + name + "' already exists!");
+                showErrorAlert(
+                    "Exercise with name a '" + name + "' already exists!"
+                );
             }
             
         } catch (Exception e) {
             // log: adding was not successful...
             System.out.println("Error in add(): " + e.getMessage());
+        }
+    }
+    
+    @FXML
+    private void delete() {
+        ExerciseInfo selectedItem = exerciseInfoTV.getSelectionModel()
+                                                  .getSelectedItem();
+        Optional<ButtonType> optional = showDeleteAlert(selectedItem);
+        if (optional.get() == yesButton) {
+            try {
+                database.remove(selectedItem.getId());
+                exerciseInfoTV.getItems().remove(
+                        exerciseInfoTV.getSelectionModel().getSelectedIndex()
+                );
+                System.out.println("deleted successfully");
+                
+            } catch (Exception e) {
+                // log: deleting exercise was not successful..
+                System.out.println("deleting exercise was not successful");
+            }
         }
     }
     
@@ -198,17 +215,16 @@ public class ExerciseInfoEditorController {
         alert.showAndWait();
     }
     
-    // temporary...
-    @FXML
-    private void list() {
-        try {
-            System.out.println("Listing all ExerciseInfos in the database:");
-            database.getItems().forEach(
-                exerciseInfo -> System.out.println(exerciseInfo)
-            );
-            
-        } catch (Exception e) {
-            System.out.println("Error in list(): " + e.getMessage());
-        }
+    private Optional<ButtonType> showDeleteAlert(ExerciseInfo exerciseInfo) {
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Confirmation");
+        alert.setHeaderText(exerciseInfo.getName());
+        alert.setContentText("Do you want to delete the exercise? Deleting the "
+                           + "exercise will also delete all entries from the "
+                           + "database.");
+        alert.getButtonTypes().clear();
+        alert.getButtonTypes().addAll(yesButton, noButton, backButton);
+        
+        return alert.showAndWait();
     }
 }

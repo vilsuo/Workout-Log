@@ -2,7 +2,7 @@ package com.mycompany.controllers;
 
 import com.mycompany.domain.Exercise;
 import com.mycompany.domain.SetBase;
-import com.mycompany.controls.SetBaseCell;
+import com.mycompany.cells.SetBaseCell;
 import java.util.Optional;
 import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
@@ -197,7 +197,7 @@ public class SetBaseListController {
     private void showEditorWindow(Parent root) {
         Stage stage = new Stage();
         
-        stage.setTitle(exerciseNameLbl.getText() + "set editor");
+        stage.setTitle(exerciseNameLbl.getText() + " Set Editor");
         
         stage.initOwner(setBaseList.getScene().getWindow());
         stage.initModality(Modality.APPLICATION_MODAL);

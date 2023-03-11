@@ -83,7 +83,7 @@ public class ExerciseBaseListController {
             }
         );
 
-        showWindow(root);
+        showWindow(root, "Exercise Creator");
     }
     
     @FXML
@@ -97,7 +97,7 @@ public class ExerciseBaseListController {
                                                     .getSelectedItem();
         controller.setExerciseBase(selectedItem);
         
-        showWindow(root);
+        showWindow(root, "Exercise Set List Editor");
     }
     
     @FXML
@@ -119,8 +119,9 @@ public class ExerciseBaseListController {
         }
     }
     
-    private void showWindow(Parent root) {
+    private void showWindow(Parent root, String title) {
         Stage stage = new Stage();
+        stage.setTitle(title);
         stage.initOwner(exerciseBaseList.getScene().getWindow());
         stage.initModality(Modality.APPLICATION_MODAL); 
         

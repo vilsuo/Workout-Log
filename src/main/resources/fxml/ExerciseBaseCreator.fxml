@@ -1,40 +1,72 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import java.lang.Double?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Control?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
 
-<GridPane
-    xmlns:fx="http://javafx.com/fxml/1"
-    fx:controller="com.mycompany.controllers.ExerciseBaseCreatorController"
-    hgap="5" vgap="5">
+<GridPane hgap="5" vgap="5" alignment="CENTER"
+          xmlns:fx="http://javafx.com/fxml/1"
+          fx:controller="com.mycompany.controllers.ExerciseBaseCreatorController">
     <padding>
         <Insets top="5" bottom="5" left="5" right="5" />
     </padding>
-    
+    <columnConstraints>
+        <ColumnConstraints minWidth="80.0" prefWidth="80.0" maxWidth="80"
+                           halignment="CENTER"/>
+        
+        <ColumnConstraints minWidth="150.0" prefWidth="150.0"
+                           halignment="CENTER" hgrow="ALWAYS" />
+    </columnConstraints>
+    <rowConstraints>
+        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" valignment="CENTER" />
+        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" valignment="CENTER" />
+        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" valignment="CENTER" />
+    </rowConstraints>
     <Label text="Category"
         GridPane.columnIndex="0" GridPane.rowIndex="0" />
-    
+
     <Label text="Exercise"
         GridPane.columnIndex="0" GridPane.rowIndex="1" />
-    
+
     <ComboBox fx:id="categoryCB"
-        GridPane.columnIndex="1" GridPane.rowIndex="0" />
+        GridPane.columnIndex="1" GridPane.rowIndex="0">
+        <maxWidth>
+            <Double fx:constant="MAX_VALUE" />
+        </maxWidth>
+    </ComboBox>
+    <ComboBox fx:id="nameCB"
+        GridPane.columnIndex="1" GridPane.rowIndex="1">
+        <maxWidth>
+            <Double fx:constant="MAX_VALUE" />
+        </maxWidth>
+    </ComboBox>
     
-    <ComboBox fx:id="exerciseBaseCB"
-        GridPane.columnIndex="1" GridPane.rowIndex="1" />
-    
-    <HBox
-        GridPane.columnIndex="0" GridPane.rowIndex="3"
-        GridPane.columnSpan="2" spacing="5">
-        <Button text="OK" onAction="#submit" fx:id="okButton" />
-        <Button text="Cancel" onAction="#cancel" />
-        <Button text="Edit" onAction="#edit" />
+    <HBox spacing="5" alignment="CENTER" GridPane.columnSpan="2"
+        GridPane.columnIndex="0" GridPane.rowIndex="2">
+        <children>
+            <Button text="Add" onAction="#submit" fx:id="addButton" HBox.hgrow="ALWAYS">
+                <maxWidth>
+                    <Double fx:constant="MAX_VALUE" />
+                </maxWidth>
+            </Button>
+            <Button text="Cancel" onAction="#cancel" HBox.hgrow="ALWAYS">
+                <maxWidth>
+                    <Double fx:constant="MAX_VALUE" />
+                </maxWidth>
+            </Button>
+            <Button text="Edit / Create" onAction="#edit" HBox.hgrow="ALWAYS">
+                <maxWidth>
+                    <Double fx:constant="MAX_VALUE" />
+                </maxWidth>
+            </Button>
+        </children>
     </HBox>
-    
-    <Button fx:id="listAllButton" onAction="#listAll"
-        GridPane.columnIndex="0" GridPane.rowIndex="4" />
 </GridPane>

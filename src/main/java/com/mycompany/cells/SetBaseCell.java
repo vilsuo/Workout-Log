@@ -1,5 +1,5 @@
 
-package com.mycompany.controls;
+package com.mycompany.cells;
 
 import com.mycompany.domain.SetBase;
 import com.mycompany.utilities.LocalDragboard;

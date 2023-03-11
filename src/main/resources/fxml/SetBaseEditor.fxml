@@ -1,11 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import java.lang.Double?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.RowConstraints?>
 
 <GridPane
     xmlns:fx="http://javafx.com/fxml/1"
@@ -14,6 +17,19 @@
     <padding>
         <Insets top="5" bottom="5" left="5" right="5" />
     </padding>
+    <columnConstraints>
+        <ColumnConstraints minWidth="100.0" prefWidth="100.0" maxWidth="100.0"
+                           halignment="CENTER"/>
+        
+        <ColumnConstraints minWidth="50.0" prefWidth="50.0"
+                           halignment="CENTER" hgrow="ALWAYS" />
+    </columnConstraints>
+    <rowConstraints>
+        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" valignment="CENTER" />
+        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" valignment="CENTER" />
+        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" valignment="CENTER" />
+        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" valignment="CENTER" />
+    </rowConstraints>
         
     <Label fx:id="workingSetsLbl" text="Working sets"
         GridPane.columnIndex="0" GridPane.rowIndex="0" />
@@ -25,18 +41,40 @@
         GridPane.columnIndex="0" GridPane.rowIndex="2" />
     
     <TextField fx:id="workingSetsTF"
-        GridPane.columnIndex="1" GridPane.rowIndex="0" />
+        GridPane.columnIndex="1" GridPane.rowIndex="0">
+        <maxWidth>
+            <Double fx:constant="MAX_VALUE" />
+        </maxWidth>
+    </TextField>
     
     <TextField fx:id="repetitionsTF"
-        GridPane.columnIndex="1" GridPane.rowIndex="1" />
+        GridPane.columnIndex="1" GridPane.rowIndex="1">
+        <maxWidth>
+            <Double fx:constant="MAX_VALUE" />
+        </maxWidth>
+    </TextField>
     
     <TextField fx:id="workingWeightTF"
-        GridPane.columnIndex="1" GridPane.rowIndex="2" />
+        GridPane.columnIndex="1" GridPane.rowIndex="2">
+        <maxWidth>
+            <Double fx:constant="MAX_VALUE" />
+        </maxWidth>
+    </TextField>
     
     <HBox
-        GridPane.columnIndex="0" GridPane.rowIndex="3"
-        GridPane.columnSpan="2" spacing="5">
-        <Button text="OK" onAction="#submit" fx:id="okButton" />
-        <Button text="Cancel" onAction="#cancel" />
+        spacing="5" alignment="CENTER" GridPane.columnIndex="0"
+        GridPane.rowIndex="3" GridPane.columnSpan="2">
+        <children>
+            <Button text="OK" onAction="#submit" fx:id="okButton" HBox.hgrow="ALWAYS">
+                <maxWidth>
+                    <Double fx:constant="MAX_VALUE" />
+                </maxWidth>
+            </Button>
+            <Button text="Cancel" onAction="#cancel" HBox.hgrow="ALWAYS">
+                <maxWidth>
+                    <Double fx:constant="MAX_VALUE" />
+                </maxWidth>
+            </Button>
+        </children>
     </HBox>
 </GridPane>
