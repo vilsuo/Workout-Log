@@ -66,7 +66,8 @@ public interface ExerciseInfoDao {
      */
     void remove(int id) throws SQLException;
     
-    int getIndexByName(String name) throws SQLException;
+    
+    ExerciseInfo getExerciseInfo(int index) throws SQLException;
     
     List<ExerciseInfo> getItems() throws SQLException;
     List<ExerciseInfo> getItemsByCategory(String category) throws SQLException;

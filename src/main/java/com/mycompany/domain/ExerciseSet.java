@@ -3,20 +3,33 @@ package com.mycompany.domain;
 
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.ReadOnlyIntegerProperty;
+import javafx.beans.property.ReadOnlyIntegerWrapper;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 
-public class SetBase {
+public class ExerciseSet {
     
+    private final ReadOnlyIntegerWrapper id;
     private final IntegerProperty workingSets;
     private final IntegerProperty repetitions;
     private final DoubleProperty workingWeight;
 
-    public SetBase(int workingSets, int repetitions, double workingWeight) {
+    public ExerciseSet(int id, int workingSets, int repetitions, double workingWeight) {
+        this.id = new ReadOnlyIntegerWrapper(id);
         this.workingSets = new SimpleIntegerProperty(workingSets);
         this.repetitions = new SimpleIntegerProperty(repetitions);
         this.workingWeight = new SimpleDoubleProperty(workingWeight);
     }
+    
+    public ReadOnlyIntegerProperty idProperty() {
+        return id;
+    }
+
+    public int getId() {
+        return id.get();
+    }
+    
     
     public IntegerProperty workingSetsProperty() {
         return workingSets;
@@ -59,6 +72,6 @@ public class SetBase {
     
     @Override
     public String toString() {
-        return workingSets.get() + " x " + repetitions.get() + " @" + workingWeight.get();
+        return "\tid=" + id.get() + ": " + workingSets.get() + " x " + repetitions.get() + " @" + workingWeight.get();
     }
 }

@@ -23,7 +23,6 @@ import javafx.util.Callback;
 
 public class ExerciseInfoEditorController {
     
-    private final String databasePath = "jdbc:h2:./workoutLog-database";
     private ExerciseInfoDaoImpl database;
     
     @FXML private TableView<ExerciseInfo> exerciseInfoTV;
@@ -144,7 +143,7 @@ public class ExerciseInfoEditorController {
     private List<ExerciseInfo> getData() {
         List<ExerciseInfo> data = new ArrayList<>();
         try {
-            database = new ExerciseInfoDaoImpl(databasePath);
+            database = new ExerciseInfoDaoImpl();
             data = database.getItems();
             
         } catch (Exception e) {
@@ -195,10 +194,16 @@ public class ExerciseInfoEditorController {
         Optional<ButtonType> optional = showDeleteAlert(selectedItem);
         if (optional.get() == yesButton) {
             try {
-                database.remove(selectedItem.getId());
+                int exerciseInfoId = selectedItem.getId();
+                
+                database.remove(exerciseInfoId);
                 exerciseInfoTV.getItems().remove(
-                        exerciseInfoTV.getSelectionModel().getSelectedIndex()
+                    exerciseInfoTV.getSelectionModel().getSelectedIndex()
                 );
+                
+                // TODO!!!
+                // remove exerciseSets with exerciseInfoId and exercises with the sets
+                
                 System.out.println("deleted successfully");
                 
             } catch (Exception e) {

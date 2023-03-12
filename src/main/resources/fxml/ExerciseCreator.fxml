@@ -14,7 +14,7 @@
 
 <GridPane hgap="5" vgap="5" alignment="CENTER"
           xmlns:fx="http://javafx.com/fxml/1"
-          fx:controller="com.mycompany.controllers.ExerciseBaseCreatorController">
+          fx:controller="com.mycompany.controllers.ExerciseCreatorController">
     <padding>
         <Insets top="5" bottom="5" left="5" right="5" />
     </padding>

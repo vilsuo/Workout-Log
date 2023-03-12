@@ -26,6 +26,7 @@ public class ExerciseInfo {
         return id.get();
     }
     
+    
     public StringProperty nameProperty() {
         return name;
     }
@@ -37,6 +38,7 @@ public class ExerciseInfo {
     public void setName(String name) {
         this.name.set(name);
     }
+    
     
     public StringProperty categoryProperty() {
         return category;
@@ -50,6 +52,7 @@ public class ExerciseInfo {
         this.category.set(category);
     }
 
+    
     @Override
     public String toString() {
         return "id=" + id.get() + ", name=" + name.get() + ", category=" + category.get();

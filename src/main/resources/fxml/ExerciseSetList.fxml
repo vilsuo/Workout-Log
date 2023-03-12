@@ -12,14 +12,14 @@
 
 <VBox alignment="CENTER" spacing="5"
     xmlns:fx="http://javafx.com/fxml/1"
-    fx:controller="com.mycompany.controllers.SetBaseListController">
+    fx:controller="com.mycompany.controllers.ExerciseSetListController">
     <padding>
         <Insets top="5" bottom="5" left="5" right="5" />
     </padding>
     <children>
-        <Label fx:id="exerciseNameLbl" />
+        <Label fx:id="exerciseInfoNameLabel" />
         
-        <ListView fx:id="setBaseList" VBox.vgrow="ALWAYS"/>
+        <ListView fx:id="exerciseSetListView" VBox.vgrow="ALWAYS"/>
         
         <VBox spacing="5">
             <children>

@@ -12,7 +12,6 @@ import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
-import javafx.collections.MapChangeListener;
 import javafx.collections.ObservableList;
 import javafx.collections.ObservableMap;
 import javafx.fxml.FXML;
@@ -27,9 +26,8 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 
-public class ExerciseBaseCreatorController {
+public class ExerciseCreatorController {
     
-    private final String databasePath = "jdbc:h2:./workoutLog-database";
     private ExerciseInfoDaoImpl database;
     
     @FXML private ComboBox categoryCB;
@@ -37,12 +35,12 @@ public class ExerciseBaseCreatorController {
     
     @FXML private Button addButton;
 
-    private final ObjectProperty<Exercise> exerciseBase = new SimpleObjectProperty<>();
+    private final ObjectProperty<Exercise> exercise = new SimpleObjectProperty<>();
     
     ObservableMap<String, List<ExerciseInfo>> observableMap;
     
-    public ObjectProperty<Exercise> exerciseBaseProperty() {
-        return exerciseBase;
+    public ObjectProperty<Exercise> exerciseProperty() {
+        return exercise;
     }
     
     public void initialize() {
@@ -112,7 +110,7 @@ public class ExerciseBaseCreatorController {
     private List<ExerciseInfo> getData() {
         List<ExerciseInfo> data = new ArrayList<>();
         try {
-            database = new ExerciseInfoDaoImpl(databasePath);
+            database = new ExerciseInfoDaoImpl();
             data = database.getItems();
             
         } catch (Exception e) {
@@ -139,9 +137,13 @@ public class ExerciseBaseCreatorController {
     
     @FXML
     private void submit() {
-        String exerciseName = ((ExerciseInfo)nameCB.getSelectionModel()
-                                            .getSelectedItem()).getName();
-        exerciseBase.set(new Exercise(exerciseName));
+        ExerciseInfo exerciseInfo = ((ExerciseInfo) nameCB.getSelectionModel()
+                                                          .getSelectedItem());
+        // TODO!!!
+        // create new Exercise database entry and return the key
+        int generatedKey = -1;
+        
+        exercise.set(new Exercise(generatedKey, exerciseInfo));
         
         close();
     }

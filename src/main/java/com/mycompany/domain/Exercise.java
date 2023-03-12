@@ -1,80 +1,109 @@
 
 package com.mycompany.domain;
 
+import java.util.ArrayList;
+import java.util.List;
 import javafx.beans.Observable;
+import javafx.beans.property.ListProperty;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.ReadOnlyIntegerProperty;
+import javafx.beans.property.ReadOnlyIntegerWrapper;
 import javafx.beans.property.SimpleListProperty;
-import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.util.Callback;
 
-public class Exercise {
+public final class Exercise {
     
-    private SimpleStringProperty exerciseName;
-    private SimpleListProperty<SetBase> sets;
+    private final ReadOnlyIntegerWrapper id;
+    private ObjectProperty<ExerciseInfo> exerciseInfo;
+    private ListProperty<ExerciseSet> exerciseSetList;
 
-    public Exercise(String exerciseName) {
-        this.exerciseName = new SimpleStringProperty(exerciseName);
+    public Exercise(int id, ExerciseInfo exerciseInfo, List<ExerciseSet> exerciseSetList) {
+        this.id = new ReadOnlyIntegerWrapper(id);
         
-        // list created so it fires updates if SetBase changes:
-        Callback<SetBase, Observable[]> extractor =
-            (SetBase setBase) -> new Observable[] {
-                setBase.workingSetsProperty(),
-                setBase.repetitionsProperty(),
-                setBase.workingWeightProperty()
+        this.exerciseInfo = new SimpleObjectProperty(exerciseInfo);
+        
+        Callback<ExerciseSet, Observable[]> extractor =
+            (ExerciseSet exerciseSet) -> new Observable[] {
+                exerciseSet.idProperty(),
+                exerciseSet.workingSetsProperty(),
+                exerciseSet.repetitionsProperty(),
+                exerciseSet.workingWeightProperty()
             };
         
-        ObservableList<SetBase> observableList =
-            FXCollections.observableArrayList(extractor);
+        // list created so it fires updates if ExerciseSet changes:
+        ObservableList<ExerciseSet> observableList =
+            FXCollections.observableList(exerciseSetList, extractor);
         
-        sets = new SimpleListProperty<>(observableList);
+        this.exerciseSetList = new SimpleListProperty<>(observableList);
     }
     
-    public Exercise(String exerciseName, SetBase set) {
-        this(exerciseName);
-        addSet(set);
+    public Exercise(int id, ExerciseInfo exerciseInfo) {
+        this(id, exerciseInfo, new ArrayList<>());
     }
     
-    public void addSet(SetBase set) {
-        sets.get().add(set);
+    public Exercise(int id, ExerciseInfo exerciseInfo, ExerciseSet exerciseSet) {
+        this(id, exerciseInfo);
+        
+        addExerciseSet(exerciseSet);
     }
     
     
-    public SimpleListProperty<SetBase> setsProperty() {
-        return sets;
+    public void addExerciseSet(ExerciseSet exerciseSet) {
+        exerciseSetList.get().add(exerciseSet);
+    }
+    
+    
+    public ReadOnlyIntegerProperty idProperty() {
+        return id;
+    }
+
+    public int getId() {
+        return id.get();
+    }
+    
+    
+    public ObjectProperty exerciseInfoProperty() {
+        return exerciseInfo;
+    }
+    
+    public final ExerciseInfo getExerciseInfo() {
+        return exerciseInfo.get();
+    }
+    
+    public final void setExerciseInfo(ExerciseInfo exerciseInfo) {
+        this.exerciseInfo.set(exerciseInfo);
+    }
+    
+    
+    public ListProperty<ExerciseSet> exerciseSetListProperty() {
+        return exerciseSetList;
     }    
     
-    public final ObservableList<SetBase> getSets() {
-        return sets.get();
+    public final ObservableList<ExerciseSet> getExerciseSetList() {
+        return exerciseSetList.get();
     }
     
-    public final void setSets(final ObservableList<SetBase> sets) {
-        this.sets.set(sets);
+    public final void setExerciseSetList(final ObservableList<ExerciseSet> exerciseSetList) {
+        this.exerciseSetList.set(exerciseSetList);
     }
     
-    
-    public SimpleStringProperty exerciseNameProperty() {
-        return this.exerciseName;
-    }
-    
-    public final String getExerciseName() {
-        return exerciseName.get();
-    }
-    
-    public final void setExerciseName(String exerciseName) {
-        this.exerciseName.set(exerciseName);
-    }
-    
-    
+   
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder(this.exerciseName.get());
+        StringBuilder sb = new StringBuilder("id=");
+        sb.append(getId());
+        sb.append("\ninfo={");
+        sb.append(this.exerciseInfo.get());
+        sb.append("}\nsets={");
         
-        for (SetBase setBase : sets.get()) {
+        for (ExerciseSet exerciseSet : exerciseSetList.get()) {
             sb.append("\n");
-            sb.append(setBase);
+            sb.append(exerciseSet);
         }
-        sb.append("\n");
+        sb.append("\n}");
         
         return sb.toString();
     }

@@ -12,7 +12,7 @@
 
 <GridPane
     xmlns:fx="http://javafx.com/fxml/1"
-    fx:controller="com.mycompany.controllers.SetBaseEditorController"
+    fx:controller="com.mycompany.controllers.ExerciseSetEditorController"
     hgap="5" vgap="5">
     <padding>
         <Insets top="5" bottom="5" left="5" right="5" />
@@ -31,13 +31,13 @@
         <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" valignment="CENTER" />
     </rowConstraints>
         
-    <Label fx:id="workingSetsLbl" text="Working sets"
+    <Label fx:id="workingSetsLabel" text="Working sets"
         GridPane.columnIndex="0" GridPane.rowIndex="0" />
     
-    <Label fx:id="repetitionsLbl" text="Repetitions"
+    <Label fx:id="repetitionsLabel" text="Repetitions"
         GridPane.columnIndex="0" GridPane.rowIndex="1" />
     
-    <Label fx:id="workingWeightLbl" text="Working weight"
+    <Label fx:id="workingWeightLabel" text="Working weight"
         GridPane.columnIndex="0" GridPane.rowIndex="2" />
     
     <TextField fx:id="workingSetsTF"

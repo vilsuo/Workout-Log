@@ -1,6 +1,6 @@
 package com.mycompany.controllers;
 
-import com.mycompany.domain.SetBase;
+import com.mycompany.domain.ExerciseSet;
 import com.mycompany.utilities.InputValidator;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;
@@ -13,13 +13,13 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 
-public class SetBaseEditorController {
+public class ExerciseSetEditorController {
     
     @FXML private Label exerciseNameLabel;
     
-    @FXML private Label workingSetsLbl;
-    @FXML private Label repetitionsLbl;
-    @FXML private Label workingWeightLbl;
+    @FXML private Label workingSetsLabel;
+    @FXML private Label repetitionsLabel;
+    @FXML private Label workingWeightLabel;
     
     @FXML private TextField workingSetsTF;
     @FXML private TextField repetitionsTF;
@@ -27,28 +27,28 @@ public class SetBaseEditorController {
     
     @FXML private Button okButton;
     
-    private final ObjectProperty<SetBase> setBase =
+    private final ObjectProperty<ExerciseSet> exerciseSet =
         new SimpleObjectProperty<>();
 
-    public ObjectProperty<SetBase> setBaseProperty() {
-        return setBase;
+    public ObjectProperty<ExerciseSet> exerciseSetProperty() {
+        return exerciseSet;
     }
     
-    public final void setSetBase(SetBase setBase) {
-        setBaseProperty().set(setBase);
+    public final void setExerciseSet(ExerciseSet exerciseSet) {
+        exerciseSetProperty().set(exerciseSet);
     }
 
     public void initialize() {
-        setBaseProperty().addListener((obs, oldSetBase, newSetBase) -> {
-            if (newSetBase != null) {
+        exerciseSetProperty().addListener((obs, oldExerciseSet, newExerciseSet) -> {
+            if (newExerciseSet != null) {
                 workingSetsTF.setText(
-                    String.valueOf(newSetBase.getWorkingSets())
+                    String.valueOf(newExerciseSet.getWorkingSets())
                 );
                 repetitionsTF.setText(
-                    String.valueOf(newSetBase.getRepetitions())
+                    String.valueOf(newExerciseSet.getRepetitions())
                 );
                 workingWeightTF.setText(
-                    String.valueOf(newSetBase.getWorkingWeight())
+                    String.valueOf(newExerciseSet.getWorkingWeight())
                 );
             }
         });
@@ -94,15 +94,20 @@ public class SetBaseEditorController {
         int repetitions = Integer.valueOf(repetitionsTF.getText());
         double workingWeight = Double.valueOf(workingWeightTF.getText());
             
-        if (setBase.get() == null) {
-            // create a new SetBase
-            setSetBase(new SetBase(workingSets, repetitions, workingWeight));
+        if (exerciseSet.get() == null) {
+            // create a new ExerciseSet
+            
+            // TODO!!!
+            // create entry in database, fetch the key
+            int generatedKey = -1;
+            
+            setExerciseSet(new ExerciseSet(generatedKey, workingSets, repetitions, workingWeight));
             
         } else {
-            // edit existing SetBase
-            setBase.get().setWorkingSets(workingSets);
-            setBase.get().setRepetitions(repetitions);
-            setBase.get().setWorkingWeight(workingWeight);
+            // edit existing ExerciseSet
+            exerciseSet.get().setWorkingSets(workingSets);
+            exerciseSet.get().setRepetitions(repetitions);
+            exerciseSet.get().setWorkingWeight(workingWeight);
         }
         
         close();
@@ -123,7 +128,7 @@ public class SetBaseEditorController {
         );
         if (!isWorkingSetsInputValid) {
             showErrorAlert(
-                workingSetsLbl.getText(),
+                workingSetsLabel.getText(),
                 "Input must be non-negative integer value"
             );
             return false;
@@ -134,7 +139,7 @@ public class SetBaseEditorController {
         );
         if (!isRepetitionsInputValid) {
             showErrorAlert(
-                repetitionsLbl.getText(),
+                repetitionsLabel.getText(),
                 "Input must be non-negative integer value"
             );
             return false;
@@ -145,7 +150,7 @@ public class SetBaseEditorController {
         );
         if (!isWorkingWeightInputValid) {
             showErrorAlert(
-                workingWeightLbl.getText(),
+                workingWeightLabel.getText(),
                 "Input must be non-negative integer/decimal value"
             );
             return false;

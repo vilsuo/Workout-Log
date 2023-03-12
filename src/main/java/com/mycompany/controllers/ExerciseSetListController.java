@@ -1,8 +1,8 @@
 package com.mycompany.controllers;
 
 import com.mycompany.domain.Exercise;
-import com.mycompany.domain.SetBase;
-import com.mycompany.cells.SetBaseCell;
+import com.mycompany.domain.ExerciseSet;
+import com.mycompany.cells.ExerciseSetCell;
 import java.util.Optional;
 import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
@@ -27,11 +27,11 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 
-public class SetBaseListController {
+public class ExerciseSetListController {
     
-    @FXML private Label exerciseNameLbl;
+    @FXML private Label exerciseInfoNameLabel;
     
-    @FXML private ListView<SetBase> setBaseList;
+    @FXML private ListView<ExerciseSet> exerciseSetListView;
     
     @FXML private Button saveButton;
     @FXML private Button editButton;
@@ -41,47 +41,50 @@ public class SetBaseListController {
     private final ButtonType noButton = new ButtonType("No");
     private final ButtonType backButton = new ButtonType("Back");
     
-    private final ObjectProperty<Exercise> exerciseBase =
+    private final ObjectProperty<Exercise> exercise =
         new SimpleObjectProperty<>();
     
-    public ObjectProperty<Exercise> exerciseBaseProperty() {
-        return exerciseBase;
+    public ObjectProperty<Exercise> exerciseProperty() {
+        return exercise;
     }
     
-    public final void setExerciseBase(Exercise exerciseBase) {
-        exerciseBaseProperty().set(exerciseBase);
+    public final void setExercise(Exercise exercise) {
+        exerciseProperty().set(exercise);
     }
     
-    private BooleanProperty changeMadeProperty =
+    private final BooleanProperty changeMadeProperty =
         new SimpleBooleanProperty(false);
     
     public void initialize() {
-        setBaseList.setCellFactory(param -> new SetBaseCell());
+        exerciseSetListView.setCellFactory(param -> new ExerciseSetCell());
          
-        exerciseBase.addListener((obs, oldExerciseBase, newExerciseBase) -> {
-            if (newExerciseBase != null) {
+        exercise.addListener((obs, oldExercise, newExercise) -> {
+            if (newExercise != null) {
                 
-                // list created so it fires updates if SetBase changes:
-                Callback<SetBase, Observable[]> extractor =
-                    (SetBase setBase) -> new Observable[] {
-                        setBase.workingSetsProperty(),
-                        setBase.repetitionsProperty(),
-                        setBase.workingWeightProperty()
+                // needed?
+                // list created so it fires updates if ExerciseSet changes:
+                Callback<ExerciseSet, Observable[]> extractor =
+                    (ExerciseSet exerciseSet) -> new Observable[] {
+                        exerciseSet.idProperty(),
+                        exerciseSet.workingSetsProperty(),
+                        exerciseSet.repetitionsProperty(),
+                        exerciseSet.workingWeightProperty()
                     };
                 
-                ObservableList<SetBase> copiedSetBases =
+                ObservableList<ExerciseSet> copiedExerciseSetList =
                     FXCollections.observableArrayList(extractor);
                 
-                for (SetBase setBase : newExerciseBase.getSets()) {
-                    SetBase copiedSetBase = new SetBase(
-                        setBase.getWorkingSets(),
-                        setBase.getRepetitions(),
-                        setBase.getWorkingWeight()
+                for (ExerciseSet exerciseSet : newExercise.getExerciseSetList()) {
+                    ExerciseSet copiedExerciseSet = new ExerciseSet(
+                        exerciseSet.getId(),
+                        exerciseSet.getWorkingSets(),
+                        exerciseSet.getRepetitions(),
+                        exerciseSet.getWorkingWeight()
                     );
-                    copiedSetBases.add(copiedSetBase);
+                    copiedExerciseSetList.add(copiedExerciseSet);
                 }
                 
-                copiedSetBases.addListener(new ListChangeListener() {
+                copiedExerciseSetList.addListener(new ListChangeListener() {
 
                     @Override
                     public void onChanged(ListChangeListener.Change change) {
@@ -89,8 +92,8 @@ public class SetBaseListController {
                     }
                 });
                 
-                setBaseList.setItems(copiedSetBases);
-                exerciseNameLbl.setText(newExerciseBase.getExerciseName());
+                exerciseSetListView.setItems(copiedExerciseSetList);
+                exerciseInfoNameLabel.setText(newExercise.getExerciseInfo().getName());
             }
         });
         
@@ -100,14 +103,14 @@ public class SetBaseListController {
         // editing is disabled if no items are selected
         editButton.disableProperty().bind(
             Bindings.isNull(
-                setBaseList.getSelectionModel().selectedItemProperty()
+                exerciseSetListView.getSelectionModel().selectedItemProperty()
             )
         );
         
         // removing is disabled if no items are selected
         removeButton.disableProperty().bind(
             Bindings.isNull(
-                setBaseList.getSelectionModel().selectedItemProperty()
+                exerciseSetListView.getSelectionModel().selectedItemProperty()
             )
         );
     }
@@ -116,7 +119,8 @@ public class SetBaseListController {
     private void save() throws Exception {
         Optional<ButtonType> optional = showSaveAlert();
         if (optional.get() == yesButton) {
-            exerciseBase.get().getSets().setAll(setBaseList.getItems());
+            exercise.get().getExerciseSetList()
+                    .setAll(exerciseSetListView.getItems());
             close();
             
         } else if (optional.get() == noButton) {
@@ -139,16 +143,16 @@ public class SetBaseListController {
 
     @FXML
     private void createNew() throws Exception {
-        String resource = "/fxml/SetBaseEditor.fxml";
+        String resource = "/fxml/ExerciseSetEditor.fxml";
         FXMLLoader loader = new FXMLLoader(getClass().getResource(resource));
         Parent root = loader.load();
 
-        SetBaseEditorController controller = loader.getController();
+        ExerciseSetEditorController controller = loader.getController();
         
-        controller.setBaseProperty().addListener(
-            (obs, oldSetBase, newSetBase) -> {
-                if (newSetBase != null) {
-                    setBaseList.getItems().add(newSetBase);
+        controller.exerciseSetProperty().addListener(
+            (obs, oldExerciseSet, newExerciseSet) -> {
+                if (newExerciseSet != null) {
+                    exerciseSetListView.getItems().add(newExerciseSet);
                 }
             }
         );
@@ -158,48 +162,48 @@ public class SetBaseListController {
 
     @FXML
     private void edit() throws Exception {
-        String resource = "/fxml/SetBaseEditor.fxml";
+        String resource = "/fxml/ExerciseSetEditor.fxml";
         FXMLLoader loader = new FXMLLoader(getClass().getResource(resource));
         Parent root = loader.load();
 
-        SetBaseEditorController controller = loader.getController();
+        ExerciseSetEditorController controller = loader.getController();
 
-        SetBase selectedItem = setBaseList.getSelectionModel()
-                                          .getSelectedItem();
-        controller.setSetBase(selectedItem);
+        ExerciseSet selectedItem = exerciseSetListView.getSelectionModel()
+                                                      .getSelectedItem();
+        controller.setExerciseSet(selectedItem);
         
         showEditorWindow(root);
     }
     
     @FXML
     private void remove() {
-        final int selectedIndex = setBaseList.getSelectionModel()
-                                             .getSelectedIndex();
-        int newSelectedIndex =
-            (selectedIndex == (setBaseList.getItems().size() - 1))
-                ? (selectedIndex - 1)
-                : selectedIndex;
+        final int selectedListViewIndex = exerciseSetListView.getSelectionModel()
+                                                             .getSelectedIndex();
+        int newSelectedListViewIndex =
+            (selectedListViewIndex == (exerciseSetListView.getItems().size() - 1))
+                ? (selectedListViewIndex - 1)
+                : selectedListViewIndex;
         
-        setBaseList.getItems().remove(selectedIndex);
+        exerciseSetListView.getItems().remove(selectedListViewIndex);
         
-        if (newSelectedIndex >= 0) {
-            setBaseList.getSelectionModel().select(newSelectedIndex);
+        if (newSelectedListViewIndex >= 0) {
+            exerciseSetListView.getSelectionModel().select(newSelectedListViewIndex);
             
         } else {
-            setBaseList.getSelectionModel().clearSelection();
+            exerciseSetListView.getSelectionModel().clearSelection();
         }
     }
     
     private void close() {
-        exerciseNameLbl.getScene().getWindow().hide();
+        exerciseInfoNameLabel.getScene().getWindow().hide();
     }
 
     private void showEditorWindow(Parent root) {
         Stage stage = new Stage();
         
-        stage.setTitle(exerciseNameLbl.getText() + " Set Editor");
+        stage.setTitle(exerciseInfoNameLabel.getText() + " Exercise Set Editor");
         
-        stage.initOwner(setBaseList.getScene().getWindow());
+        stage.initOwner(exerciseSetListView.getScene().getWindow());
         stage.initModality(Modality.APPLICATION_MODAL);
         
         Scene scene = new Scene(root);
@@ -210,7 +214,7 @@ public class SetBaseListController {
     private Optional<ButtonType> showSaveAlert() {
         Alert alert = new Alert(AlertType.CONFIRMATION);
         alert.setTitle("Confirmation");
-        alert.setHeaderText(exerciseNameLbl.getText());
+        alert.setHeaderText(exerciseInfoNameLabel.getText());
         alert.setContentText("Do you want to save the changes?");
         
         alert.getButtonTypes().clear();
@@ -222,7 +226,7 @@ public class SetBaseListController {
     private Optional<ButtonType> showCancelAlert() {
         Alert alert = new Alert(AlertType.CONFIRMATION);
         alert.setTitle("Confirmation");
-        alert.setHeaderText(exerciseNameLbl.getText());
+        alert.setHeaderText(exerciseInfoNameLabel.getText());
         alert.setContentText("Do you want to cancel the changes?");
         
         alert.getButtonTypes().clear();

@@ -1,7 +1,7 @@
 
 package com.mycompany.cells;
 
-import com.mycompany.domain.SetBase;
+import com.mycompany.domain.ExerciseSet;
 import com.mycompany.utilities.LocalDragboard;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -16,9 +16,9 @@ import javafx.scene.input.TransferMode;
  * 
  * onDragDropped inefficient: whole list is replaced
  */
-public class SetBaseCell extends ListCell<SetBase> {
+public class ExerciseSetCell extends ListCell<ExerciseSet> {
     
-    public SetBaseCell() {
+    public ExerciseSetCell() {
         ListCell thisCell = this;
         
         // https://docs.oracle.com/javafx/2/api/javafx/scene/input/DragEvent.html
@@ -55,7 +55,7 @@ public class SetBaseCell extends ListCell<SetBase> {
             
             // 2. Put the real data in a custom dragboard, since the dragboard
             // does not support custum classes
-            LocalDragboard.getInstance().putValue(SetBase.class, getItem());
+            LocalDragboard.getInstance().putValue(ExerciseSet.class, getItem());
             
             event.consume();
         });
@@ -83,7 +83,7 @@ public class SetBaseCell extends ListCell<SetBase> {
             is provided by the getDragboard() method.
             */
             if ((event.getGestureSource() != thisCell) &&
-                    LocalDragboard.getInstance().hasType(SetBase.class))
+                    LocalDragboard.getInstance().hasType(ExerciseSet.class))
             {
                 event.acceptTransferModes(TransferMode.MOVE);
             }
@@ -97,7 +97,7 @@ public class SetBaseCell extends ListCell<SetBase> {
         */
         setOnDragEntered(event -> {
             if ((event.getGestureSource() != thisCell) &&
-                    LocalDragboard.getInstance().hasType(SetBase.class))
+                    LocalDragboard.getInstance().hasType(ExerciseSet.class))
             {
                 setOpacity(0.3);
             }
@@ -109,7 +109,7 @@ public class SetBaseCell extends ListCell<SetBase> {
         */
         setOnDragExited(event -> {
             if ((event.getGestureSource() != thisCell) &&
-                    LocalDragboard.getInstance().hasType(SetBase.class))
+                    LocalDragboard.getInstance().hasType(ExerciseSet.class))
             {
                 setOpacity(1);
             }
@@ -135,11 +135,11 @@ public class SetBaseCell extends ListCell<SetBase> {
             boolean success = false;
 
             LocalDragboard ldb = LocalDragboard.getInstance();
-            if (ldb.hasType(SetBase.class)) {
-                ObservableList<SetBase> items = getListView().getItems();
+            if (ldb.hasType(ExerciseSet.class)) {
+                ObservableList<ExerciseSet> items = getListView().getItems();
                 
-                SetBase sourceSetBase = ldb.getValue(SetBase.class);
-                SetBase targetSetBase = getItem();
+                ExerciseSet sourceSetBase = ldb.getValue(ExerciseSet.class);
+                ExerciseSet targetSetBase = getItem();
                 
                 int sourceIndex = items.indexOf(sourceSetBase);
                 int targetIndex = items.indexOf(targetSetBase);
@@ -147,7 +147,7 @@ public class SetBaseCell extends ListCell<SetBase> {
                 int min = Math.min(sourceIndex, targetIndex);
                 int max = Math.max(sourceIndex, targetIndex);
                         
-                ObservableList<SetBase> temp = FXCollections.observableArrayList();
+                ObservableList<ExerciseSet> temp = FXCollections.observableArrayList();
                 for (int i = 0; i < items.size(); ++i) {
                     if ((i < min) || (i > max)) {
                         temp.add(items.get(i));
@@ -191,7 +191,7 @@ public class SetBaseCell extends ListCell<SetBase> {
     }
     
     @Override
-    protected void updateItem(SetBase item, boolean empty) {
+    protected void updateItem(ExerciseSet item, boolean empty) {
         super.updateItem(item, empty);
         
         if (empty || item == null) {

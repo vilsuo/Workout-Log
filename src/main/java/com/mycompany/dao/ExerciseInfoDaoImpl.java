@@ -1,6 +1,7 @@
 
 package com.mycompany.dao;
 
+import com.mycompany.application.App;
 import com.mycompany.domain.ExerciseInfo;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -13,13 +14,8 @@ import java.util.List;
 
 public class ExerciseInfoDaoImpl implements ExerciseInfoDao {
     
-    private final String path = "jdbc:h2:./workoutLog-database";
-    private String databasePath;
+    private final String databasePath = App.DATABASE_PATH;
 
-    public ExerciseInfoDaoImpl(String databasePath) {
-        this.databasePath = path;
-    }
-    
     private Connection createConnectionAndEnsureDatabase() throws SQLException {
         Connection conn = DriverManager.getConnection(this.databasePath, "sa", "");
         String sql = "CREATE TABLE IF NOT EXISTS ExerciseInfo ("
@@ -110,6 +106,27 @@ public class ExerciseInfoDaoImpl implements ExerciseInfoDao {
     }
     
     @Override
+    public ExerciseInfo getExerciseInfo(int index) throws SQLException {
+        try (Connection connection = createConnectionAndEnsureDatabase()) {
+            String sql = "SELECT * FROM ExerciseInfo WHERE id = ?;";
+            try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+                pstmt.setInt(1, index);
+                
+                try (ResultSet results = connection.prepareStatement(sql).executeQuery()) {
+                    while (results.next()) {
+                        return new ExerciseInfo(
+                            results.getInt("id"),
+                            results.getString("name"),
+                            results.getString("column")
+                        );
+                    }
+                    return null;
+                }
+            }
+        }
+    }
+    
+    @Override
     public List<ExerciseInfo> getItems() throws SQLException {
         List<ExerciseInfo> exerciseInfos = new ArrayList<>();
         try (Connection connection = createConnectionAndEnsureDatabase()) {
@@ -152,8 +169,7 @@ public class ExerciseInfoDaoImpl implements ExerciseInfoDao {
         return exerciseInfos;
     }
     
-    @Override
-    public int getIndexByName(String name) throws SQLException {
+    private int getIndexByName(String name) throws SQLException {
         try (Connection connection = createConnectionAndEnsureDatabase()) {
             PreparedStatement stmt = connection.prepareStatement(
                 "SELECT id FROM ExerciseInfo WHERE name = ?;"

@@ -1,2 +1,11 @@
 2023-03-10 01:00:29 jdbc[3]: exception
 org.h2.jdbc.JdbcSQLNonTransientException: The object is already closed [90007-214]
+2023-03-12 18:07:35 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "UPDATE ExerciseSet SET workingSets = ? [*]SET = repetitions SET workingWeight = ? WHERE id = ?;"; SQL statement:
+UPDATE ExerciseSet SET workingSets = ? SET = repetitions SET workingWeight = ? WHERE id = ?; [42000-214]
+2023-03-12 18:08:50 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "UPDATE ExerciseSet SET workingSets = ? [*]SET repetitions = ? SET workingWeight = ? WHERE id = ?;"; SQL statement:
+UPDATE ExerciseSet SET workingSets = ? SET repetitions = ? SET workingWeight = ? WHERE id = ?; [42000-214]
+2023-03-12 18:11:15 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "UPDATE ExerciseSet SET workingSets = ? [*]SET repetitions = ? SET workingWeight = ? WHERE id = ?;"; SQL statement:
+UPDATE ExerciseSet SET workingSets = ? SET repetitions = ? SET workingWeight = ? WHERE id = ?; [42000-214]
