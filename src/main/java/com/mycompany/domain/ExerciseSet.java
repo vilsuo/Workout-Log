@@ -14,12 +14,14 @@ public class ExerciseSet {
     private final IntegerProperty workingSets;
     private final IntegerProperty repetitions;
     private final DoubleProperty workingWeight;
+    private final IntegerProperty orderNumber;
 
-    public ExerciseSet(int id, int workingSets, int repetitions, double workingWeight) {
+    public ExerciseSet(int id, int workingSets, int repetitions, double workingWeight, int orderNumber) {
         this.id = new ReadOnlyIntegerWrapper(id);
         this.workingSets = new SimpleIntegerProperty(workingSets);
         this.repetitions = new SimpleIntegerProperty(repetitions);
         this.workingWeight = new SimpleDoubleProperty(workingWeight);
+        this.orderNumber = new SimpleIntegerProperty(orderNumber);
     }
     
     public ReadOnlyIntegerProperty idProperty() {
@@ -70,8 +72,40 @@ public class ExerciseSet {
     }
     
     
+    public IntegerProperty orderNumberProperty() {
+        return orderNumber;
+    }
+    
+    public final int getOrderNumber() {
+        return orderNumber.get();
+    }
+    
+    public final void setOrderNumber(int order) {
+        this.orderNumber.set(order);
+    }
+    
+    @Override
+    public boolean equals(Object other) {
+        if (other == null) {
+            return false;
+        }
+        
+        if (!(other instanceof ExerciseSet)) {
+            return false;
+        }
+        
+        ExerciseSet exerciseSet = (ExerciseSet) other;
+        
+        return (getId() == exerciseSet.getId())
+            && (getWorkingSets() == exerciseSet.getWorkingSets())
+            && (getRepetitions() == exerciseSet.getRepetitions())
+            && (getWorkingWeight() == exerciseSet.getWorkingWeight())
+            && (getOrderNumber() == exerciseSet.getOrderNumber());
+    }
+    
     @Override
     public String toString() {
-        return "\tid=" + id.get() + ": " + workingSets.get() + " x " + repetitions.get() + " @" + workingWeight.get();
+        return "\tid=" + id.get() + ": " + workingSets.get() + " x " + repetitions.get()
+                       + " @" + workingWeight.get() + " #" + orderNumber.get();
     }
 }

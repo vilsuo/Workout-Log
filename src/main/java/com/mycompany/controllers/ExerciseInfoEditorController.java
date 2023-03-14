@@ -23,19 +23,17 @@ import javafx.util.Callback;
 
 public class ExerciseInfoEditorController {
     
-    private ExerciseInfoDaoImpl database;
+    private ExerciseInfoDaoImpl exerciseInfoDatabase = new ExerciseInfoDaoImpl();
     
-    @FXML private TableView<ExerciseInfo> exerciseInfoTV;
+    @FXML private TableView<ExerciseInfo> exerciseInfoTableView;
     @FXML private TableColumn<ExerciseInfo, String> nameColumn;
     @FXML private TableColumn<ExerciseInfo, String> categoryColumn;
     
-    @FXML private TextField nameTF;
-    @FXML private TextField categoryTF;
+    @FXML private TextField nameTextField;
+    @FXML private TextField categoryTextField;
     
     @FXML private Button addButton;
     @FXML private Button deleteButton;
-    
-    private ObservableList<ExerciseInfo> exerciseInfos;
     
     private final ButtonType yesButton = new ButtonType("Yes");
     private final ButtonType noButton = new ButtonType("No");
@@ -47,13 +45,12 @@ public class ExerciseInfoEditorController {
         
         BooleanBinding textFieldsNotFilled = new BooleanBinding() {
             {
-                super.bind(nameTF.textProperty(), categoryTF.textProperty());
+                super.bind(nameTextField.textProperty(), categoryTextField.textProperty());
             }
 
             @Override
             protected boolean computeValue() {
-                return (nameTF.getText().isBlank()
-                        || categoryTF.getText().isBlank());
+                return (nameTextField.getText().isBlank() || categoryTextField.getText().isBlank());
             }
         };
         
@@ -62,99 +59,88 @@ public class ExerciseInfoEditorController {
         
         // disable 'delete' if no items are selected
         deleteButton.disableProperty().bind(
-            exerciseInfoTV.getSelectionModel().selectedItemProperty().isNull()
+            exerciseInfoTableView.getSelectionModel().selectedItemProperty().isNull()
         );
     }
     
     private void setUpTableViewColumns() {
         nameColumn.setCellFactory(param -> new ExerciseInfoEditingCell());
+        categoryColumn.setCellFactory(param -> new ExerciseInfoEditingCell());
+         
         nameColumn.setOnEditCommit(new EventHandler<TableColumn.CellEditEvent<ExerciseInfo, String>>() {
             @Override
             public void handle(TableColumn.CellEditEvent<ExerciseInfo, String> event) {
                 String newName = event.getNewValue();
-                
                 if (newName.isBlank()) {
-                    showErrorAlert(
-                        "Field '" + nameColumn.getText() + "' can not be blank!"
-                    );
-                    exerciseInfoTV.refresh();
+                    showErrorAlert("Field '" + nameColumn.getText() + "' can not be blank!");
+                    exerciseInfoTableView.refresh();
                     return;
                     
                 } else if (isExerciseNameTaken(newName)) {
-                    showErrorAlert(
-                        "Exercise with name a '" + newName + "' already exists!"
-                    );
+                    showErrorAlert("Exercise with name a '" + newName + "' already exists!");
+                    exerciseInfoTableView.refresh();
                     return;
                 }
                 
                 try {
-                    ExerciseInfo edited = event.getTableView().getItems()
-                                        .get(event.getTablePosition().getRow());
+                    ExerciseInfo editedExerciseInfo = event.getTableView().getItems().get(event.getTablePosition().getRow());
                 
-                    database.updateName(edited.getId(), newName);
-                    edited.setName(newName);
+                    exerciseInfoDatabase.updateItemName(editedExerciseInfo.getId(), newName);
+                    editedExerciseInfo.setName(newName);
                     
                 } catch (Exception e){
-                    // log: update name was not successful...
-                    System.out.println("update name was not successful");
+                    System.out.println("Error in ExerciseInfoEditorController.setUpTableViewColumns() nameColumn: " + e.getMessage());
                 }
             }
         });
         
-        categoryColumn.setCellFactory(param -> new ExerciseInfoEditingCell());
         categoryColumn.setOnEditCommit(new EventHandler<TableColumn.CellEditEvent<ExerciseInfo, String>>() {
             @Override
             public void handle(TableColumn.CellEditEvent<ExerciseInfo, String> event) {
                 String newCategory = event.getNewValue();
                 if (newCategory.isBlank()) {
-                    showErrorAlert(
-                        "Field '" + categoryColumn.getText() + "' can not be blank!"
-                    );
-                    exerciseInfoTV.refresh();
+                    showErrorAlert("Field '" + categoryColumn.getText() + "' can not be blank!");
+                    exerciseInfoTableView.refresh();
                     return;
                 }
                 
                 try {
-                    ExerciseInfo edited = event.getTableView().getItems()
-                                        .get(event.getTablePosition().getRow());
+                    ExerciseInfo editedExerciseInfo = event.getTableView().getItems().get(event.getTablePosition().getRow());
                 
-                    database.updateCategory(edited.getId(), newCategory);
-                    edited.setCategory(newCategory);
+                    exerciseInfoDatabase.updateItemCategory(editedExerciseInfo.getId(), newCategory);
+                    editedExerciseInfo.setCategory(newCategory);
                     
                 } catch (Exception e){
-                    // log: update category was not successful...
-                    System.out.println("update category was not successful");
+                    System.out.println(
+                        "Error in ExerciseInfoEditorController.setUpTableViewColumns() categoryColumn: " + e.getMessage()
+                    );
                 }
             }
         });
     }
     
     private void setUpTableViewData() {
-        Callback<ExerciseInfo, Observable[]> extractor =
-            (ExerciseInfo exerciseInfo) -> new Observable[] {
-                exerciseInfo.idProperty(),
-                exerciseInfo.nameProperty(),
-                exerciseInfo.categoryProperty()
-            };
-        exerciseInfos = FXCollections.observableList(getData(), extractor);
-        exerciseInfoTV.setItems(exerciseInfos);
+        Callback<ExerciseInfo, Observable[]> extractor = (ExerciseInfo exerciseInfo) -> new Observable[] {
+            exerciseInfo.idProperty(),
+            exerciseInfo.nameProperty(),
+            exerciseInfo.categoryProperty()
+        };
+        ObservableList<ExerciseInfo> exerciseInfoList = FXCollections.observableList(getData(), extractor);
+        exerciseInfoTableView.setItems(exerciseInfoList);
     }
     
     private List<ExerciseInfo> getData() {
         List<ExerciseInfo> data = new ArrayList<>();
         try {
-            database = new ExerciseInfoDaoImpl();
-            data = database.getItems();
-            
+            data = exerciseInfoDatabase.getAllItems();
         } catch (Exception e) {
-            // log: loading database was not successful...
-            System.out.println("loading database was not successful");
+            System.out.println("error in ExerciseInfoEditorController.getData(): " + e.getMessage());
         }
         return data;
     }
     
     private boolean isExerciseNameTaken(String exerciseName) {
-        long count = exerciseInfoTV.getItems().stream()
+        long count = exerciseInfoTableView.getItems().stream()
                                 .map(exerciseInfo -> exerciseInfo.getName())
                                 .filter(name -> name.equals(exerciseName))
                                 .count();
@@ -163,52 +149,42 @@ public class ExerciseInfoEditorController {
     
     @FXML
     private void add() {
-        String name = nameTF.getText();
-        String catecory = categoryTF.getText();
+        String name = nameTextField.getText();
+        String catecory = categoryTextField.getText();
         try {
-            int generatedKey = database.create(name, catecory);
+            int generatedKey = exerciseInfoDatabase.createItem(name, catecory);
             if (generatedKey != -1) {
-                exerciseInfos.add(
-                    new ExerciseInfo(generatedKey, name, catecory)
-                );
-                
-                nameTF.clear();
-                categoryTF.clear();
-                
+                exerciseInfoTableView.getItems().add(new ExerciseInfo(generatedKey, name, catecory));
+                nameTextField.clear();
+                categoryTextField.clear();
             } else {
-                showErrorAlert(
-                    "Exercise with name a '" + name + "' already exists!"
-                );
+                showErrorAlert("Exercise with name a '" + name + "' already exists!");
             }
             
         } catch (Exception e) {
-            // log: adding was not successful...
-            System.out.println("Error in add(): " + e.getMessage());
+            System.out.println("Error in ExerciseInfoEditorController.add(): " + e.getMessage());
         }
     }
     
     @FXML
     private void delete() {
-        ExerciseInfo selectedItem = exerciseInfoTV.getSelectionModel()
-                                                  .getSelectedItem();
+        ExerciseInfo selectedItem = exerciseInfoTableView.getSelectionModel().getSelectedItem();
         Optional<ButtonType> optional = showDeleteAlert(selectedItem);
         if (optional.get() == yesButton) {
             try {
                 int exerciseInfoId = selectedItem.getId();
-                
-                database.remove(exerciseInfoId);
-                exerciseInfoTV.getItems().remove(
-                    exerciseInfoTV.getSelectionModel().getSelectedIndex()
-                );
+                exerciseInfoDatabase.removeItem(exerciseInfoId);
+                exerciseInfoTableView.getItems().remove(exerciseInfoTableView.getSelectionModel().getSelectedIndex());
                 
                 // TODO!!!
-                // remove exerciseSets with exerciseInfoId and exercises with the sets
-                
+                // removeItem exerciseSets with exerciseInfoId and exercises with the sets
                 System.out.println("deleted successfully");
                 
             } catch (Exception e) {
                 // log: deleting exercise was not successful..
-                System.out.println("deleting exercise was not successful");
+                System.out.println(
+                    "Error in ExerciseInfoEditorController.delete(): " + e.getMessage()
+                );
             }
         }
     }

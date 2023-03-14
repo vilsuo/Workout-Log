@@ -14,12 +14,20 @@ import java.util.List;
 
 public class ExerciseInfoDaoImpl implements ExerciseInfoDao {
     
-    private final String databasePath = App.DATABASE_PATH;
+    private String databasePath;
+    
+    public ExerciseInfoDaoImpl(String databasePath) {
+        this.databasePath = databasePath;
+    }
+    
+    public ExerciseInfoDaoImpl() {
+        databasePath = App.DATABASE_PATH;
+    }
 
     private Connection createConnectionAndEnsureDatabase() throws SQLException {
-        Connection conn = DriverManager.getConnection(this.databasePath, "sa", "");
+        Connection conn = DriverManager.getConnection(databasePath, "sa", "");
         String sql = "CREATE TABLE IF NOT EXISTS ExerciseInfo ("
-                    + "id IDENTITY NOT NULL PRIMARY KEY, "
+                    + "id INTEGER AUTO_INCREMENT PRIMARY KEY, "
                     + "name VARCHAR NOT NULL, "
                     + "category VARCHAR NOT NULL"
                     + ");";
@@ -30,7 +38,7 @@ public class ExerciseInfoDaoImpl implements ExerciseInfoDao {
     }
     
     @Override
-    public int create(String name, String category) throws SQLException {
+    public int createItem(String name, String category) throws SQLException {
         if (getIndexByName(name) != -1) {
             return -1;
         }
@@ -54,7 +62,7 @@ public class ExerciseInfoDaoImpl implements ExerciseInfoDao {
     }
     
     @Override
-    public boolean updateName(int id, String newName) throws SQLException {
+    public boolean updateItemName(int id, String newName) throws SQLException {
         if (getIndexByName(newName) != -1) {
             return false;
         }
@@ -71,7 +79,7 @@ public class ExerciseInfoDaoImpl implements ExerciseInfoDao {
     }
     
     @Override
-    public void updateCategory(int id, String newCategory) throws SQLException {
+    public void updateItemCategory(int id, String newCategory) throws SQLException {
         try (Connection conn = createConnectionAndEnsureDatabase()) {
             String sql = "UPDATE ExerciseInfo SET category = ? WHERE id = ?;";
             try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -83,19 +91,7 @@ public class ExerciseInfoDaoImpl implements ExerciseInfoDao {
     }
     
     @Override
-    public void renameCategory(String currentCategory, String newCategory) throws SQLException {
-        try (Connection conn = createConnectionAndEnsureDatabase()) {
-            String sql =  "UPDATE ExerciseInfo SET category = ? WHERE category = ?;";
-            try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
-                pstmt.setString(1, newCategory);
-                pstmt.setString(2, currentCategory);
-                pstmt.executeUpdate();
-            }
-        }
-    }
-    
-    @Override
-    public void remove(int id) throws SQLException {
+    public void removeItem(int id) throws SQLException {
         try (Connection connection = createConnectionAndEnsureDatabase()) {
             String sql = "DELETE FROM ExerciseInfo WHERE id = ?;";
             try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
@@ -106,18 +102,30 @@ public class ExerciseInfoDaoImpl implements ExerciseInfoDao {
     }
     
     @Override
-    public ExerciseInfo getExerciseInfo(int index) throws SQLException {
+    public void removeItems(List<Integer> idList) throws SQLException {
+        try (Connection connection = createConnectionAndEnsureDatabase()) {
+            String sql = "DELETE FROM ExerciseInfo WHERE id = ?;";
+            for (int id : idList) {
+                try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+                    pstmt.setInt(1, id);
+                    pstmt.executeUpdate();
+                }
+            }
+        }
+    }
+    
+    @Override
+    public ExerciseInfo getItem(int id) throws SQLException {
         try (Connection connection = createConnectionAndEnsureDatabase()) {
             String sql = "SELECT * FROM ExerciseInfo WHERE id = ?;";
             try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
-                pstmt.setInt(1, index);
-                
-                try (ResultSet results = connection.prepareStatement(sql).executeQuery()) {
+                pstmt.setInt(1, id);
+                try (ResultSet results = pstmt.executeQuery()) {
                     while (results.next()) {
                         return new ExerciseInfo(
                             results.getInt("id"),
                             results.getString("name"),
-                            results.getString("column")
+                            results.getString("category")
                         );
                     }
                     return null;
@@ -127,13 +135,38 @@ public class ExerciseInfoDaoImpl implements ExerciseInfoDao {
     }
     
     @Override
-    public List<ExerciseInfo> getItems() throws SQLException {
-        List<ExerciseInfo> exerciseInfos = new ArrayList<>();
+    public List<ExerciseInfo> getItems(List<Integer> idList) throws SQLException {
+        List<ExerciseInfo> exerciseInfoList = new ArrayList<>();
+        try (Connection connection = createConnectionAndEnsureDatabase()) {
+            String sql = "SELECT * FROM ExerciseInfo WHERE id = ?;";
+            for (int id : idList) {
+                try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+                    pstmt.setInt(1, id);
+                    try (ResultSet results = pstmt.executeQuery()) {
+                        while (results.next()) {
+                            exerciseInfoList.add(
+                                new ExerciseInfo(
+                                    results.getInt("id"),
+                                    results.getString("name"),
+                                    results.getString("category")
+                                )
+                            );
+                        }
+                    }
+                }
+            }
+        }
+        return exerciseInfoList;
+    }
+    
+    @Override
+    public List<ExerciseInfo> getAllItems() throws SQLException {
+        List<ExerciseInfo> exerciseInfoList = new ArrayList<>();
         try (Connection connection = createConnectionAndEnsureDatabase()) {
             String sql = "SELECT * FROM ExerciseInfo;";
             try (ResultSet results = connection.prepareStatement(sql).executeQuery()) {
                 while (results.next()) {
-                    exerciseInfos.add(
+                    exerciseInfoList.add(
                         new ExerciseInfo(
                             results.getInt("id"),
                             results.getString("name"),
@@ -143,17 +176,17 @@ public class ExerciseInfoDaoImpl implements ExerciseInfoDao {
                 }
             }
         }
-        return exerciseInfos;
+        return exerciseInfoList;
     }
     
     @Override
-    public List<ExerciseInfo> getItemsByCategory(String category) throws SQLException {
+    public List<ExerciseInfo> getAllItemsByCategory(String category) throws SQLException {
         List<ExerciseInfo> exerciseInfos = new ArrayList<>();
         try (Connection connection = createConnectionAndEnsureDatabase()) {
             String sql = "SELECT * FROM ExerciseInfo WHERE category = ?;";
             try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
                 pstmt.setString(1, category);
-                try (ResultSet results = connection.prepareStatement(sql).executeQuery()) {
+                try (ResultSet results = pstmt.executeQuery()) {
                     while (results.next()) {
                         exerciseInfos.add(
                             new ExerciseInfo(
@@ -184,40 +217,4 @@ public class ExerciseInfoDaoImpl implements ExerciseInfoDao {
             }
         }
     }
-    
-    
-    /*
-    @Override
-    public List<String> getNamesByCategory(String category) throws SQLException {
-        List<String> names = new ArrayList<>();
-        try (Connection connection = createConnectionAndEnsureDatabase()) {
-            PreparedStatement stmt = connection.prepareStatement(
-                "SELECT name FROM ExerciseInfo WHERE category = ?;"
-            );
-            stmt.setString(1, category);
-            ResultSet results = stmt.executeQuery();
-            
-            while (results.next()) {
-                names.add(results.getString("name"));
-            }
-        }
-        return names;
-    }
-    
-    @Override
-    public List<String> getCategories() throws SQLException {
-        List<String> categories = new ArrayList<>();
-        try (Connection connection = createConnectionAndEnsureDatabase()) {
-            PreparedStatement stmt = connection.prepareStatement(
-                "SELECT category FROM ExerciseInfo;"
-            );
-            ResultSet results = stmt.executeQuery();
-            
-            while (results.next()) {
-                categories.add(results.getString("category"));
-            }
-        }
-        return categories;
-    }
-    */
 }

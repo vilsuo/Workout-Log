@@ -1,6 +1,6 @@
 package com.mycompany.controllers;
 
-import com.mycompany.cells.ExerciseInfoNameDisplayCell;
+import com.mycompany.dao.ExerciseDaoImpl;
 import com.mycompany.dao.ExerciseInfoDaoImpl;
 import com.mycompany.domain.ExerciseInfo;
 import com.mycompany.domain.Exercise;
@@ -20,111 +20,87 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
-import javafx.scene.control.ListCell;
-import javafx.scene.control.ListView;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import javafx.util.Callback;
 
 public class ExerciseCreatorController {
     
-    private ExerciseInfoDaoImpl database;
+    private final ExerciseInfoDaoImpl exerciseInfoDatabase = new ExerciseInfoDaoImpl();
+    private final ExerciseDaoImpl exerciseDatabase = new ExerciseDaoImpl();
     
-    @FXML private ComboBox categoryCB;
-    @FXML private ComboBox nameCB;
-    
+    @FXML private ComboBox categoryComboBox;
+    @FXML private ComboBox nameComboBox;
     @FXML private Button addButton;
+    
+    private ObservableMap<String, Map<String, Integer> > exerciseInfoMap;
 
     private final ObjectProperty<Exercise> exercise = new SimpleObjectProperty<>();
-    
-    ObservableMap<String, List<ExerciseInfo>> observableMap;
     
     public ObjectProperty<Exercise> exerciseProperty() {
         return exercise;
     }
     
     public void initialize() {
-        createCategories();
+        setUpData();
+        setUpListeners();
+    }
+    
+    private void setUpData() {
+        List<ExerciseInfo> data = loadExerciseInfoList();
+        Map<String, Map<String , Integer>> map = new HashMap<>();
+        for (ExerciseInfo item : data) {
+            if (!map.containsKey(item.getCategory())) {
+                map.put(item.getCategory(), new HashMap<>());
+            }
+            map.get(item.getCategory()).put(item.getName(), item.getId());
+        }
         
-        categoryCB.getSelectionModel().selectedItemProperty().addListener(
+        exerciseInfoMap = FXCollections.observableHashMap();
+        exerciseInfoMap.putAll(map);
+        
+        ObservableList<String> categoryList = FXCollections.observableArrayList(
+            exerciseInfoMap.keySet()
+        );
+        FXCollections.sort(categoryList);
+        
+        categoryComboBox.getItems().setAll(categoryList);
+    }
+    
+    private List<ExerciseInfo> loadExerciseInfoList() {
+        try {
+            return exerciseInfoDatabase.getAllItems();
+        } catch (Exception e) {
+            System.out.println("Error in ExerciseCreatorController.getData(): " + e.getMessage());
+        }
+        return new ArrayList<>();
+    }
+    
+    private void setUpListeners() {
+        categoryComboBox.getSelectionModel().selectedItemProperty().addListener(
             (obs, oldCategory, newCategory) -> {
                 if (newCategory != null) {
-                    ObservableList<ExerciseInfo> observableList =
-                    FXCollections.observableList(
-                        observableMap.get((String) newCategory)
+                    ObservableList<String> observableList = FXCollections.observableArrayList(
+                        exerciseInfoMap.get((String) newCategory).keySet()
                     );
-                
-                    FXCollections.sort(observableList, (item1, item2) -> {
-                            return item1.getName().compareTo(item2.getName());
-                        }
-                    ); 
-                    nameCB.getItems().setAll(observableList);
+                    FXCollections.sort(observableList);
+                    nameComboBox.getItems().setAll(observableList);
                 }
             }
         );
         
-        Callback<ListView<ExerciseInfo>, ListCell<ExerciseInfo>> cb = param -> {
-            return new ExerciseInfoNameDisplayCell();
-        };
-        
-        // set combobox to display names instead of ExerciseInfo objects
-        nameCB.setCellFactory(cb);
-        
-        // set combobox button cell also to displays names
-        nameCB.setButtonCell(cb.call(null));
-        
-        nameCB.disableProperty().bind(
-            Bindings.isNull(
-                categoryCB.getSelectionModel().selectedItemProperty()
-            )
+        nameComboBox.disableProperty().bind(
+            Bindings.isNull(categoryComboBox.getSelectionModel().selectedItemProperty())
         );
         
         addButton.disableProperty().bind(
-            Bindings.isNull(
-                nameCB.getSelectionModel().selectedItemProperty()
-            )
+            Bindings.isNull(nameComboBox.getSelectionModel().selectedItemProperty())
         );
-    }
-    
-    private void createCategories() {
-        observableMap = FXCollections.observableHashMap();
-        Map<String, List<ExerciseInfo>> map = new HashMap<>();
-        
-        List<ExerciseInfo> data = getData();
-        for (ExerciseInfo item : data) {
-            if (!map.containsKey(item.getCategory())) {
-                map.put(item.getCategory(), new ArrayList<>());
-            }
-            map.get(item.getCategory()).add(item);
-        }
-        observableMap.putAll(map);
-        
-        ObservableList<String> categoryList = FXCollections.observableArrayList(
-            observableMap.keySet()
-        );
-        
-        FXCollections.sort(categoryList);
-        categoryCB.getItems().setAll(categoryList);
-    }
-    
-    private List<ExerciseInfo> getData() {
-        List<ExerciseInfo> data = new ArrayList<>();
-        try {
-            database = new ExerciseInfoDaoImpl();
-            data = database.getItems();
-            
-        } catch (Exception e) {
-            // log: loading database was not successful...
-            System.out.println("loading database was not successful");
-        }
-        return data;
     }
     
     @FXML
     private void edit() throws Exception {
-        // clear selections
-        categoryCB.getSelectionModel().clearSelection();
-        nameCB.getSelectionModel().clearSelection();
+        categoryComboBox.getSelectionModel().clearSelection();
+        nameComboBox.getSelectionModel().clearSelection();
         
         String resource = "/fxml/ExerciseInfoEditor.fxml";
         FXMLLoader loader = new FXMLLoader(getClass().getResource(resource));
@@ -132,20 +108,24 @@ public class ExerciseCreatorController {
         showEditorWindow(root);
         
         // refresh...
-        createCategories();
+        setUpData();
     }
     
     @FXML
     private void submit() {
-        ExerciseInfo exerciseInfo = ((ExerciseInfo) nameCB.getSelectionModel()
-                                                          .getSelectedItem());
-        // TODO!!!
-        // create new Exercise database entry and return the key
-        int generatedKey = -1;
+        String category = (String) categoryComboBox.getSelectionModel().getSelectedItem();
+        String name = (String) nameComboBox.getSelectionModel().getSelectedItem();
+        int id = exerciseInfoMap.get(category).get(name);
         
-        exercise.set(new Exercise(generatedKey, exerciseInfo));
-        
-        close();
+        ExerciseInfo exerciseInfo = new ExerciseInfo(id, name, category);
+        try {
+            int generatedKey = exerciseDatabase.createItem(exerciseInfo);
+            exercise.set(new Exercise(generatedKey, exerciseInfo));
+            
+            close();
+        } catch (Exception e) {
+            System.out.println("Error in ExerciseCreatorController.submit(): " + e.getMessage());
+        }
     }
     
     @FXML
@@ -154,36 +134,17 @@ public class ExerciseCreatorController {
     }
     
     private void close() {
-        categoryCB.getScene().getWindow().hide();
+        categoryComboBox.getScene().getWindow().hide();
     }
     
     private void showEditorWindow(Parent root) {
         Stage stage = new Stage();
         stage.setTitle("Exercise Info Editor");
-        stage.initOwner(categoryCB.getScene().getWindow());
+        stage.initOwner(categoryComboBox.getScene().getWindow());
         stage.initModality(Modality.APPLICATION_MODAL);
         
         Scene scene = new Scene(root);
         stage.setScene(scene);
         stage.showAndWait();
     }
-    
-    /*
-    // temporary...
-    @FXML
-    private void listAll() {
-        String cb = (String) categoryCB.getSelectionModel().getSelectedItem();
-        ExerciseInfo name = (ExerciseInfo) nameCB.getSelectionModel().getSelectedItem();
-        
-        System.out.println("category: " + cb != null ? cb : "null");
-        System.out.println("name: " + name != null ? name : "null");
-        
-        try {
-            database.getItems()
-                    .forEach(exercise -> System.out.println(exercise));
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-        }
-    }
-    */
 }

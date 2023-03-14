@@ -18,6 +18,7 @@ public class ExerciseInfo {
         this.category = new SimpleStringProperty(category);
     }
     
+    
     public ReadOnlyIntegerProperty idProperty() {
         return id;
     }
@@ -51,8 +52,24 @@ public class ExerciseInfo {
     public void setCategory(String category) {
         this.category.set(category);
     }
-
     
+    @Override
+    public boolean equals(Object other) {
+        if (other == null) {
+            return false;
+        }
+        
+        if (!(other instanceof ExerciseInfo)) {
+            return false;
+        }
+        
+        ExerciseInfo item = (ExerciseInfo) other;
+        
+        return (getId() == item.getId())
+             && getName().equals(item.getName())
+             && getCategory().equals(item.getCategory());
+    }
+
     @Override
     public String toString() {
         return "id=" + id.get() + ", name=" + name.get() + ", category=" + category.get();
