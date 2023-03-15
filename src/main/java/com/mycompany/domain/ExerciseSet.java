@@ -32,6 +32,10 @@ public class ExerciseSet implements Comparable<ExerciseSet>{
         return id.get();
     }
     
+    public void setId(int id) {
+        this.id.set(id);
+    }
+    
     
     public IntegerProperty workingSetsProperty() {
         return workingSets;

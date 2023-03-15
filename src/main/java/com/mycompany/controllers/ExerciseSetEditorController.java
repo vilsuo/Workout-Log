@@ -3,6 +3,7 @@ package com.mycompany.controllers;
 import com.mycompany.dao.ExerciseSetDaoImpl;
 import com.mycompany.domain.ExerciseSet;
 import com.mycompany.utilities.InputValidator;
+import com.mycompany.utilities.NumberGenerator;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -107,25 +108,25 @@ public class ExerciseSetEditorController {
         if (exerciseSet.get() == null) {
             // add new
             try {
+                int tempId = NumberGenerator.generateNextNegativeNumber();
+                int tempOrderNumber = -1;
                 
-                /*
-                I COMMENTED THIS OUT JUST TO THE PROJECT WOULD COMPILE WHILE TESTING!!
-                
-                int generatedKey = ExerciseSetDatabase.create(workingSets, repetitions, workingWeight);
-                setExerciseSet(new ExerciseSet(generatedKey, workingSets, repetitions, workingWeight));
-                */
-                
-                // TODO
-                // createItem ExerciseToExerciseSet -table entry!!!
-                
-                
+                setExerciseSet(
+                    new ExerciseSet(
+                        tempId,
+                        workingSets,
+                        repetitions,
+                        workingWeight,
+                        tempOrderNumber
+                    )
+                );
             } catch (Exception e) {
                 System.out.println("Error in ExerciseSetEditorController.submit() add new: " + e.getMessage());
             }
         } else {
             // edit existing ExerciseSet
             try {
-                ExerciseSetDatabase.updateItem(exerciseSet.get().getId(), repetitions, workingSets, workingWeight);
+                //ExerciseSetDatabase.updateItem(exerciseSet.get().getId(), repetitions, workingSets, workingWeight);
                 exerciseSet.get().setWorkingSets(workingSets);
                 exerciseSet.get().setRepetitions(repetitions);
                 exerciseSet.get().setWorkingWeight(workingWeight);

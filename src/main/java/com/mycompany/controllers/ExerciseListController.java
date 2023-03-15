@@ -21,7 +21,7 @@ import javafx.util.Callback;
 
 public class ExerciseListController {
     
-    private final ExerciseManagerImpl database = new ExerciseManagerImpl();
+    private final ExerciseManagerImpl manager = new ExerciseManagerImpl();
     
     @FXML private ListView<Exercise> exerciseListView;
     
@@ -30,7 +30,7 @@ public class ExerciseListController {
     
     public void initialize() {
         setUpData();
-        setUpListeners();
+        setUpProperties();
     }
     
     private void setUpData() {
@@ -46,14 +46,14 @@ public class ExerciseListController {
     
     private List<Exercise> loadExerciseList() {
         try {
-            return database.getAllExercises();
+            return manager.getAllExercises();
         } catch (Exception e) {
             System.out.println("Error in ExerciseListController.loadExerciseList: " + e.getMessage());
         }
         return new ArrayList<>();
     }
     
-    private void setUpListeners() {
+    private void setUpProperties() {
         editButton.disableProperty().bind(
             Bindings.isNull(exerciseListView.getSelectionModel().selectedItemProperty())
         );
@@ -81,7 +81,7 @@ public class ExerciseListController {
 
         showWindow(root, "Exercise Creator");
         
-        // refresh
+        // refresh in case of renames
         setUpData();
     }
     
@@ -96,6 +96,8 @@ public class ExerciseListController {
         controller.setExercise(selectedExercise);
         
         showWindow(root, "Exercise SetList Editor");
+        
+        // no need to reload edited exercise?
     }
     
     @FXML
@@ -106,8 +108,8 @@ public class ExerciseListController {
             : selectedListIndex;
         
         try {
-            Exercise selectedExercise = (Exercise) exerciseListView.getSelectionModel().getSelectedItem();
-            database.removeExercise(selectedExercise.getId());
+            Exercise selectedExercise = exerciseListView.getSelectionModel().getSelectedItem();
+            manager.removeExercise(selectedExercise.getId());
             exerciseListView.getItems().remove(selectedListIndex);
             
             if (newSelectedListIndex >= 0) {

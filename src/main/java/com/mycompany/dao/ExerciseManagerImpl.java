@@ -60,59 +60,28 @@ public class ExerciseManagerImpl {
      * 
      * @param exercise
      * 
-     * @param exerciseSet   Assumes item is already in the ExerciseSet-database. 
-     *                      Order number is set to correct one
+     * @param exerciseSet   Assumes item is already in the ExerciseSet-database.
+     *                      Does not update order number.
      * 
      * @throws SQLException 
      */
-    public void addExerciseSetToExercise(Exercise exercise, ExerciseSet exerciseSet) throws SQLException {
-        linkDatabase.createItem(exercise.getId(), exerciseSet.getId());
-        
-        exercise.addExerciseSet(exerciseSet);
-        
-        int newExerciseSetNumber = exercise.getExerciseSetList().size() - 1;
-        exerciseSet.setOrderNumber(newExerciseSetNumber);
-        exerciseSetDatabase.updateItemOrderNumber(exerciseSet.getId(), newExerciseSetNumber);
+    public void addExerciseSetToExercise(int exerciseId, int exerciseSetId) throws SQLException {
+        linkDatabase.createItem(exerciseId, exerciseSetId);
     }
     
-    
     /**
-     * All order numbers updated to database and exercise
-     * 
-     * @param exercise
-     * 
-     * @param exerciseSet       Removed from exercise.exerciseSetList.
-     *                          Removed from link database.
-     *                          Removed from database.
+     * Assumes the exercise set belongs only to a single exercise, if not it is 
+     * removed from all exercises.
+     *
+     * @param exerciseSetId Removed from link database, and exercise set database.
      * @throws SQLException 
      */
-    public void removeExerciseSetFromExercise(Exercise exercise, ExerciseSet exerciseSet) throws SQLException {
-        // remove all information about the exercise set
-        linkDatabase.removeItemsByExerciseSet(exerciseSet.getId()); // assumes the exercise set belongs only to a single exercise
-        exerciseSetDatabase.removeItem(exerciseSet.getId());
-        
-        exercise.getExerciseSetList().remove(exerciseSet);
-        
-        // update exercise set order numbers
-        int exerciseSetOrderNumber = exerciseSet.getOrderNumber();
-        
-        List<Integer> idList = new ArrayList<>();
-        List<Integer> orderList = new ArrayList<>();
-        for (ExerciseSet item : exercise.getExerciseSetList()) {
-            if (item.getOrderNumber() > exerciseSetOrderNumber) {
-                idList.add(item.getId());
-                
-                int newOrderNumber = item.getOrderNumber() - 1;
-                orderList.add(newOrderNumber);
-                item.setOrderNumber(newOrderNumber);
-            }
-        }
-        
-        exerciseSetDatabase.updateItemsOrderNumbers(idList, orderList);
+    public void removeExerciseSet(int exerciseSetId) throws SQLException {
+        linkDatabase.removeItemsByExerciseSet(exerciseSetId);
+        exerciseSetDatabase.removeItem(exerciseSetId);
     }
     
     /**
-     * 
      * @param exerciseId
      * @return              ExerciseSets are sorted by orderNumber
      * @throws SQLException 

@@ -3,6 +3,11 @@ package com.mycompany.controllers;
 import com.mycompany.domain.Exercise;
 import com.mycompany.domain.ExerciseSet;
 import com.mycompany.cells.ExerciseSetCell;
+import com.mycompany.dao.ExerciseManagerImpl;
+import com.mycompany.dao.ExerciseSetDao;
+import com.mycompany.dao.ExerciseSetDaoImpl;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
@@ -28,6 +33,9 @@ import javafx.stage.Stage;
 import javafx.util.Callback;
 
 public class ExerciseSetListController {
+    
+    ExerciseManagerImpl manager = new ExerciseManagerImpl();
+    ExerciseSetDao exerciseSetDatabase = new ExerciseSetDaoImpl();
     
     @FXML private Label exerciseInfoNameLabel;
     
@@ -55,9 +63,15 @@ public class ExerciseSetListController {
     private final BooleanProperty changeMadeProperty =
         new SimpleBooleanProperty(false);
     
+    private final Map<Integer, ExerciseSet> removedExercisSetsMap = new HashMap<>();
+    
     public void initialize() {
         exerciseSetListView.setCellFactory(param -> new ExerciseSetCell());
-         
+        setUpListeners();
+        setUpProperties();
+    }
+    
+    private void setUpListeners() {
         exercise.addListener((obs, oldExercise, newExercise) -> {
             if (newExercise != null) {
                 
@@ -80,10 +94,7 @@ public class ExerciseSetListController {
                         exerciseSet.getWorkingSets(),
                         exerciseSet.getRepetitions(),
                         exerciseSet.getWorkingWeight(),
-                        
-                        // I ADDED THE FOLLOWING LINE JUST SO THE PROJECT WOULD 
-                        // COMPLILE DURING TESTING!!
-                        1
+                        exerciseSet.getOrderNumber()
                     );
                     copiedExerciseSetList.add(copiedExerciseSet);
                 }
@@ -97,10 +108,14 @@ public class ExerciseSetListController {
                 });
                 
                 exerciseSetListView.setItems(copiedExerciseSetList);
-                exerciseInfoNameLabel.setText(newExercise.getExerciseInfo().getName());
+                exerciseInfoNameLabel.setText(
+                    newExercise.getExerciseInfo().getName()
+                );
             }
         });
-        
+    }
+    
+    private void setUpProperties() {
         // saving is disabled if no changes has been made
         saveButton.disableProperty().bind(Bindings.not(changeMadeProperty));
         
@@ -123,8 +138,47 @@ public class ExerciseSetListController {
     private void save() throws Exception {
         Optional<ButtonType> optional = showSaveAlert();
         if (optional.get() == yesButton) {
-            exercise.get().getExerciseSetList()
-                    .setAll(exerciseSetListView.getItems());
+            
+            // handle removed ExerciseSets:
+            for (int exerciseSetId : removedExercisSetsMap.keySet()) {
+                // if removed set was not new, remove it from the database
+                if (exerciseSetId > 0) {
+                    manager.removeExerciseSet(
+                        removedExercisSetsMap.get(exerciseSetId).getId()
+                    );
+                }
+            }
+            
+            int orderNumber = 1;
+            for (ExerciseSet exerciseSet : exerciseSetListView.getItems()) {
+                if (exerciseSet.getId() < 0) {
+                    // new exercise set
+                    int exerciseSetId = exerciseSetDatabase.createItem(
+                        exerciseSet.getWorkingSets(),
+                        exerciseSet.getRepetitions(),
+                        exerciseSet.getWorkingWeight(),
+                        orderNumber
+                    );
+                    exerciseSet.setId(exerciseSetId);
+                    manager.addExerciseSetToExercise(exercise.get().getId(), exerciseSet.getId());
+                    
+                } else {
+                    // (edited) exerciseSet
+                    exerciseSetDatabase.updateItem(
+                        exerciseSet.getId(),
+                        exerciseSet.getWorkingSets(),
+                        exerciseSet.getRepetitions(),
+                        exerciseSet.getWorkingWeight(),
+                        orderNumber
+                    );
+                }
+                
+                exerciseSet.setOrderNumber(orderNumber);
+                ++orderNumber;
+            }
+            
+            exercise.get().getExerciseSetList().setAll(exerciseSetListView.getItems());
+            
             close();
             
         } else if (optional.get() == noButton) {
@@ -139,7 +193,6 @@ public class ExerciseSetListController {
             if (optional.get() == yesButton) {
                 close();
             }
-            
         } else {
             close();
         }
@@ -172,8 +225,9 @@ public class ExerciseSetListController {
 
         ExerciseSetEditorController controller = loader.getController();
 
-        ExerciseSet selectedItem = exerciseSetListView.getSelectionModel()
-                                                      .getSelectedItem();
+        ExerciseSet selectedItem = 
+            exerciseSetListView.getSelectionModel().getSelectedItem();
+        
         controller.setExerciseSet(selectedItem);
         
         showEditorWindow(root);
@@ -181,18 +235,22 @@ public class ExerciseSetListController {
     
     @FXML
     private void remove() {
-        final int selectedListViewIndex = exerciseSetListView.getSelectionModel()
-                                                             .getSelectedIndex();
+        final int selectedListViewIndex =
+            exerciseSetListView.getSelectionModel().getSelectedIndex();
+        
         int newSelectedListViewIndex =
             (selectedListViewIndex == (exerciseSetListView.getItems().size() - 1))
                 ? (selectedListViewIndex - 1)
                 : selectedListViewIndex;
         
-        exerciseSetListView.getItems().remove(selectedListViewIndex);
+        ExerciseSet removedExerciseSet =
+            exerciseSetListView.getItems().remove(selectedListViewIndex);
+        
+        removedExercisSetsMap.put(removedExerciseSet.getId(), removedExerciseSet);
         
         if (newSelectedListViewIndex >= 0) {
-            exerciseSetListView.getSelectionModel().select(newSelectedListViewIndex);
-            
+            exerciseSetListView.getSelectionModel()
+                               .select(newSelectedListViewIndex);
         } else {
             exerciseSetListView.getSelectionModel().clearSelection();
         }
@@ -204,9 +262,7 @@ public class ExerciseSetListController {
 
     private void showEditorWindow(Parent root) {
         Stage stage = new Stage();
-        
-        stage.setTitle(exerciseInfoNameLabel.getText() + " Exercise Set Editor");
-        
+        stage.setTitle(exerciseInfoNameLabel.getText() + " set editor");
         stage.initOwner(exerciseSetListView.getScene().getWindow());
         stage.initModality(Modality.APPLICATION_MODAL);
         

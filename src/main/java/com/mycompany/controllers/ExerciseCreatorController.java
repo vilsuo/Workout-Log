@@ -1,7 +1,5 @@
 package com.mycompany.controllers;
 
-import com.mycompany.dao.ExerciseDao;
-import com.mycompany.dao.ExerciseDaoImpl;
 import com.mycompany.dao.ExerciseInfoDao;
 import com.mycompany.dao.ExerciseInfoDaoImpl;
 import com.mycompany.dao.ExerciseManagerImpl;
@@ -30,7 +28,6 @@ public class ExerciseCreatorController {
     
     private final ExerciseManagerImpl manager = new ExerciseManagerImpl();
     private final ExerciseInfoDao exerciseInfoDatabase = new ExerciseInfoDaoImpl();
-    private final ExerciseDao exerciseDatabase = new ExerciseDaoImpl();
     
     @FXML private ComboBox categoryComboBox;
     @FXML private ComboBox nameComboBox;

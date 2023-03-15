@@ -91,20 +91,10 @@ public class ExerciseToExerciseSetDaoImpl implements ExerciseToExerciseSetDao {
                 pstmt.executeUpdate();
             }
         }
-        
-        /*
-        // delete all exercise sets associated with the exercise id
-        ExerciseSetDao exerciseSetDatabase = new ExerciseSetDaoImpl();
-        exerciseSetDatabase.removeItem(exerciseSetId);
-        */
     }
     
     @Override
     public void removeItemsByExercise(int exerciseId) throws SQLException {
-        /*
-        List<Integer> exerciseIdsExerciseSetIdList = getExerciseSetIdList(exerciseId);
-        */
-        
         // delete from this link table the exercise id values
         try (Connection connection = createConnectionAndEnsureDatabase()) {
             String sql = "DELETE FROM ExerciseToExerciseSet WHERE exercise_id = ?;";
@@ -113,15 +103,6 @@ public class ExerciseToExerciseSetDaoImpl implements ExerciseToExerciseSetDao {
                 pstmt.executeUpdate();
             }
         }
-        /*
-        // delete all exercise sets associated with the exercise id
-        ExerciseSetDao exerciseSetDatabase = new ExerciseSetDaoImpl();
-        exerciseSetDatabase.removeItems(exerciseIdsExerciseSetIdList);
-        
-        // finally removeItems exercise
-        ExerciseDao exerciseDatabase = new ExerciseDaoImpl();
-        exerciseDatabase.removeItem(exerciseId);
-        */
     }
     
     @Override

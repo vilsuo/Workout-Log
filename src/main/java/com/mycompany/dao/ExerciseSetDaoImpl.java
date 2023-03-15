@@ -62,21 +62,23 @@ public class ExerciseSetDaoImpl implements ExerciseSetDao {
     }
 
     @Override
-    public void updateItem(int id, int newWorkingSets, int newRepetitions, double newWorkingWeight) throws SQLException {
+    public void updateItem(int id, int newWorkingSets, int newRepetitions, double newWorkingWeight, int orderNumber) throws SQLException {
         try (Connection conn = createConnectionAndEnsureDatabase()) {
             String sql = "UPDATE ExerciseSet "
-                       + "SET workingSets = ?, repetitions = ?, workingWeight = ? "
+                       + "SET workingSets = ?, repetitions = ?, workingWeight = ?, orderNumber = ?"
                        + "WHERE id = ?;";
             try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
                 pstmt.setInt(1, newWorkingSets);
                 pstmt.setInt(2, newRepetitions);
                 pstmt.setDouble(3, newWorkingWeight);
-                pstmt.setInt(4, id);
+                pstmt.setInt(4, orderNumber);
+                pstmt.setInt(5, id);
                 pstmt.executeUpdate();
             }
         }
     }
     
+    /*
     @Override
     public void updateItemOrderNumber(int id, int newOrderNumber) throws SQLException {
         try (Connection conn = createConnectionAndEnsureDatabase()) {
@@ -106,7 +108,8 @@ public class ExerciseSetDaoImpl implements ExerciseSetDao {
             }
         }
     }
-
+    */
+    
     @Override
     public void removeItem(int id) throws SQLException {
         try (Connection connection = createConnectionAndEnsureDatabase()) {
