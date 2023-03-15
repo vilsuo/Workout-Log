@@ -34,7 +34,6 @@ public interface ExerciseInfoDao {
     void updateItemCategory(int id, String newCategory) throws SQLException;
     
     void removeItem(int id) throws SQLException;
-    void removeItems(List<Integer> idList) throws SQLException;
     
     ExerciseInfo getItem(int id) throws SQLException;
     List<ExerciseInfo> getItems(List<Integer> idList) throws SQLException;

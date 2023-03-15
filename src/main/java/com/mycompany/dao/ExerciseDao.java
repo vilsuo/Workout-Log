@@ -1,7 +1,6 @@
 
 package com.mycompany.dao;
 
-import com.mycompany.domain.Exercise;
 import java.sql.SQLException;
 import java.util.List;
 
@@ -13,9 +12,9 @@ public interface ExerciseDao {
     
     int getExerciseInfoId(int exerciseId) throws SQLException;
     
-    // needed here? move elsewhere?
-    // Exercise getItem(int id) throws SQLException;
+    // write tests!
+    List<Integer> getExerciseIdList(int exerciseInfoId) throws SQLException;
     
-    // needed here? move elsewhere?
-    // List<Exercise> getTableItems() throws SQLException;
+    // temporary?
+    List<Integer> getAllExerciseIds() throws SQLException;
 }

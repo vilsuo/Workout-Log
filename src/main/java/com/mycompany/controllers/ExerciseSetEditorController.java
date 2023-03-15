@@ -107,8 +107,13 @@ public class ExerciseSetEditorController {
         if (exerciseSet.get() == null) {
             // add new
             try {
+                
+                /*
+                I COMMENTED THIS OUT JUST TO THE PROJECT WOULD COMPILE WHILE TESTING!!
+                
                 int generatedKey = ExerciseSetDatabase.create(workingSets, repetitions, workingWeight);
                 setExerciseSet(new ExerciseSet(generatedKey, workingSets, repetitions, workingWeight));
+                */
                 
                 // TODO
                 // createItem ExerciseToExerciseSet -table entry!!!

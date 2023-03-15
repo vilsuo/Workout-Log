@@ -8,7 +8,7 @@ import javafx.beans.property.ReadOnlyIntegerWrapper;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 
-public class ExerciseSet {
+public class ExerciseSet implements Comparable<ExerciseSet>{
     
     private final ReadOnlyIntegerWrapper id;
     private final IntegerProperty workingSets;
@@ -82,6 +82,11 @@ public class ExerciseSet {
     
     public final void setOrderNumber(int order) {
         this.orderNumber.set(order);
+    }
+    
+    @Override
+    public int compareTo(ExerciseSet other) {
+        return getOrderNumber() - other.getOrderNumber();
     }
     
     @Override

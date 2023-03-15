@@ -168,31 +168,6 @@ public class ExerciseInfoDaoImplTest {
     }
     
     @Test
-    public void removeItemsTest() throws SQLException {
-        String name1 = "Bench";
-        String category1 = "Chest";
-        int id1 = database.createItem(name1, category1);
-        
-        String name2 = "Ohp";
-        String category2 = "Shoulders";
-        int id2 = database.createItem(name2, category2);
-        
-        String name3 = "Squat";
-        String category3 = "Legs";
-        int id3 = database.createItem(name3, category3);
-        
-        database.removeItems(Arrays.asList(id1, id2));
-        List<ExerciseInfo> itemsList = database.getAllItems();
-        
-        // deleted
-        assertFalse(itemsList.contains(new ExerciseInfo(id1, name1, category1)));
-        assertFalse(itemsList.contains(new ExerciseInfo(id2, name2, category2)));
-        
-        // not deleted
-        assertTrue(itemsList.contains(new ExerciseInfo(id3, name3, category3)));
-    }
-    
-    @Test
     public void getItemsTest() throws SQLException {
         List<ExerciseInfo> itemList1 = database.getItems(new ArrayList<>());
         assertTrue(itemList1.isEmpty());

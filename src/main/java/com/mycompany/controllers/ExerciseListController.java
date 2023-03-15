@@ -1,7 +1,7 @@
 
 package com.mycompany.controllers;
 
-import com.mycompany.dao.ExerciseDaoImpl;
+import com.mycompany.dao.ExerciseManagerImpl;
 import com.mycompany.domain.Exercise;
 import java.util.ArrayList;
 import java.util.List;
@@ -21,7 +21,7 @@ import javafx.util.Callback;
 
 public class ExerciseListController {
     
-    private final ExerciseDaoImpl exerciseDatabase = new ExerciseDaoImpl();
+    private final ExerciseManagerImpl database = new ExerciseManagerImpl();
     
     @FXML private ListView<Exercise> exerciseListView;
     
@@ -46,9 +46,9 @@ public class ExerciseListController {
     
     private List<Exercise> loadExerciseList() {
         try {
-            return exerciseDatabase.getTableItems();
+            return database.getAllExercises();
         } catch (Exception e) {
-            System.out.println("Error in ExerciseListController.getData(): " + e.getMessage());
+            System.out.println("Error in ExerciseListController.loadExerciseList: " + e.getMessage());
         }
         return new ArrayList<>();
     }
@@ -73,12 +73,16 @@ public class ExerciseListController {
         controller.exerciseProperty().addListener(
             (obs, oldExercise, newExercise) -> {
                 if (newExercise != null) {
+                    // newExercise is created in the database by ExerciseCreatorController
                     exerciseListView.getItems().add(newExercise);
                 }
             }
         );
 
         showWindow(root, "Exercise Creator");
+        
+        // refresh
+        setUpData();
     }
     
     @FXML
@@ -101,13 +105,9 @@ public class ExerciseListController {
             ? (selectedListIndex - 1)
             : selectedListIndex;
         
-        // TODO!!!
-        // removeItem exercise from database and the sets associated with it
-        
-        
         try {
             Exercise selectedExercise = (Exercise) exerciseListView.getSelectionModel().getSelectedItem();
-            exerciseDatabase.removeItem(selectedExercise.getId());
+            database.removeExercise(selectedExercise.getId());
             exerciseListView.getItems().remove(selectedListIndex);
             
             if (newSelectedListIndex >= 0) {

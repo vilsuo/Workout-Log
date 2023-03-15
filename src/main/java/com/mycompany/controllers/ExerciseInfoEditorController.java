@@ -4,6 +4,8 @@ package com.mycompany.controllers;
 import com.mycompany.dao.ExerciseInfoDaoImpl;
 import com.mycompany.domain.ExerciseInfo;
 import com.mycompany.cells.ExerciseInfoEditingCell;
+import com.mycompany.dao.ExerciseInfoDao;
+import com.mycompany.dao.ExerciseManagerImpl;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -23,7 +25,8 @@ import javafx.util.Callback;
 
 public class ExerciseInfoEditorController {
     
-    private ExerciseInfoDaoImpl exerciseInfoDatabase = new ExerciseInfoDaoImpl();
+    private ExerciseManagerImpl manager = new ExerciseManagerImpl();
+    private ExerciseInfoDao exerciseInfoDatabase = new ExerciseInfoDaoImpl();
     
     @FXML private TableView<ExerciseInfo> exerciseInfoTableView;
     @FXML private TableColumn<ExerciseInfo, String> nameColumn;
@@ -40,9 +43,12 @@ public class ExerciseInfoEditorController {
     private final ButtonType backButton = new ButtonType("Back");
 
     public void initialize() {
+        setUpProperties();
         setUpTableViewColumns();
         setUpTableViewData();
-        
+    }
+    
+    private void setUpProperties() {
         BooleanBinding textFieldsNotFilled = new BooleanBinding() {
             {
                 super.bind(nameTextField.textProperty(), categoryTextField.textProperty());
@@ -76,6 +82,7 @@ public class ExerciseInfoEditorController {
                     exerciseInfoTableView.refresh();
                     return;
                     
+                // exerciseInfoTableView is always up to date
                 } else if (isExerciseNameTaken(newName)) {
                     showErrorAlert("Exercise with name a '" + newName + "' already exists!");
                     exerciseInfoTableView.refresh();
@@ -125,16 +132,16 @@ public class ExerciseInfoEditorController {
             exerciseInfo.nameProperty(),
             exerciseInfo.categoryProperty()
         };
-        ObservableList<ExerciseInfo> exerciseInfoList = FXCollections.observableList(getData(), extractor);
+        ObservableList<ExerciseInfo> exerciseInfoList = FXCollections.observableList(loadExerciseInfoList(), extractor);
         exerciseInfoTableView.setItems(exerciseInfoList);
     }
     
-    private List<ExerciseInfo> getData() {
+    private List<ExerciseInfo> loadExerciseInfoList() {
         List<ExerciseInfo> data = new ArrayList<>();
         try {
             data = exerciseInfoDatabase.getAllItems();
         } catch (Exception e) {
-            System.out.println("error in ExerciseInfoEditorController.getData(): " + e.getMessage());
+            System.out.println("error in ExerciseInfoEditorController.loadExerciseInfoList(): " + e.getMessage());
         }
         return data;
     }
@@ -152,8 +159,10 @@ public class ExerciseInfoEditorController {
         String name = nameTextField.getText();
         String catecory = categoryTextField.getText();
         try {
+            // try to create a new ExerciseInfo
             int generatedKey = exerciseInfoDatabase.createItem(name, catecory);
             if (generatedKey != -1) {
+                // created successfully, now add the item also to the table view
                 exerciseInfoTableView.getItems().add(new ExerciseInfo(generatedKey, name, catecory));
                 nameTextField.clear();
                 categoryTextField.clear();
@@ -173,15 +182,15 @@ public class ExerciseInfoEditorController {
         if (optional.get() == yesButton) {
             try {
                 int exerciseInfoId = selectedItem.getId();
-                exerciseInfoDatabase.removeItem(exerciseInfoId);
-                exerciseInfoTableView.getItems().remove(exerciseInfoTableView.getSelectionModel().getSelectedIndex());
                 
-                // TODO!!!
-                // removeItem exerciseSets with exerciseInfoId and exercises with the sets
+                // remove ExerciseInfo and all Exercises and ExerciseSets associated with it
+                manager.removeExerciseInfo(exerciseInfoId);
+                
+                // remove ExerciseInfo also from the table
+                exerciseInfoTableView.getItems().remove(exerciseInfoTableView.getSelectionModel().getSelectedIndex());
                 System.out.println("deleted successfully");
                 
             } catch (Exception e) {
-                // log: deleting exercise was not successful..
                 System.out.println(
                     "Error in ExerciseInfoEditorController.delete(): " + e.getMessage()
                 );
@@ -200,9 +209,9 @@ public class ExerciseInfoEditorController {
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
         alert.setTitle("Confirmation");
         alert.setHeaderText(exerciseInfo.getName());
-        alert.setContentText("Do you want to delete the exercise? Deleting the "
-                           + "exercise will also delete all entries from the "
-                           + "database.");
+        alert.setContentText("Do you want to delete the item? Deleting the item"
+                           + " will also delete all exercise records associated"
+                           + " with it.");
         alert.getButtonTypes().clear();
         alert.getButtonTypes().addAll(yesButton, noButton, backButton);
         

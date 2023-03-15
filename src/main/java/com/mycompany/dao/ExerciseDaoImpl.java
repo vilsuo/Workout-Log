@@ -2,9 +2,6 @@
 package com.mycompany.dao;
 
 import com.mycompany.application.App;
-import com.mycompany.domain.Exercise;
-import com.mycompany.domain.ExerciseInfo;
-import com.mycompany.domain.ExerciseSet;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -96,58 +93,35 @@ public class ExerciseDaoImpl implements ExerciseDao {
         return -1;
     }
     
-    /*
     @Override
-    public Exercise getItem(int id) throws SQLException {
-        // getItems associated sets
-        ExerciseToExerciseSetDao linkDatabase = new ExerciseToExerciseSetDaoImpl();
-        ExerciseSetDao exerciseDatabase = new ExerciseSetDaoImpl();
-        
-        List<ExerciseSet> exerciseSetList = exerciseDatabase.getItems(
-            linkDatabase.getExerciseSetIdList(id)
-        );
-        
+    public List<Integer> getExerciseIdList(int exerciseInfoId) throws SQLException {
+        List<Integer> exerciseIdList = new ArrayList<>();
         try (Connection connection = createConnectionAndEnsureDatabase()) {
-            String sql = "SELECT * FROM Exercise WHERE id = ?;";
+            String sql = "SELECT id FROM Exercise WHERE exerciseInfo_id = ?;";
             try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
-                pstmt.setInt(1, id);
+                pstmt.setInt(1, exerciseInfoId);
                 try (ResultSet results = pstmt.executeQuery()) {
-                    
-                    ExerciseInfoDao exerciseInfoDatabase = new ExerciseInfoDaoImpl();
                     while (results.next()) {
-                        ExerciseInfo exerciseInfo = exerciseInfoDatabase.getItem(
-                            results.getInt("exerciseInfo_id")
-                        );
-                        
-                        return new Exercise(id, exerciseInfo, exerciseSetList);
+                        exerciseIdList.add(results.getInt("id"));
                     }
                 }
             }
         }
-        return null;
+        return exerciseIdList;
     }
-    */
     
-    /*
     @Override
-    public List<Exercise> getTableItems() throws SQLException {
-        List<Exercise> exerciseList = new ArrayList<>();
+    public List<Integer> getAllExerciseIds() throws SQLException {
+        List<Integer> exerciseIdList = new ArrayList<>();
         try (Connection connection = createConnectionAndEnsureDatabase()) {
-            String sql = "SELECT * FROM Exercise;";
+            String sql = "SELECT id FROM Exercise;";
             try (ResultSet results = connection.prepareStatement(sql).executeQuery()) {
                 
-                ExerciseInfoDao exerciseInfoDatabase = new ExerciseInfoDaoImpl();
                 while (results.next()) {
-                    int exerciseId = results.getInt("id");
-                    
-                    int exerciseInfoId = results.getInt("exerciseInfo_id");
-                    ExerciseInfo exerciseInfo = exerciseInfoDatabase.getItem(exerciseInfoId);
-                    
-                    exerciseList.add(new Exercise(exerciseId, exerciseInfo));
+                    exerciseIdList.add(results.getInt("id"));
                 }
             }
         }
-        return exerciseList;
+        return exerciseIdList;
     }
-    */
 }

@@ -1,13 +1,11 @@
 
 package com.mycompany.dao;
 
-import com.mycompany.domain.Exercise;
 import com.mycompany.domain.ExerciseInfo;
 import java.io.File;
 import java.sql.SQLException;
 import java.util.UUID;
 import org.junit.jupiter.api.AfterEach;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

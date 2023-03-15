@@ -11,5 +11,6 @@ public interface ExerciseToExerciseSetDao {
     void removeItemsByExerciseSet(int exerciseSetId) throws SQLException;
     void removeItemsByExercise(int exerciseId) throws SQLException;
     
+    // write tests!
     List<Integer> getExerciseSetIdList(int exerciseId) throws SQLException;
 }

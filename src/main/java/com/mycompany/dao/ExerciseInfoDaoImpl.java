@@ -102,19 +102,6 @@ public class ExerciseInfoDaoImpl implements ExerciseInfoDao {
     }
     
     @Override
-    public void removeItems(List<Integer> idList) throws SQLException {
-        try (Connection connection = createConnectionAndEnsureDatabase()) {
-            String sql = "DELETE FROM ExerciseInfo WHERE id = ?;";
-            for (int id : idList) {
-                try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
-                    pstmt.setInt(1, id);
-                    pstmt.executeUpdate();
-                }
-            }
-        }
-    }
-    
-    @Override
     public ExerciseInfo getItem(int id) throws SQLException {
         try (Connection connection = createConnectionAndEnsureDatabase()) {
             String sql = "SELECT * FROM ExerciseInfo WHERE id = ?;";

@@ -79,7 +79,11 @@ public class ExerciseSetListController {
                         exerciseSet.getId(),
                         exerciseSet.getWorkingSets(),
                         exerciseSet.getRepetitions(),
-                        exerciseSet.getWorkingWeight()
+                        exerciseSet.getWorkingWeight(),
+                        
+                        // I ADDED THE FOLLOWING LINE JUST SO THE PROJECT WOULD 
+                        // COMPLILE DURING TESTING!!
+                        1
                     );
                     copiedExerciseSetList.add(copiedExerciseSet);
                 }

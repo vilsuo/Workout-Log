@@ -25,9 +25,9 @@ public class ExerciseToExerciseSetDaoImpl implements ExerciseToExerciseSetDao {
     
     private Connection createConnectionAndEnsureDatabase() throws SQLException {
         Connection conn = DriverManager.getConnection(this.databasePath, "sa", "");
-        /*
+        
         String sql = "CREATE TABLE IF NOT EXISTS ExerciseInfo ("
-                    + "id IDENTITY NOT NULL PRIMARY KEY, "
+                    + "id INTEGER AUTO_INCREMENT PRIMARY KEY, "
                     + "name VARCHAR NOT NULL, "
                     + "category VARCHAR NOT NULL"
                     + ");";
@@ -36,16 +36,16 @@ public class ExerciseToExerciseSetDaoImpl implements ExerciseToExerciseSetDao {
         }
         
         sql = "CREATE TABLE IF NOT EXISTS Exercise ("
-                    + "id IDENTITY NOT NULL PRIMARY KEY, "
-                    + "exerciseInfo_id BIGINT NOT NULL, "
+                    + "id INTEGER AUTO_INCREMENT PRIMARY KEY, "
+                    + "exerciseInfo_id INTEGER NOT NULL, "
                     + "FOREIGN KEY (exerciseInfo_id) REFERENCES ExerciseInfo(id)"
                     + ");";
         try (Statement stmt = conn.createStatement()) {
             stmt.execute(sql);
         }
         
-        String sql = "CREATE TABLE IF NOT EXISTS ExerciseSet ("
-                    + "id IDENTITY NOT NULL PRIMARY KEY, "
+        sql = "CREATE TABLE IF NOT EXISTS ExerciseSet ("
+                    + "id INTEGER AUTO_INCREMENT PRIMARY KEY, "
                     + "workingSets INTEGER NOT NULL, "
                     + "repetitions INTEGER NOT NULL, "
                     + "workingWeight DOUBLE PRECISION NOT NULL, "
@@ -54,8 +54,8 @@ public class ExerciseToExerciseSetDaoImpl implements ExerciseToExerciseSetDao {
         try (Statement stmt = conn.createStatement()) {
             stmt.execute(sql);
         }
-        */
-        String sql = "CREATE TABLE IF NOT EXISTS ExerciseToExerciseSet ("
+        
+        sql = "CREATE TABLE IF NOT EXISTS ExerciseToExerciseSet ("
                     + "exercise_id INTEGER NOT NULL, "
                     + "exerciseSet_id INTEGER NOT NULL, "
                     + "FOREIGN KEY (exercise_id) REFERENCES Exercise(id), "
@@ -126,7 +126,7 @@ public class ExerciseToExerciseSetDaoImpl implements ExerciseToExerciseSetDao {
     
     @Override
     public List<Integer> getExerciseSetIdList(int exerciseId) throws SQLException {
-        List<Integer> exerciseSetList = new ArrayList<>();
+        List<Integer> exerciseSetIdList = new ArrayList<>();
         try (Connection connection = createConnectionAndEnsureDatabase()) {
             String sql = "SELECT exerciseSet_id "
                        + "FROM ExerciseToExerciseSet "
@@ -135,11 +135,11 @@ public class ExerciseToExerciseSetDaoImpl implements ExerciseToExerciseSetDao {
                 pstmt.setInt(1, exerciseId);
                 try (ResultSet result = pstmt.executeQuery()) {
                     while (result.next()) {
-                        exerciseSetList.add(result.getInt("exerciseSet_id"));
+                        exerciseSetIdList.add(result.getInt("exerciseSet_id"));
                     }
                 }
             }
         }
-        return exerciseSetList;
+        return exerciseSetIdList;
     }
 }
