@@ -1,7 +1,6 @@
 
 package com.mycompany.cells;
 
-import com.mycompany.domain.ExerciseSet;
 import com.mycompany.utilities.LocalDragboard;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -16,10 +15,13 @@ import javafx.scene.input.TransferMode;
  * 
  * onDragDropped inefficient: whole list is replaced
  */
-public class ExerciseSetCell extends ListCell<ExerciseSet> {
+public class DragAndDropListCell<T> extends ListCell<T> {
+
+    //private final Class<T> tClass;
     
-    public ExerciseSetCell() {
+    public DragAndDropListCell(Class<T> tClass) {
         ListCell thisCell = this;
+        //this.tClass = tClass;
         
         // https://docs.oracle.com/javafx/2/api/javafx/scene/input/DragEvent.html
         
@@ -55,7 +57,7 @@ public class ExerciseSetCell extends ListCell<ExerciseSet> {
             
             // 2. Put the real data in a custom dragboard, since the dragboard
             // does not support custum classes
-            LocalDragboard.getInstance().putValue(ExerciseSet.class, getItem());
+            LocalDragboard.getInstance().putValue(tClass, getItem());
             
             event.consume();
         });
@@ -83,7 +85,7 @@ public class ExerciseSetCell extends ListCell<ExerciseSet> {
             is provided by the getDragboard() method.
             */
             if ((event.getGestureSource() != thisCell) &&
-                    LocalDragboard.getInstance().hasType(ExerciseSet.class))
+                    LocalDragboard.getInstance().hasType(tClass))
             {
                 event.acceptTransferModes(TransferMode.MOVE);
             }
@@ -97,7 +99,7 @@ public class ExerciseSetCell extends ListCell<ExerciseSet> {
         */
         setOnDragEntered(event -> {
             if ((event.getGestureSource() != thisCell) &&
-                    LocalDragboard.getInstance().hasType(ExerciseSet.class))
+                    LocalDragboard.getInstance().hasType(tClass))
             {
                 setOpacity(0.3);
             }
@@ -109,7 +111,7 @@ public class ExerciseSetCell extends ListCell<ExerciseSet> {
         */
         setOnDragExited(event -> {
             if ((event.getGestureSource() != thisCell) &&
-                    LocalDragboard.getInstance().hasType(ExerciseSet.class))
+                    LocalDragboard.getInstance().hasType(tClass))
             {
                 setOpacity(1);
             }
@@ -135,25 +137,25 @@ public class ExerciseSetCell extends ListCell<ExerciseSet> {
             boolean success = false;
 
             LocalDragboard ldb = LocalDragboard.getInstance();
-            if (ldb.hasType(ExerciseSet.class)) {
-                ObservableList<ExerciseSet> items = getListView().getItems();
+            if (ldb.hasType(tClass)) {
+                ObservableList<T> items = getListView().getItems();
                 
-                ExerciseSet sourceSetBase = ldb.getValue(ExerciseSet.class);
-                ExerciseSet targetSetBase = getItem();
+                T sourceItem = ldb.getValue(tClass);
+                T targetItem = getItem();
                 
-                int sourceIndex = items.indexOf(sourceSetBase);
-                int targetIndex = items.indexOf(targetSetBase);
+                int sourceIndex = items.indexOf(sourceItem);
+                int targetIndex = items.indexOf(targetItem);
                 
                 int min = Math.min(sourceIndex, targetIndex);
                 int max = Math.max(sourceIndex, targetIndex);
                         
-                ObservableList<ExerciseSet> temp = FXCollections.observableArrayList();
+                ObservableList<T> temp = FXCollections.observableArrayList();
                 for (int i = 0; i < items.size(); ++i) {
                     if ((i < min) || (i > max)) {
                         temp.add(items.get(i));
                         
                     } else if (i == targetIndex) {
-                        temp.add(sourceSetBase);
+                        temp.add(sourceItem);
                         
                     } else {
                         if (sourceIndex < targetIndex) {
@@ -191,15 +193,15 @@ public class ExerciseSetCell extends ListCell<ExerciseSet> {
     }
     
     @Override
-    protected void updateItem(ExerciseSet item, boolean empty) {
-        super.updateItem(item, empty);
+    protected void updateItem(T type, boolean empty) {
+        super.updateItem(type, empty);
         
-        if (empty || item == null) {
+        if (empty || type == null) {
             setText(null);
             setGraphic(null);
             
         } else {
-            setText(item.toString());
+            setText(type.toString());
         }
     }
 }

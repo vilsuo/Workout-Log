@@ -88,6 +88,7 @@ public class ExerciseSet implements Comparable<ExerciseSet>{
         this.orderNumber.set(order);
     }
     
+    
     @Override
     public int compareTo(ExerciseSet other) {
         return getOrderNumber() - other.getOrderNumber();

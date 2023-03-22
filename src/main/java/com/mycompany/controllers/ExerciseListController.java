@@ -1,8 +1,11 @@
 
 package com.mycompany.controllers;
 
+import com.mycompany.application.App;
+import com.mycompany.cells.DragAndDropListCell;
 import com.mycompany.dao.ExerciseManagerImpl;
 import com.mycompany.domain.Exercise;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import javafx.beans.Observable;
@@ -21,7 +24,7 @@ import javafx.util.Callback;
 
 public class ExerciseListController {
     
-    private final ExerciseManagerImpl manager = new ExerciseManagerImpl();
+    private final ExerciseManagerImpl manager = new ExerciseManagerImpl(App.DATABASE_PATH);
     
     @FXML private ListView<Exercise> exerciseListView;
     
@@ -37,11 +40,13 @@ public class ExerciseListController {
         Callback<Exercise, Observable[]> extractor = (Exercise exercise) -> new Observable[] {
             exercise.idProperty(),
             exercise.exerciseInfoProperty(),
-            exercise.exerciseSetListProperty()
+            exercise.exerciseSetListProperty(),
+            exercise.orderNumberProperty()
         };
         
         ObservableList<Exercise> exercises = FXCollections.observableList(loadExerciseList(), extractor);
         exerciseListView.setItems(exercises);
+        exerciseListView.setCellFactory(param -> new DragAndDropListCell(Exercise.class));
     }
     
     private List<Exercise> loadExerciseList() {
@@ -70,11 +75,17 @@ public class ExerciseListController {
         Parent root = loader.load();
         
         ExerciseCreatorController controller = loader.getController();
-        controller.exerciseProperty().addListener(
-            (obs, oldExercise, newExercise) -> {
-                if (newExercise != null) {
-                    // newExercise is created in the database by ExerciseCreatorController
-                    exerciseListView.getItems().add(newExercise);
+        controller.exerciseInfoProperty().addListener(
+            (obs, oldExerciseInfo, newExerciseInfo) -> {
+                if (newExerciseInfo != null) {
+                    Exercise newExercise;
+                    try {
+                        newExercise = manager.createNewExercise(newExerciseInfo, exerciseListView.getItems().size() + 1);
+                        exerciseListView.getItems().add(newExercise);
+                    } catch (SQLException ex) {
+                        System.out.println("Error in ExerciseListController.newExercise(): ");
+                        ex.printStackTrace();
+                    }
                 }
             }
         );

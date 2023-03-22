@@ -4,25 +4,27 @@ package com.mycompany.domain;
 import java.util.ArrayList;
 import java.util.List;
 import javafx.beans.Observable;
+import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyIntegerProperty;
 import javafx.beans.property.ReadOnlyIntegerWrapper;
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleListProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.util.Callback;
 
-public final class Exercise {
+public final class Exercise implements Comparable<Exercise>{
     
     private final ReadOnlyIntegerWrapper id;
     private ObjectProperty<ExerciseInfo> exerciseInfo;
     private ListProperty<ExerciseSet> exerciseSetList;
+    private final IntegerProperty orderNumber;
 
-    public Exercise(int id, ExerciseInfo exerciseInfo, List<ExerciseSet> exerciseSetList) {
+    public Exercise(int id, ExerciseInfo exerciseInfo, List<ExerciseSet> exerciseSetList, int orderNumber) {
         this.id = new ReadOnlyIntegerWrapper(id);
-        
         this.exerciseInfo = new SimpleObjectProperty(exerciseInfo);
         
         Callback<ExerciseSet, Observable[]> extractor =
@@ -30,7 +32,8 @@ public final class Exercise {
                 exerciseSet.idProperty(),
                 exerciseSet.workingSetsProperty(),
                 exerciseSet.repetitionsProperty(),
-                exerciseSet.workingWeightProperty()
+                exerciseSet.workingWeightProperty(),
+                exerciseSet.orderNumberProperty()
             };
         
         // list created so it fires updates if ExerciseSet changes:
@@ -38,14 +41,16 @@ public final class Exercise {
             FXCollections.observableList(exerciseSetList, extractor);
         
         this.exerciseSetList = new SimpleListProperty<>(observableList);
+        
+        this.orderNumber = new SimpleIntegerProperty(orderNumber);
     }
     
-    public Exercise(int id, ExerciseInfo exerciseInfo) {
-        this(id, exerciseInfo, new ArrayList<>());
+    public Exercise(int id, ExerciseInfo exerciseInfo, int orderNumber) {
+        this(id, exerciseInfo, new ArrayList<>(), orderNumber);
     }
     
-    public Exercise(int id, ExerciseInfo exerciseInfo, ExerciseSet exerciseSet) {
-        this(id, exerciseInfo);
+    public Exercise(int id, ExerciseInfo exerciseInfo, ExerciseSet exerciseSet, int orderNumber) {
+        this(id, exerciseInfo, orderNumber);
         
         addExerciseSet(exerciseSet);
     }
@@ -90,13 +95,32 @@ public final class Exercise {
         this.exerciseSetList.set(exerciseSetList);
     }
     
+    
+    public IntegerProperty orderNumberProperty() {
+        return orderNumber;
+    }
+    
+    public final int getOrderNumber() {
+        return orderNumber.get();
+    }
+    
+    public final void setOrderNumber(int order) {
+        this.orderNumber.set(order);
+    }
+    
+    @Override
+    public int compareTo(Exercise other) {
+        return getOrderNumber() - other.getOrderNumber();
+    }
    
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder("id=");
         sb.append(getId());
+        sb.append(", #");
+        sb.append(orderNumber.get());
         sb.append("\ninfo={");
-        sb.append(this.exerciseInfo.get());
+        sb.append(exerciseInfo.get());
         sb.append("}\nsets={");
         
         for (ExerciseSet exerciseSet : exerciseSetList.get()) {

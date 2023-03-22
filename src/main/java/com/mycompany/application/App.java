@@ -12,9 +12,12 @@ import javafx.scene.Parent;
 
 /**
  * TODO
- * 
  * - extractors needed?
  * - observableArrayList / observableList?
+ * 
+ * - update test classes
+ * 
+ * - drag and drop to update orderNumbers
  */
 
 public class App extends Application {
@@ -39,19 +42,20 @@ public class App extends Application {
     @Override
     public void init() throws SQLException {
         // create tables if not exists
-        String sql1 = "CREATE TABLE IF NOT EXISTS ExerciseInfo ("
+        String createExerciseInfoTable = "CREATE TABLE IF NOT EXISTS ExerciseInfo ("
                     + "id INTEGER AUTO_INCREMENT PRIMARY KEY, "
                     + "name VARCHAR NOT NULL, "
                     + "category VARCHAR NOT NULL"
                     + ");";
         
-        String sql2 = "CREATE TABLE IF NOT EXISTS Exercise ("
+        String createExerciseTable = "CREATE TABLE IF NOT EXISTS Exercise ("
                     + "id INTEGER AUTO_INCREMENT PRIMARY KEY, "
                     + "exerciseInfo_id INTEGER NOT NULL, "
-                    + "FOREIGN KEY (exerciseInfo_id) REFERENCES ExerciseInfo(id)"
+                    + "FOREIGN KEY (exerciseInfo_id) REFERENCES ExerciseInfo(id), "
+                    + "orderNumber INTEGER NOT NULL"
                     + ");";
         
-        String sql3 = "CREATE TABLE IF NOT EXISTS ExerciseSet ("
+        String createExerciseSetTable = "CREATE TABLE IF NOT EXISTS ExerciseSet ("
                     + "id INTEGER AUTO_INCREMENT PRIMARY KEY, "
                     + "workingSets INTEGER NOT NULL, "
                     + "repetitions INTEGER NOT NULL, "
@@ -59,18 +63,23 @@ public class App extends Application {
                     + "orderNumber INTEGER NOT NULL"
                     + ");";
         
-        String sql4 = "CREATE TABLE IF NOT EXISTS ExerciseToExerciseSet ("
+        String createExerciseToExerciseSetTable = "CREATE TABLE IF NOT EXISTS ExerciseToExerciseSet ("
                     + "exercise_id INTEGER NOT NULL, "
                     + "exerciseSet_id INTEGER NOT NULL, "
                     + "FOREIGN KEY (exercise_id) REFERENCES Exercise(id), "
                     + "FOREIGN KEY (exerciseSet_id) REFERENCES ExerciseSet(id)"
                     + ");";
         
-        String[] ss = new String[]{sql1, sql2, sql3, sql4};
+        String[] ss = new String[]{
+            createExerciseInfoTable,
+            createExerciseTable,
+            createExerciseSetTable,
+            createExerciseToExerciseSetTable
+        };
         
-        Connection conn = DriverManager.getConnection(DATABASE_PATH, "sa", "");
+        Connection connection = DriverManager.getConnection(DATABASE_PATH, "sa", "");
         for (String sql : ss) {
-            try (Statement stmt = conn.createStatement()) {
+            try (Statement stmt = connection.createStatement()) {
                 stmt.execute(sql);
             }
         }

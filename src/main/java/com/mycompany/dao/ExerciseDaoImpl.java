@@ -1,9 +1,7 @@
 
 package com.mycompany.dao;
 
-import com.mycompany.application.App;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -11,7 +9,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ExerciseDaoImpl implements ExerciseDao {
+public class ExerciseDaoImpl {
     
     private String databasePath;
     
@@ -19,108 +17,75 @@ public class ExerciseDaoImpl implements ExerciseDao {
         this.databasePath = databasePath;
     }
     
-    public ExerciseDaoImpl() {
-        databasePath = App.DATABASE_PATH;
-    }
-    
-    private Connection createConnectionAndEnsureDatabase() throws SQLException {
-        Connection conn = DriverManager.getConnection(this.databasePath, "sa", "");
-        String sql = "CREATE TABLE IF NOT EXISTS ExerciseInfo ("
-                    + "id INTEGER AUTO_INCREMENT PRIMARY KEY, "
-                    + "name VARCHAR NOT NULL, "
-                    + "category VARCHAR NOT NULL"
-                    + ");";
-        try (Statement stmt = conn.createStatement()) {
-            stmt.execute(sql);
-        }
+    public int createItem(Connection connection, int exerciseInfoId, int orderNumber) throws SQLException {
+        String sql = "INSERT INTO Exercise (exerciseInfo_id, orderNumber) VALUES (?, ?);";
+        PreparedStatement pstmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS );
+        pstmt.setInt(1, exerciseInfoId);
+        pstmt.setInt(2, orderNumber);
+        pstmt.executeUpdate();
         
-        sql = "CREATE TABLE IF NOT EXISTS Exercise ("
-                    + "id INTEGER AUTO_INCREMENT PRIMARY KEY, "
-                    + "exerciseInfo_id INTEGER NOT NULL, "
-                    + "FOREIGN KEY (exerciseInfo_id) REFERENCES ExerciseInfo(id)"
-                    + ");";
-                    // "FOREIGN KEY (workout_id) REFERENCES Workout"
-        try (Statement stmt = conn.createStatement()) {
-            stmt.execute(sql);
-        }
-        return conn;
-    }
-    
-    @Override
-    public int createItem(int exerciseInfoId) throws SQLException {
-        try (Connection conn = createConnectionAndEnsureDatabase()) {
-            String sql = "INSERT INTO Exercise "
-                       + "(exerciseInfo_id) "
-                       + "VALUES (?);";
-            try (PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS )) {
-                pstmt.setInt(1, exerciseInfoId);
-                pstmt.executeUpdate();
-                
-                try (ResultSet rs = pstmt.getGeneratedKeys()) {
-                    while (rs.next()) {
-                        return rs.getInt(1);
-                    }
-                    return -1;
-                }
-            }
-        }
-    }
-    
-    @Override
-    public void removeItem(int id) throws SQLException {
-        try (Connection connection = createConnectionAndEnsureDatabase()) {
-            String sql = "DELETE FROM Exercise WHERE id = ?;";
-            try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
-                pstmt.setInt(1, id);
-                pstmt.executeUpdate();
-            }
-        }
-    }
-    
-    @Override
-    public int getExerciseInfoId(int exerciseId) throws SQLException {
-        try (Connection connection = createConnectionAndEnsureDatabase()) {
-            String sql = "SELECT exerciseInfo_id FROM Exercise WHERE id = ?;";
-            try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
-                pstmt.setInt(1, exerciseId);
-                try (ResultSet results = pstmt.executeQuery()) {
-                    while (results.next()) {
-                        return results.getInt("exerciseInfo_id");
-                    }
-                }
-            }
+        ResultSet results = pstmt.getGeneratedKeys();
+        while (results.next()) {
+            return results.getInt(1);
         }
         return -1;
     }
     
-    @Override
-    public List<Integer> getExerciseIdList(int exerciseInfoId) throws SQLException {
+    public void removeItem(Connection connection, int id) throws SQLException {
+        String sql = "DELETE FROM Exercise WHERE id = ?;";
+        PreparedStatement pstmt = connection.prepareStatement(sql);
+        pstmt.setInt(1, id);
+        pstmt.executeUpdate();
+    }
+    
+    // remove items
+    
+    // update order number
+    
+    public int getItemOrderNumber(Connection connection, int exerciseId) throws SQLException {
+        String sql = "SELECT orderNumber FROM Exercise WHERE id = ?;";
+        PreparedStatement pstmt = connection.prepareStatement(sql);
+        pstmt.setInt(1, exerciseId);
+        
+        ResultSet results = pstmt.executeQuery();
+        while (results.next()) {
+            return results.getInt("orderNumber");
+        }
+        return -1;
+    }
+    
+    public int getExerciseInfoId(Connection connection, int exerciseId) throws SQLException {
+        String sql = "SELECT exerciseInfo_id FROM Exercise WHERE id = ?;";
+        PreparedStatement pstmt = connection.prepareStatement(sql);
+        pstmt.setInt(1, exerciseId);
+        
+        ResultSet results = pstmt.executeQuery();
+        while (results.next()) {
+            return results.getInt("exerciseInfo_id");
+        }
+        return -1;
+    }
+    
+    public List<Integer> getExerciseIdList(Connection connection, int exerciseInfoId) throws SQLException {
         List<Integer> exerciseIdList = new ArrayList<>();
-        try (Connection connection = createConnectionAndEnsureDatabase()) {
-            String sql = "SELECT id FROM Exercise WHERE exerciseInfo_id = ?;";
-            try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
-                pstmt.setInt(1, exerciseInfoId);
-                try (ResultSet results = pstmt.executeQuery()) {
-                    while (results.next()) {
-                        exerciseIdList.add(results.getInt("id"));
-                    }
-                }
-            }
+        String sql = "SELECT id FROM Exercise WHERE exerciseInfo_id = ?;";
+        PreparedStatement pstmt = connection.prepareStatement(sql);
+        pstmt.setInt(1, exerciseInfoId);
+        
+        ResultSet results = pstmt.executeQuery();
+        while (results.next()) {
+            exerciseIdList.add(results.getInt("id"));
         }
         return exerciseIdList;
     }
     
-    @Override
-    public List<Integer> getAllExerciseIds() throws SQLException {
+    public List<Integer> getAllExerciseIds(Connection connection) throws SQLException {
         List<Integer> exerciseIdList = new ArrayList<>();
-        try (Connection connection = createConnectionAndEnsureDatabase()) {
-            String sql = "SELECT id FROM Exercise;";
-            try (ResultSet results = connection.prepareStatement(sql).executeQuery()) {
-                
-                while (results.next()) {
-                    exerciseIdList.add(results.getInt("id"));
-                }
-            }
+        String sql = "SELECT id FROM Exercise;";
+        
+        ResultSet results = connection.prepareStatement(sql).executeQuery();
+        while (results.next()) {
+            exerciseIdList.add(results.getInt("id"));
         }
         return exerciseIdList;
     }

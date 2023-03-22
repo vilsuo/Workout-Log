@@ -1,10 +1,9 @@
 
 package com.mycompany.controllers;
 
-import com.mycompany.dao.ExerciseInfoDaoImpl;
+import com.mycompany.application.App;
 import com.mycompany.domain.ExerciseInfo;
 import com.mycompany.cells.ExerciseInfoEditingCell;
-import com.mycompany.dao.ExerciseInfoDao;
 import com.mycompany.dao.ExerciseManagerImpl;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,8 +24,7 @@ import javafx.util.Callback;
 
 public class ExerciseInfoEditorController {
     
-    private ExerciseManagerImpl manager = new ExerciseManagerImpl();
-    private ExerciseInfoDao exerciseInfoDatabase = new ExerciseInfoDaoImpl();
+    private ExerciseManagerImpl manager = new ExerciseManagerImpl(App.DATABASE_PATH);
     
     @FXML private TableView<ExerciseInfo> exerciseInfoTableView;
     @FXML private TableColumn<ExerciseInfo, String> nameColumn;
@@ -92,7 +90,7 @@ public class ExerciseInfoEditorController {
                 try {
                     ExerciseInfo editedExerciseInfo = event.getTableView().getItems().get(event.getTablePosition().getRow());
                 
-                    exerciseInfoDatabase.updateItemName(editedExerciseInfo.getId(), newName);
+                    manager.updateExerciseInfoName(editedExerciseInfo.getId(), newName);
                     editedExerciseInfo.setName(newName);
                     
                 } catch (Exception e){
@@ -114,7 +112,7 @@ public class ExerciseInfoEditorController {
                 try {
                     ExerciseInfo editedExerciseInfo = event.getTableView().getItems().get(event.getTablePosition().getRow());
                 
-                    exerciseInfoDatabase.updateItemCategory(editedExerciseInfo.getId(), newCategory);
+                    manager.updateExerciseInfoCategory(editedExerciseInfo.getId(), newCategory);
                     editedExerciseInfo.setCategory(newCategory);
                     
                 } catch (Exception e){
@@ -139,7 +137,7 @@ public class ExerciseInfoEditorController {
     private List<ExerciseInfo> loadExerciseInfoList() {
         List<ExerciseInfo> data = new ArrayList<>();
         try {
-            data = exerciseInfoDatabase.getAllItems();
+            data = manager.getAllExerciseInfos();
         } catch (Exception e) {
             System.out.println("error in ExerciseInfoEditorController.loadExerciseInfoList(): " + e.getMessage());
         }
@@ -160,7 +158,7 @@ public class ExerciseInfoEditorController {
         String catecory = categoryTextField.getText();
         try {
             // try to create a new ExerciseInfo
-            int generatedKey = exerciseInfoDatabase.createItem(name, catecory);
+            int generatedKey = manager.createExerciseInfo(name, catecory);
             if (generatedKey != -1) {
                 // created successfully, now add the item also to the table view
                 exerciseInfoTableView.getItems().add(new ExerciseInfo(generatedKey, name, catecory));
@@ -188,7 +186,6 @@ public class ExerciseInfoEditorController {
                 
                 // remove ExerciseInfo also from the table
                 exerciseInfoTableView.getItems().remove(exerciseInfoTableView.getSelectionModel().getSelectedIndex());
-                System.out.println("deleted successfully");
                 
             } catch (Exception e) {
                 System.out.println(

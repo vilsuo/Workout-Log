@@ -1,11 +1,10 @@
 package com.mycompany.controllers;
 
+import com.mycompany.application.App;
+import com.mycompany.cells.DragAndDropListCell;
 import com.mycompany.domain.Exercise;
 import com.mycompany.domain.ExerciseSet;
-import com.mycompany.cells.ExerciseSetCell;
 import com.mycompany.dao.ExerciseManagerImpl;
-import com.mycompany.dao.ExerciseSetDao;
-import com.mycompany.dao.ExerciseSetDaoImpl;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -34,8 +33,7 @@ import javafx.util.Callback;
 
 public class ExerciseSetListController {
     
-    ExerciseManagerImpl manager = new ExerciseManagerImpl();
-    ExerciseSetDao exerciseSetDatabase = new ExerciseSetDaoImpl();
+    ExerciseManagerImpl manager = new ExerciseManagerImpl(App.DATABASE_PATH);
     
     @FXML private Label exerciseInfoNameLabel;
     
@@ -63,10 +61,10 @@ public class ExerciseSetListController {
     private final BooleanProperty changeMadeProperty =
         new SimpleBooleanProperty(false);
     
-    private final Map<Integer, ExerciseSet> removedExercisSetsMap = new HashMap<>();
+    private final Map<Integer, ExerciseSet> removedExerciseSetsMap = new HashMap<>();
     
     public void initialize() {
-        exerciseSetListView.setCellFactory(param -> new ExerciseSetCell());
+        exerciseSetListView.setCellFactory(param -> new DragAndDropListCell(ExerciseSet.class));
         setUpListeners();
         setUpProperties();
     }
@@ -74,7 +72,6 @@ public class ExerciseSetListController {
     private void setUpListeners() {
         exercise.addListener((obs, oldExercise, newExercise) -> {
             if (newExercise != null) {
-                
                 // needed?
                 // list created so it fires updates if ExerciseSet changes:
                 Callback<ExerciseSet, Observable[]> extractor =
@@ -140,11 +137,12 @@ public class ExerciseSetListController {
         if (optional.get() == yesButton) {
             
             // handle removed ExerciseSets:
-            for (int exerciseSetId : removedExercisSetsMap.keySet()) {
+            for (int exerciseSetId : removedExerciseSetsMap.keySet()) {
                 // if removed set was not new, remove it from the database
                 if (exerciseSetId > 0) {
+                    // slow... maybe implement method to remove all at a time
                     manager.removeExerciseSet(
-                        removedExercisSetsMap.get(exerciseSetId).getId()
+                        removedExerciseSetsMap.get(exerciseSetId).getId()
                     );
                 }
             }
@@ -153,7 +151,7 @@ public class ExerciseSetListController {
             for (ExerciseSet exerciseSet : exerciseSetListView.getItems()) {
                 if (exerciseSet.getId() < 0) {
                     // new exercise set
-                    int exerciseSetId = exerciseSetDatabase.createItem(
+                    int exerciseSetId = manager.createExerciseSet(
                         exerciseSet.getWorkingSets(),
                         exerciseSet.getRepetitions(),
                         exerciseSet.getWorkingWeight(),
@@ -164,7 +162,11 @@ public class ExerciseSetListController {
                     
                 } else {
                     // (edited) exerciseSet
-                    exerciseSetDatabase.updateItem(
+                    // slow... maybe check if
+                    // 1) exercise set was not edited
+                    // 2) order number did not change
+                    // then no need for update
+                   manager.updateExerciseSet(
                         exerciseSet.getId(),
                         exerciseSet.getWorkingSets(),
                         exerciseSet.getRepetitions(),
@@ -172,13 +174,11 @@ public class ExerciseSetListController {
                         orderNumber
                     );
                 }
-                
                 exerciseSet.setOrderNumber(orderNumber);
                 ++orderNumber;
             }
             
             exercise.get().getExerciseSetList().setAll(exerciseSetListView.getItems());
-            
             close();
             
         } else if (optional.get() == noButton) {
@@ -246,7 +246,7 @@ public class ExerciseSetListController {
         ExerciseSet removedExerciseSet =
             exerciseSetListView.getItems().remove(selectedListViewIndex);
         
-        removedExercisSetsMap.put(removedExerciseSet.getId(), removedExerciseSet);
+        removedExerciseSetsMap.put(removedExerciseSet.getId(), removedExerciseSet);
         
         if (newSelectedListViewIndex >= 0) {
             exerciseSetListView.getSelectionModel()

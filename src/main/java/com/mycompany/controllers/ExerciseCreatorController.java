@@ -1,7 +1,6 @@
 package com.mycompany.controllers;
 
-import com.mycompany.dao.ExerciseInfoDao;
-import com.mycompany.dao.ExerciseInfoDaoImpl;
+import com.mycompany.application.App;
 import com.mycompany.dao.ExerciseManagerImpl;
 import com.mycompany.domain.ExerciseInfo;
 import com.mycompany.domain.Exercise;
@@ -26,19 +25,18 @@ import javafx.stage.Stage;
 
 public class ExerciseCreatorController {
     
-    private final ExerciseManagerImpl manager = new ExerciseManagerImpl();
-    private final ExerciseInfoDao exerciseInfoDatabase = new ExerciseInfoDaoImpl();
+    private final ExerciseManagerImpl manager = new ExerciseManagerImpl(App.DATABASE_PATH);
     
     @FXML private ComboBox categoryComboBox;
     @FXML private ComboBox nameComboBox;
     @FXML private Button addButton;
     
-    private ObservableMap<String, Map<String, Integer> > exerciseInfoMap;
+    private ObservableMap<String, Map<String, Integer>> exerciseInfoMap;
 
-    private final ObjectProperty<Exercise> exercise = new SimpleObjectProperty<>();
+    private final ObjectProperty<ExerciseInfo> exerciseInfo = new SimpleObjectProperty<>();
     
-    public ObjectProperty<Exercise> exerciseProperty() {
-        return exercise;
+    public ObjectProperty<ExerciseInfo> exerciseInfoProperty() {
+        return exerciseInfo;
     }
     
     public void initialize() {
@@ -69,7 +67,7 @@ public class ExerciseCreatorController {
     
     private List<ExerciseInfo> loadExerciseInfoList() {
         try {
-            return exerciseInfoDatabase.getAllItems();
+            return manager.getAllExerciseInfos();
         } catch (Exception e) {
             System.out.println("Error in ExerciseCreatorController.loadExerciseInfoList(): " + e.getMessage());
         }
@@ -118,16 +116,8 @@ public class ExerciseCreatorController {
         String name = (String) nameComboBox.getSelectionModel().getSelectedItem();
         int exerciseInfoId = exerciseInfoMap.get(category).get(name);
         
-        ExerciseInfo exerciseInfo = new ExerciseInfo(exerciseInfoId, name, category);
-        try {
-            // ExerciseInfo already exists in the database
-            Exercise newExercise = manager.createNewExercise(exerciseInfo);
-            exercise.set(newExercise);
-            
-            close();
-        } catch (Exception e) {
-            System.out.println("Error in ExerciseCreatorController.submit(): " + e.getMessage());
-        }
+        ExerciseInfo newExerciseInfo = new ExerciseInfo(exerciseInfoId, name, category);
+        exerciseInfo.set(newExerciseInfo);
     }
     
     @FXML

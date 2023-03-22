@@ -1,10 +1,11 @@
 
 package com.mycompany.dao;
 
-import com.mycompany.application.App;
 import com.mycompany.domain.Exercise;
 import com.mycompany.domain.ExerciseInfo;
 import com.mycompany.domain.ExerciseSet;
+import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -20,10 +21,10 @@ public class ExerciseManagerImpl {
     
     private String databasePath;
     
-    private ExerciseInfoDao exerciseInfoDatabase = new ExerciseInfoDaoImpl();
-    private ExerciseSetDao exerciseSetDatabase = new ExerciseSetDaoImpl();
-    private ExerciseDao exerciseDatabase = new ExerciseDaoImpl();
-    private ExerciseToExerciseSetDao linkDatabase = new ExerciseToExerciseSetDaoImpl();
+    private ExerciseInfoDaoImpl exerciseInfoDatabase;
+    private ExerciseSetDaoImpl exerciseSetDatabase;
+    private ExerciseDaoImpl exerciseDatabase;
+    private ExerciseToExerciseSetDaoImpl linkDatabase;
     
     public ExerciseManagerImpl(String databasePath) {
         this.databasePath = databasePath;
@@ -32,41 +33,110 @@ public class ExerciseManagerImpl {
         exerciseDatabase = new ExerciseDaoImpl(this.databasePath);
         linkDatabase = new ExerciseToExerciseSetDaoImpl(this.databasePath);
     }
-    
-    public ExerciseManagerImpl() {
-        databasePath = App.DATABASE_PATH;
-        exerciseInfoDatabase = new ExerciseInfoDaoImpl();
-        exerciseSetDatabase = new ExerciseSetDaoImpl();
-        exerciseDatabase = new ExerciseDaoImpl();
-        linkDatabase = new ExerciseToExerciseSetDaoImpl();
-    }
 
+    private Connection createConnectionAndEnsureDatabase() throws SQLException {
+        Connection connection = DriverManager.getConnection(this.databasePath, "sa", "");
+        
+        String createExerciseInfoTable = "CREATE TABLE IF NOT EXISTS ExerciseInfo ("
+                    + "id INTEGER AUTO_INCREMENT PRIMARY KEY, "
+                    + "name VARCHAR NOT NULL, "
+                    + "category VARCHAR NOT NULL"
+                    + ");";
+        
+        String createExerciseTable = "CREATE TABLE IF NOT EXISTS Exercise ("
+                    + "id INTEGER AUTO_INCREMENT PRIMARY KEY, "
+                    + "exerciseInfo_id INTEGER NOT NULL, "
+                    + "FOREIGN KEY (exerciseInfo_id) REFERENCES ExerciseInfo(id), "
+                    + "orderNumber INTEGER NOT NULL"
+                    + ");";
+        
+        String createExerciseSetTable = "CREATE TABLE IF NOT EXISTS ExerciseSet ("
+                    + "id INTEGER AUTO_INCREMENT PRIMARY KEY, "
+                    + "workingSets INTEGER NOT NULL, "
+                    + "repetitions INTEGER NOT NULL, "
+                    + "workingWeight DOUBLE PRECISION NOT NULL, "
+                    + "orderNumber INTEGER NOT NULL"
+                    + ");";
+        
+        String createExerciseToExerciseSetTable = "CREATE TABLE IF NOT EXISTS ExerciseToExerciseSet ("
+                    + "exercise_id INTEGER NOT NULL, "
+                    + "exerciseSet_id INTEGER NOT NULL, "
+                    + "FOREIGN KEY (exercise_id) REFERENCES Exercise(id), "
+                    + "FOREIGN KEY (exerciseSet_id) REFERENCES ExerciseSet(id)"
+                    + ");";
+        
+        String[] ss = new String[]{
+            createExerciseInfoTable,
+            createExerciseTable,
+            createExerciseSetTable,
+            createExerciseToExerciseSetTable
+        };
+
+        for (String sql : ss) {
+            connection.prepareStatement(sql).execute();
+        }
+        
+        return connection;
+    }
     
+    public int createExerciseInfo(String name, String category) throws SQLException {
+        try (Connection connection = createConnectionAndEnsureDatabase()) {
+            return exerciseInfoDatabase.createItem(connection, name, category);
+        }
+    }
+    
+    public boolean updateExerciseInfoName(int id, String newName) throws SQLException {
+        try (Connection connection = createConnectionAndEnsureDatabase()) {
+            return exerciseInfoDatabase.updateItemName(connection, id, newName);
+        }
+    }
+    
+    public void updateExerciseInfoCategory(int id, String newCategory) throws SQLException {
+        try (Connection connection = createConnectionAndEnsureDatabase()) {
+            exerciseInfoDatabase.updateItemCategory(connection, id, newCategory);
+        }
+    }
+    
+    public List<ExerciseInfo> getAllExerciseInfos() throws SQLException {
+        try (Connection connection = createConnectionAndEnsureDatabase()) {
+            return exerciseInfoDatabase.getAllItems(connection);
+        }
+    }
+    
+    public int createExerciseSet(int workingSets, int repetitions, double workingWeight, int orderNumber) throws SQLException {
+        try (Connection connection = createConnectionAndEnsureDatabase()) {
+            return exerciseSetDatabase.createItem(connection, workingSets, repetitions, workingWeight, orderNumber);
+        }
+    }
+    
+    public void updateExerciseSet(int id, int newWorkingSets, int newRepetitions, double newWorkingWeight, int orderNumber) throws SQLException {
+        try (Connection connection = createConnectionAndEnsureDatabase()) {
+            exerciseSetDatabase.updateItem(connection, id, newWorkingSets, newRepetitions, newWorkingWeight, orderNumber);
+        }
+    }
+    
+    
+    // make param exerciseInfoId instead?
     /**
      * 
      * @param exerciseInfo  Assumes item is already in the ExerciseInfo-database.
      * @return
      * @throws SQLException 
      */
-    public Exercise createNewExercise(ExerciseInfo exerciseInfo) throws SQLException {
-        int exerciseId = exerciseDatabase.createItem(exerciseInfo.getId());
-        if (exerciseId == -1) {
-            return null;
+    public Exercise createNewExercise(ExerciseInfo exerciseInfo, int orderNumber) throws SQLException {
+        try (Connection connection = createConnectionAndEnsureDatabase()) {
+            int exerciseId = exerciseDatabase.createItem(connection, exerciseInfo.getId(), orderNumber);
+            if (exerciseId == -1) {
+                return null;
+            }
+            return new Exercise(exerciseId, exerciseInfo, orderNumber);
         }
-        return new Exercise(exerciseId, exerciseInfo);
     }
 
-    /**
-     * 
-     * @param exercise
-     * 
-     * @param exerciseSet   Assumes item is already in the ExerciseSet-database.
-     *                      Does not update order number.
-     * 
-     * @throws SQLException 
-     */
     public void addExerciseSetToExercise(int exerciseId, int exerciseSetId) throws SQLException {
-        linkDatabase.createItem(exerciseId, exerciseSetId);
+        try (Connection connection = createConnectionAndEnsureDatabase()) {
+            linkDatabase.createItem(connection, exerciseId, exerciseSetId);
+        }
     }
     
     /**
@@ -77,8 +147,10 @@ public class ExerciseManagerImpl {
      * @throws SQLException 
      */
     public void removeExerciseSet(int exerciseSetId) throws SQLException {
-        linkDatabase.removeItemsByExerciseSet(exerciseSetId);
-        exerciseSetDatabase.removeItem(exerciseSetId);
+        try (Connection connection = createConnectionAndEnsureDatabase()) {
+            linkDatabase.removeItemsByExerciseSet(connection, exerciseSetId);
+            exerciseSetDatabase.removeItem(connection, exerciseSetId);
+        }
     }
     
     /**
@@ -87,24 +159,31 @@ public class ExerciseManagerImpl {
      * @throws SQLException 
      */
     public Exercise getExercise(int exerciseId) throws SQLException {
-        int exerciseInfoId = exerciseDatabase.getExerciseInfoId(exerciseId);
-        ExerciseInfo exerciseInfo = exerciseInfoDatabase.getItem(exerciseInfoId);
-        
-        List<Integer> exerciseSetIdList = linkDatabase.getExerciseSetIdList(exerciseId);
-        
-        List<ExerciseSet> exerciseSetList = exerciseSetDatabase.getItems(exerciseSetIdList);
-        Collections.sort(exerciseSetList);
-        
-        return new Exercise(exerciseId, exerciseInfo, exerciseSetList);
+        try (Connection connection = createConnectionAndEnsureDatabase()) {
+            int exerciseInfoId = exerciseDatabase.getExerciseInfoId(connection, exerciseId);
+            int exerciseOrderNumber = exerciseDatabase.getItemOrderNumber(connection, exerciseId);
+            
+            ExerciseInfo exerciseInfo = exerciseInfoDatabase.getItem(connection, exerciseInfoId);
+
+            List<Integer> exerciseSetIdList = linkDatabase.getExerciseSetIdList(connection, exerciseId);
+
+            List<ExerciseSet> exerciseSetList = exerciseSetDatabase.getItems(connection, exerciseSetIdList);
+            Collections.sort(exerciseSetList);
+
+            return new Exercise(exerciseId, exerciseInfo, exerciseSetList, exerciseOrderNumber);
+        }
     }
     
     public List<Exercise> getAllExercises() throws SQLException {
-        List<Exercise> exerciseList = new ArrayList<>();
-        List<Integer> exerciseIdList = exerciseDatabase.getAllExerciseIds();
-        for (int id : exerciseIdList) {
-            exerciseList.add(getExercise(id));
+        try (Connection connection = createConnectionAndEnsureDatabase()) {
+            List<Exercise> exerciseList = new ArrayList<>();
+            List<Integer> exerciseIdList = exerciseDatabase.getAllExerciseIds(connection);
+            for (int id : exerciseIdList) {
+                exerciseList.add(getExercise(id));
+            }
+            Collections.sort(exerciseList);
+            return exerciseList;
         }
-        return exerciseList;
     }
     
     /**
@@ -114,17 +193,18 @@ public class ExerciseManagerImpl {
      * @throws SQLException 
      */
     public void removeExercise(int exerciseId) throws SQLException {
-        
-        List<Integer> exerciseSetIdList = linkDatabase.getExerciseSetIdList(exerciseId);
-        
-        // 1. delete link table
-        linkDatabase.removeItemsByExercise(exerciseId);
-        
-        // delete sets
-        exerciseSetDatabase.removeItems(exerciseSetIdList);
-        
-        // delete exercise
-        exerciseDatabase.removeItem(exerciseId);
+        try (Connection connection = createConnectionAndEnsureDatabase()) {
+            List<Integer> exerciseSetIdList = linkDatabase.getExerciseSetIdList(connection, exerciseId);
+
+            // 1. delete link table
+            linkDatabase.removeItemsByExercise(connection, exerciseId);
+
+            // delete sets
+            exerciseSetDatabase.removeItems(connection, exerciseSetIdList);
+
+            // delete exercise
+            exerciseDatabase.removeItem(connection, exerciseId);
+        }
     }
     
     /**
@@ -134,24 +214,26 @@ public class ExerciseManagerImpl {
      * @throws SQLException 
      */
     public void removeExerciseInfo(int exerciseInfoId) throws SQLException {
+        try (Connection connection = createConnectionAndEnsureDatabase()) {
         // exercises associated with deleted exerciseInfo
-        List<Integer> exerciseIdList = exerciseDatabase.getExerciseIdList(exerciseInfoId);
-        
-        for (int exerciseId : exerciseIdList) {
-            // get exercise set associated with the exercise
-            List<Integer> exerciseSetIdList = linkDatabase.getExerciseSetIdList(exerciseId);
-            
-            // 1. delete link table
-            linkDatabase.removeItemsByExercise(exerciseId);
-            
-            // 2.1 delete exercise sets
-            exerciseSetDatabase.removeItems(exerciseSetIdList);
-            
-            // 2. delete exercises
-            exerciseDatabase.removeItem(exerciseId);
+            List<Integer> exerciseIdList = exerciseDatabase.getExerciseIdList(connection, exerciseInfoId);
+
+            for (int exerciseId : exerciseIdList) {
+                // get exercise set associated with the exercise
+                List<Integer> exerciseSetIdList = linkDatabase.getExerciseSetIdList(connection, exerciseId);
+
+                // 1. delete link table
+                linkDatabase.removeItemsByExercise(connection, exerciseId);
+
+                // 2.1 delete exercise sets
+                exerciseSetDatabase.removeItems(connection, exerciseSetIdList);
+
+                // 2. delete exercises
+                exerciseDatabase.removeItem(connection, exerciseId);
+            }
+
+            // 3. delete exerciseInfo
+            exerciseInfoDatabase.removeItem(connection, exerciseInfoId);
         }
-        
-        // 3. delete exerciseInfo
-        exerciseInfoDatabase.removeItem(exerciseInfoId);
     }
 }

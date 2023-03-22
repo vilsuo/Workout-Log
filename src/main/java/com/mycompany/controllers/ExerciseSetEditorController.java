@@ -1,5 +1,6 @@
 package com.mycompany.controllers;
 
+import com.mycompany.application.App;
 import com.mycompany.dao.ExerciseSetDaoImpl;
 import com.mycompany.domain.ExerciseSet;
 import com.mycompany.utilities.InputValidator;
@@ -16,8 +17,6 @@ import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 
 public class ExerciseSetEditorController {
-    
-    ExerciseSetDaoImpl ExerciseSetDatabase = new ExerciseSetDaoImpl();
     
     @FXML private Label exerciseNameLabel;
     
