@@ -1,7 +1,7 @@
 package com.mycompany.controllers;
 
 import com.mycompany.application.App;
-import com.mycompany.dao.ExerciseManagerImpl;
+import com.mycompany.dao.ManagerImpl;
 import com.mycompany.domain.ExerciseInfo;
 import com.mycompany.domain.Exercise;
 import java.util.ArrayList;
@@ -25,7 +25,7 @@ import javafx.stage.Stage;
 
 public class ExerciseCreatorController {
     
-    private final ExerciseManagerImpl manager = new ExerciseManagerImpl(App.DATABASE_PATH);
+    private final ManagerImpl manager = new ManagerImpl(App.DATABASE_PATH);
     
     @FXML private ComboBox categoryComboBox;
     @FXML private ComboBox nameComboBox;

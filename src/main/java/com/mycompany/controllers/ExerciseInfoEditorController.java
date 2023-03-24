@@ -4,7 +4,7 @@ package com.mycompany.controllers;
 import com.mycompany.application.App;
 import com.mycompany.domain.ExerciseInfo;
 import com.mycompany.cells.ExerciseInfoEditingCell;
-import com.mycompany.dao.ExerciseManagerImpl;
+import com.mycompany.dao.ManagerImpl;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -24,7 +24,7 @@ import javafx.util.Callback;
 
 public class ExerciseInfoEditorController {
     
-    private ExerciseManagerImpl manager = new ExerciseManagerImpl(App.DATABASE_PATH);
+    private ManagerImpl manager = new ManagerImpl(App.DATABASE_PATH);
     
     @FXML private TableView<ExerciseInfo> exerciseInfoTableView;
     @FXML private TableColumn<ExerciseInfo, String> nameColumn;

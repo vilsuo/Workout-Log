@@ -29,11 +29,10 @@ public class App extends Application {
         init();
         
         try {
-            Parent root = (Parent)FXMLLoader.load(getClass().getResource("/fxml/ExerciseList.fxml"));
+            Parent root = (Parent)FXMLLoader.load(getClass().getResource("/fxml/WorkoutList.fxml"));
             Scene scene = new Scene(root);
             primaryStage.setScene(scene);
             primaryStage.show();
-            
         } catch(Exception e) {
             e.printStackTrace();
         }
@@ -55,6 +54,13 @@ public class App extends Application {
                     + "orderNumber INTEGER NOT NULL"
                     + ");";
         
+        String createWorkoutTable = "CREATE TABLE IF NOT EXISTS Workout ("
+                    + "id INTEGER AUTO_INCREMENT PRIMARY KEY, "
+                    + "name VARCHAR, "
+                    + "date DATE NOT NULL, "
+                    + "orderNumber INTEGER NOT NULL"
+                    + ");";
+        
         String createExerciseSetTable = "CREATE TABLE IF NOT EXISTS ExerciseSet ("
                     + "id INTEGER AUTO_INCREMENT PRIMARY KEY, "
                     + "workingSets INTEGER NOT NULL, "
@@ -70,11 +76,20 @@ public class App extends Application {
                     + "FOREIGN KEY (exerciseSet_id) REFERENCES ExerciseSet(id)"
                     + ");";
         
+        String createWorkoutToExerciseTable = "CREATE TABLE IF NOT EXISTS WorkoutToExercise ("
+                    + "workout_id INTEGER NOT NULL, "
+                    + "exercise_id INTEGER NOT NULL, "
+                    + "FOREIGN KEY (workout_id) REFERENCES Workout(id), "
+                    + "FOREIGN KEY (exercise_id) REFERENCES Exercise(id) "
+                    + ");";
+        
         String[] ss = new String[]{
             createExerciseInfoTable,
             createExerciseTable,
+            createWorkoutTable,
             createExerciseSetTable,
-            createExerciseToExerciseSetTable
+            createExerciseToExerciseSetTable,
+            createWorkoutToExerciseTable
         };
         
         Connection connection = DriverManager.getConnection(DATABASE_PATH, "sa", "");
@@ -84,7 +99,7 @@ public class App extends Application {
             }
         }
     }
-
+    
     public static void main(String[] args) {
         launch(args);
     }

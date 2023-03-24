@@ -4,7 +4,7 @@ import com.mycompany.application.App;
 import com.mycompany.cells.DragAndDropListCell;
 import com.mycompany.domain.Exercise;
 import com.mycompany.domain.ExerciseSet;
-import com.mycompany.dao.ExerciseManagerImpl;
+import com.mycompany.dao.ManagerImpl;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -33,7 +33,7 @@ import javafx.util.Callback;
 
 public class ExerciseSetListController {
     
-    ExerciseManagerImpl manager = new ExerciseManagerImpl(App.DATABASE_PATH);
+    ManagerImpl manager = new ManagerImpl(App.DATABASE_PATH);
     
     @FXML private Label exerciseInfoNameLabel;
     

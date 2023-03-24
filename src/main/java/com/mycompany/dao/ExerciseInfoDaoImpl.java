@@ -12,12 +12,6 @@ import java.util.List;
 
 public class ExerciseInfoDaoImpl {
     
-    private String databasePath;
-    
-    public ExerciseInfoDaoImpl(String databasePath) {
-        this.databasePath = databasePath;
-    }
-    
     /**
      * Adds a entry to ExerciseInfo-table, if the table does not
      * already contain a entry with the given name.

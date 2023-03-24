@@ -11,13 +11,7 @@ import java.util.List;
 
 public class ExerciseDaoImpl {
     
-    private String databasePath;
-    
-    public ExerciseDaoImpl(String databasePath) {
-        this.databasePath = databasePath;
-    }
-    
-    public int createItem(Connection connection, int exerciseInfoId, int orderNumber) throws SQLException {
+    public int createExercise(Connection connection, int exerciseInfoId, int orderNumber) throws SQLException {
         String sql = "INSERT INTO Exercise (exerciseInfo_id, orderNumber) VALUES (?, ?);";
         PreparedStatement pstmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS );
         pstmt.setInt(1, exerciseInfoId);
@@ -31,7 +25,7 @@ public class ExerciseDaoImpl {
         return -1;
     }
     
-    public void removeItem(Connection connection, int id) throws SQLException {
+    public void removeExercise(Connection connection, int id) throws SQLException {
         String sql = "DELETE FROM Exercise WHERE id = ?;";
         PreparedStatement pstmt = connection.prepareStatement(sql);
         pstmt.setInt(1, id);
@@ -42,7 +36,7 @@ public class ExerciseDaoImpl {
     
     // update order number
     
-    public int getItemOrderNumber(Connection connection, int exerciseId) throws SQLException {
+    public int getExerciseOrderNumber(Connection connection, int exerciseId) throws SQLException {
         String sql = "SELECT orderNumber FROM Exercise WHERE id = ?;";
         PreparedStatement pstmt = connection.prepareStatement(sql);
         pstmt.setInt(1, exerciseId);

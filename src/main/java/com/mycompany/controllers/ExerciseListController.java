@@ -3,13 +3,16 @@ package com.mycompany.controllers;
 
 import com.mycompany.application.App;
 import com.mycompany.cells.DragAndDropListCell;
-import com.mycompany.dao.ExerciseManagerImpl;
+import com.mycompany.dao.ManagerImpl;
 import com.mycompany.domain.Exercise;
+import com.mycompany.domain.Workout;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -24,12 +27,23 @@ import javafx.util.Callback;
 
 public class ExerciseListController {
     
-    private final ExerciseManagerImpl manager = new ExerciseManagerImpl(App.DATABASE_PATH);
+    private final ManagerImpl manager = new ManagerImpl(App.DATABASE_PATH);
     
     @FXML private ListView<Exercise> exerciseListView;
     
     @FXML private Button editButton;
     @FXML private Button removeButton;
+    
+    private final ObjectProperty<Workout> workout =
+        new SimpleObjectProperty();
+    
+    public ObjectProperty<Workout> workoutProperty() {
+        return workout;
+    }
+    
+    public void setWorkout(Workout workout) {
+        workoutProperty().set(workout);
+    }
     
     public void initialize() {
         setUpData();

@@ -21,7 +21,7 @@ public final class Exercise implements Comparable<Exercise>{
     private final ReadOnlyIntegerWrapper id;
     private ObjectProperty<ExerciseInfo> exerciseInfo;
     private ListProperty<ExerciseSet> exerciseSetList;
-    private final IntegerProperty orderNumber;
+    private IntegerProperty orderNumber;
 
     public Exercise(int id, ExerciseInfo exerciseInfo, List<ExerciseSet> exerciseSetList, int orderNumber) {
         this.id = new ReadOnlyIntegerWrapper(id);

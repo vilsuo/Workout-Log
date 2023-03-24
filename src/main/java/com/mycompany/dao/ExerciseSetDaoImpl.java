@@ -12,12 +12,6 @@ import java.util.List;
 
 public class ExerciseSetDaoImpl {
     
-    private String databasePath;
-    
-    public ExerciseSetDaoImpl(String databasePath) {
-        this.databasePath = databasePath;
-    }
-
     public int createItem(Connection connection, int workingSets, int repetitions, double workingWeight, int orderNumber) throws SQLException {
             String sql = "INSERT INTO ExerciseSet (workingSets, repetitions, workingWeight, orderNumber) VALUES (?, ?, ?, ?);";
             PreparedStatement pstmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS );
