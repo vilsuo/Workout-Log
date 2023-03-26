@@ -17,7 +17,8 @@ import javafx.scene.Parent;
  * 
  * - update test classes
  * 
- * - drag and drop to update orderNumbers
+ * - error handling 
+ *   - what exception to catch?
  */
 
 public class App extends Application {

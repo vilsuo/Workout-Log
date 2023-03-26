@@ -36,7 +36,6 @@ public final class Exercise implements Comparable<Exercise>{
                 exerciseSet.orderNumberProperty()
             };
         
-        // list created so it fires updates if ExerciseSet changes:
         ObservableList<ExerciseSet> observableList =
             FXCollections.observableList(exerciseSetList, extractor);
         

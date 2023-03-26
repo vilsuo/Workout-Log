@@ -49,12 +49,16 @@ public class ExerciseInfoEditorController {
     private void setUpProperties() {
         BooleanBinding textFieldsNotFilled = new BooleanBinding() {
             {
-                super.bind(nameTextField.textProperty(), categoryTextField.textProperty());
+                super.bind(
+                    nameTextField.textProperty(),
+                    categoryTextField.textProperty()
+                );
             }
 
             @Override
             protected boolean computeValue() {
-                return (nameTextField.getText().isBlank() || categoryTextField.getText().isBlank());
+                return (nameTextField.getText().isBlank()
+                     || categoryTextField.getText().isBlank());
             }
         };
         
@@ -63,7 +67,9 @@ public class ExerciseInfoEditorController {
         
         // disable 'delete' if no items are selected
         deleteButton.disableProperty().bind(
-            exerciseInfoTableView.getSelectionModel().selectedItemProperty().isNull()
+            exerciseInfoTableView.getSelectionModel()
+                                 .selectedItemProperty()
+                                 .isNull()
         );
     }
     
@@ -158,10 +164,10 @@ public class ExerciseInfoEditorController {
         String catecory = categoryTextField.getText();
         try {
             // try to create a new ExerciseInfo
-            int generatedKey = manager.createExerciseInfo(name, catecory);
-            if (generatedKey != -1) {
+            ExerciseInfo exerciseInfo = manager.createExerciseInfo(name, catecory);
+            if (exerciseInfo != null) {
                 // created successfully, now add the item also to the table view
-                exerciseInfoTableView.getItems().add(new ExerciseInfo(generatedKey, name, catecory));
+                exerciseInfoTableView.getItems().add(exerciseInfo);
                 nameTextField.clear();
                 categoryTextField.clear();
             } else {
@@ -185,7 +191,9 @@ public class ExerciseInfoEditorController {
                 manager.removeExerciseInfo(exerciseInfoId);
                 
                 // remove ExerciseInfo also from the table
-                exerciseInfoTableView.getItems().remove(exerciseInfoTableView.getSelectionModel().getSelectedIndex());
+                exerciseInfoTableView.getItems().remove(
+                    exerciseInfoTableView.getSelectionModel().getSelectedIndex()
+                );
                 
             } catch (Exception e) {
                 System.out.println(

@@ -27,6 +27,19 @@ public class WorkoutDaoImpl {
         return -1;
     }
     
+    public String getWorkoutName(Connection connection, int id) throws SQLException {
+        String sql = "SELECT name FROM Workout WHERE id = ?;";
+        
+        PreparedStatement pstmt = connection.prepareStatement(sql);
+        pstmt.setInt(1, id);
+        
+        ResultSet results = pstmt.executeQuery();
+        while (results.next()) {
+            return results.getString("name");
+        }
+        return "";
+    }
+    
     public int getWorkoutOrderNumber(Connection connection, int id) throws SQLException {
         String sql = "SELECT orderNumber FROM Workout WHERE id = ?;";
         
@@ -62,5 +75,13 @@ public class WorkoutDaoImpl {
             dateList.add(results.getDate("date"));
         }
         return dateList;
+    }
+    
+    public void removeWorkout(Connection connection, int id) throws SQLException {
+        String sql = "DELETE FROM Workout WHERE id = ?;";
+        
+        PreparedStatement pstmt = connection.prepareStatement(sql);
+        pstmt.setInt(1, id);
+        pstmt.executeUpdate();
     }
 }

@@ -3,7 +3,6 @@ package com.mycompany.controllers;
 import com.mycompany.application.App;
 import com.mycompany.dao.ManagerImpl;
 import com.mycompany.domain.ExerciseInfo;
-import com.mycompany.domain.Exercise;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;

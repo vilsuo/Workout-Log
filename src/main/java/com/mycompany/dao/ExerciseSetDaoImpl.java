@@ -12,7 +12,7 @@ import java.util.List;
 
 public class ExerciseSetDaoImpl {
     
-    public int createItem(Connection connection, int workingSets, int repetitions, double workingWeight, int orderNumber) throws SQLException {
+    public int createExerciseSet(Connection connection, int workingSets, int repetitions, double workingWeight, int orderNumber) throws SQLException {
             String sql = "INSERT INTO ExerciseSet (workingSets, repetitions, workingWeight, orderNumber) VALUES (?, ?, ?, ?);";
             PreparedStatement pstmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS );
             pstmt.setInt(1, workingSets);
@@ -28,7 +28,7 @@ public class ExerciseSetDaoImpl {
             return -1;
     }
 
-    public void updateItem(Connection connection, int id, int newWorkingSets, int newRepetitions, double newWorkingWeight, int orderNumber) throws SQLException {
+    public void updateExerciseSet(Connection connection, int id, int newWorkingSets, int newRepetitions, double newWorkingWeight, int orderNumber) throws SQLException {
             String sql = "UPDATE ExerciseSet SET workingSets = ?, repetitions = ?, workingWeight = ?, orderNumber = ? WHERE id = ?;";
             PreparedStatement pstmt = connection.prepareStatement(sql);
             pstmt.setInt(1, newWorkingSets);
@@ -39,14 +39,14 @@ public class ExerciseSetDaoImpl {
             pstmt.executeUpdate();
     }
     
-    public void removeItem(Connection connection, int id) throws SQLException {
+    public void removeExerciseSet(Connection connection, int id) throws SQLException {
             String sql = "DELETE FROM ExerciseSet WHERE id = ?;";
             PreparedStatement pstmt = connection.prepareStatement(sql);
             pstmt.setInt(1, id);
             pstmt.executeUpdate();
     }
     
-    public void removeItems(Connection connection, List<Integer> idList) throws SQLException {
+    public void removeExerciseSetList(Connection connection, List<Integer> idList) throws SQLException {
             String sql = "DELETE FROM ExerciseSet WHERE id = ?;";
             for (int id : idList) {
                 PreparedStatement pstmt = connection.prepareStatement(sql);
@@ -55,7 +55,7 @@ public class ExerciseSetDaoImpl {
             }
     }
     
-    public ExerciseSet getItem(Connection connection, int id) throws SQLException {
+    public ExerciseSet getExerciseSet(Connection connection, int id) throws SQLException {
         ExerciseSet exerciseSet = null;
             String sql = "SELECT * FROM ExerciseSet WHERE id = ?;";
             PreparedStatement pstmt = connection.prepareStatement(sql);
@@ -74,7 +74,7 @@ public class ExerciseSetDaoImpl {
         return exerciseSet;
     }
     
-    public List<ExerciseSet> getItems(Connection connection, List<Integer> IdList) throws SQLException {
+    public List<ExerciseSet> getExerciseSetList(Connection connection, List<Integer> IdList) throws SQLException {
         List<ExerciseSet> exerciseSetList = new ArrayList<>();
             String sql = "SELECT * FROM ExerciseSet WHERE id = ?;";
             for (int id : IdList) {
@@ -97,6 +97,7 @@ public class ExerciseSetDaoImpl {
         return exerciseSetList;
     }
     
+    /*
     // temporary
     public List<ExerciseSet> list(Connection connection) throws SQLException {
         List<ExerciseSet> exerciseSetList = new ArrayList<>();
@@ -116,4 +117,5 @@ public class ExerciseSetDaoImpl {
             }
         return exerciseSetList;
     }
+    */
 }

@@ -22,8 +22,8 @@ public class ExerciseInfoDaoImpl {
      *                  successful.
      * @throws java.sql.SQLException
      */
-    public int createItem(Connection connection, String name, String category) throws SQLException {
-        if (getIndexByName(connection, name) != -1) {
+    public int createExerciseInfo(Connection connection, String name, String category) throws SQLException {
+        if (getExerciseInfoIdByName(connection, name) != -1) {
             return -1;
         }
         String sql = "INSERT INTO ExerciseInfo (name, category) VALUES (?, ?);";
@@ -49,8 +49,8 @@ public class ExerciseInfoDaoImpl {
      * @return              True if update was successful, false otherwise.
      * @throws SQLException 
      */
-    public boolean updateItemName(Connection connection, int id, String newName) throws SQLException {
-        if (getIndexByName(connection, newName) != -1) {
+    public boolean updateExerciseInfoName(Connection connection, int id, String newName) throws SQLException {
+        if (getExerciseInfoIdByName(connection, newName) != -1) {
             return false;
         }
         
@@ -63,7 +63,7 @@ public class ExerciseInfoDaoImpl {
         return true;
     }
     
-    public void updateItemCategory(Connection connection, int id, String newCategory) throws SQLException {
+    public void updateExerciseInfoCategory(Connection connection, int id, String newCategory) throws SQLException {
         String sql = "UPDATE ExerciseInfo SET category = ? WHERE id = ?;";
         PreparedStatement pstmt = connection.prepareStatement(sql);
         pstmt.setString(1, newCategory);
@@ -71,14 +71,14 @@ public class ExerciseInfoDaoImpl {
         pstmt.executeUpdate();
     }
     
-    public void removeItem(Connection connection, int id) throws SQLException {
+    public void removeExerciseInfo(Connection connection, int id) throws SQLException {
         String sql = "DELETE FROM ExerciseInfo WHERE id = ?;";
         PreparedStatement pstmt = connection.prepareStatement(sql);
         pstmt.setInt(1, id);
         pstmt.executeUpdate();
     }
     
-    public ExerciseInfo getItem(Connection connection, int id) throws SQLException {
+    public ExerciseInfo getExerciseInfo(Connection connection, int id) throws SQLException {
         String sql = "SELECT * FROM ExerciseInfo WHERE id = ?;";
         PreparedStatement pstmt = connection.prepareStatement(sql);
         pstmt.setInt(1, id);
@@ -94,7 +94,7 @@ public class ExerciseInfoDaoImpl {
         return null;
     }
     
-    public List<ExerciseInfo> getItems(Connection connection, List<Integer> idList) throws SQLException {
+    public List<ExerciseInfo> getExerciseInfoList(Connection connection, List<Integer> idList) throws SQLException {
         List<ExerciseInfo> exerciseInfoList = new ArrayList<>();
         String sql = "SELECT * FROM ExerciseInfo WHERE id = ?;";
         for (int id : idList) {
@@ -115,7 +115,7 @@ public class ExerciseInfoDaoImpl {
         return exerciseInfoList;
     }
     
-    public List<ExerciseInfo> getAllItems(Connection connection) throws SQLException {
+    public List<ExerciseInfo> getAllExerciseInfos(Connection connection) throws SQLException {
         List<ExerciseInfo> exerciseInfoList = new ArrayList<>();
         String sql = "SELECT * FROM ExerciseInfo;";
         
@@ -132,7 +132,7 @@ public class ExerciseInfoDaoImpl {
         return exerciseInfoList;
     }
     
-    public List<ExerciseInfo> getAllItemsByCategory(Connection connection,String category) throws SQLException {
+    public List<ExerciseInfo> getExerciseInfoListByCategory(Connection connection,String category) throws SQLException {
         List<ExerciseInfo> exerciseInfos = new ArrayList<>();
         String sql = "SELECT * FROM ExerciseInfo WHERE category = ?;";
         PreparedStatement pstmt = connection.prepareStatement(sql);
@@ -151,7 +151,7 @@ public class ExerciseInfoDaoImpl {
         return exerciseInfos;
     }
     
-    private int getIndexByName(Connection connection, String name) throws SQLException {
+    private int getExerciseInfoIdByName(Connection connection, String name) throws SQLException {
         String sql = "SELECT id FROM ExerciseInfo WHERE name = ?;";
         PreparedStatement stmt = connection.prepareStatement(sql);
         stmt.setString(1, name);

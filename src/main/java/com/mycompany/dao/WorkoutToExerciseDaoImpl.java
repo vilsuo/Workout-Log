@@ -40,7 +40,7 @@ public class WorkoutToExerciseDaoImpl {
         
         ResultSet results = pstmt.executeQuery();
         while (results.next()) {
-            exerciseIdList.add(results.getInt("workout_id"));
+            exerciseIdList.add(results.getInt("exercise_id"));
         }
         return exerciseIdList;
     }

@@ -7,14 +7,9 @@ import com.mycompany.dao.ManagerImpl;
 import com.mycompany.domain.Exercise;
 import com.mycompany.domain.Workout;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -23,8 +18,11 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ListView;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import javafx.util.Callback;
 
+/* TODO!
+- drag and drop update order number
+
+*/
 public class ExerciseListController {
     
     private final ManagerImpl manager = new ManagerImpl(App.DATABASE_PATH);
@@ -46,39 +44,31 @@ public class ExerciseListController {
     }
     
     public void initialize() {
-        setUpData();
+        exerciseListView.setCellFactory(
+            param -> new DragAndDropListCell(Exercise.class)
+        );
         setUpProperties();
     }
     
-    private void setUpData() {
-        Callback<Exercise, Observable[]> extractor = (Exercise exercise) -> new Observable[] {
-            exercise.idProperty(),
-            exercise.exerciseInfoProperty(),
-            exercise.exerciseSetListProperty(),
-            exercise.orderNumberProperty()
-        };
-        
-        ObservableList<Exercise> exercises = FXCollections.observableList(loadExerciseList(), extractor);
-        exerciseListView.setItems(exercises);
-        exerciseListView.setCellFactory(param -> new DragAndDropListCell(Exercise.class));
-    }
-    
-    private List<Exercise> loadExerciseList() {
-        try {
-            return manager.getAllExercises();
-        } catch (Exception e) {
-            System.out.println("Error in ExerciseListController.loadExerciseList: " + e.getMessage());
-        }
-        return new ArrayList<>();
-    }
-    
     private void setUpProperties() {
+        workoutProperty().addListener(
+            (obs, oldWorkout, newWorkout) -> {
+                if (newWorkout != null) {
+                    exerciseListView.setItems(newWorkout.getExerciseList());
+                }
+            }
+        );
+        
         editButton.disableProperty().bind(
-            Bindings.isNull(exerciseListView.getSelectionModel().selectedItemProperty())
+            Bindings.isNull(
+                exerciseListView.getSelectionModel().selectedItemProperty()
+            )
         );
         
         removeButton.disableProperty().bind(
-            Bindings.isNull(exerciseListView.getSelectionModel().selectedItemProperty())
+            Bindings.isNull(
+                exerciseListView.getSelectionModel().selectedItemProperty()
+            )
         );
     }
     
@@ -92,10 +82,17 @@ public class ExerciseListController {
         controller.exerciseInfoProperty().addListener(
             (obs, oldExerciseInfo, newExerciseInfo) -> {
                 if (newExerciseInfo != null) {
-                    Exercise newExercise;
                     try {
-                        newExercise = manager.createNewExercise(newExerciseInfo, exerciseListView.getItems().size() + 1);
-                        exerciseListView.getItems().add(newExercise);
+                        int workoutId = workout.get().getId();
+                        int newExerciseOrderNumber =
+                            exerciseListView.getItems().size() + 1;
+                        
+                        Exercise newExercise = manager.createExercise(
+                            workoutId, newExerciseInfo, newExerciseOrderNumber
+                        );
+                        
+                        workout.get().addExercise(newExercise);
+                        
                     } catch (SQLException ex) {
                         System.out.println("Error in ExerciseListController.newExercise(): ");
                         ex.printStackTrace();
@@ -107,7 +104,6 @@ public class ExerciseListController {
         showWindow(root, "Exercise Creator");
         
         // refresh in case of renames
-        setUpData();
     }
     
     @FXML
@@ -121,29 +117,33 @@ public class ExerciseListController {
         controller.setExercise(selectedExercise);
         
         showWindow(root, "Exercise SetList Editor");
-        
-        // no need to reload edited exercise?
     }
     
     @FXML
     private void removeExercise() throws Exception {
-        final int selectedListIndex = exerciseListView.getSelectionModel().getSelectedIndex();
-        int newSelectedListIndex = (selectedListIndex == exerciseListView.getItems().size() - 1)
+        final int selectedListIndex = exerciseListView.getSelectionModel()
+                                                      .getSelectedIndex();
+        int newSelectedListIndex =
+            (selectedListIndex == exerciseListView.getItems().size() - 1)
             ? (selectedListIndex - 1)
             : selectedListIndex;
         
         try {
-            Exercise selectedExercise = exerciseListView.getSelectionModel().getSelectedItem();
+            Exercise selectedExercise = exerciseListView.getSelectionModel()
+                                                        .getSelectedItem();
             manager.removeExercise(selectedExercise.getId());
             exerciseListView.getItems().remove(selectedListIndex);
             
             if (newSelectedListIndex >= 0) {
-                exerciseListView.getSelectionModel().select(newSelectedListIndex);
+                exerciseListView.getSelectionModel()
+                                .select(newSelectedListIndex);
             } else {
                 exerciseListView.getSelectionModel().clearSelection();
             }
         } catch (Exception e) {
-            System.out.println("Error in ExerciseListController.removeExercise(): " + e.getMessage());
+            System.out.println(
+                "Error in ExerciseListController.removeExercise(): " + e.getMessage()
+            );
         }
     }
     

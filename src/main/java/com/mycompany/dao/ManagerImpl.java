@@ -27,7 +27,7 @@ public class ManagerImpl {
     private ExerciseSetDaoImpl exerciseSetDatabase;
     private ExerciseDaoImpl exerciseDatabase;
     private WorkoutDaoImpl workoutDatabase;
-    private ExerciseToExerciseSetDaoImpl exerciseToExerciseSetlinkDatabase;
+    private ExerciseToExerciseSetDaoImpl exerciseToExerciseSetLinkDatabase;
     private WorkoutToExerciseDaoImpl workoutToExerciseLinkDatabase;
     
     public ManagerImpl(String databasePath) {
@@ -36,7 +36,7 @@ public class ManagerImpl {
         exerciseSetDatabase = new ExerciseSetDaoImpl();
         exerciseDatabase = new ExerciseDaoImpl();
         workoutDatabase = new WorkoutDaoImpl();
-        exerciseToExerciseSetlinkDatabase = new ExerciseToExerciseSetDaoImpl();
+        exerciseToExerciseSetLinkDatabase = new ExerciseToExerciseSetDaoImpl();
         workoutToExerciseLinkDatabase = new WorkoutToExerciseDaoImpl();
     }
 
@@ -101,63 +101,67 @@ public class ManagerImpl {
         return connection;
     }
     
-    public int createExerciseInfo(String name, String category) throws SQLException {
+    public ExerciseInfo createExerciseInfo(String name, String category) throws SQLException {
         try (Connection connection = createConnectionAndEnsureDatabase()) {
-            return exerciseInfoDatabase.createItem(connection, name, category);
+            int exerciseInfoId = exerciseInfoDatabase.createExerciseInfo(connection, name, category);
+            
+            if (exerciseInfoId == -1) {
+                return null;
+            }
+            
+            return new ExerciseInfo(exerciseInfoId, name, category);
         }
     }
     
     public boolean updateExerciseInfoName(int id, String newName) throws SQLException {
         try (Connection connection = createConnectionAndEnsureDatabase()) {
-            return exerciseInfoDatabase.updateItemName(connection, id, newName);
+            return exerciseInfoDatabase.updateExerciseInfoName(connection, id, newName);
         }
     }
     
     public void updateExerciseInfoCategory(int id, String newCategory) throws SQLException {
         try (Connection connection = createConnectionAndEnsureDatabase()) {
-            exerciseInfoDatabase.updateItemCategory(connection, id, newCategory);
+            exerciseInfoDatabase.updateExerciseInfoCategory(connection, id, newCategory);
         }
     }
     
     public List<ExerciseInfo> getAllExerciseInfos() throws SQLException {
         try (Connection connection = createConnectionAndEnsureDatabase()) {
-            return exerciseInfoDatabase.getAllItems(connection);
+            return exerciseInfoDatabase.getAllExerciseInfos(connection);
         }
     }
     
+    
     public int createExerciseSet(int workingSets, int repetitions, double workingWeight, int orderNumber) throws SQLException {
         try (Connection connection = createConnectionAndEnsureDatabase()) {
-            return exerciseSetDatabase.createItem(connection, workingSets, repetitions, workingWeight, orderNumber);
+            return exerciseSetDatabase.createExerciseSet(connection, workingSets, repetitions, workingWeight, orderNumber);
         }
     }
     
     public void updateExerciseSet(int id, int newWorkingSets, int newRepetitions, double newWorkingWeight, int orderNumber) throws SQLException {
         try (Connection connection = createConnectionAndEnsureDatabase()) {
-            exerciseSetDatabase.updateItem(connection, id, newWorkingSets, newRepetitions, newWorkingWeight, orderNumber);
+            exerciseSetDatabase.updateExerciseSet(connection, id, newWorkingSets, newRepetitions, newWorkingWeight, orderNumber);
         }
     }
     
     
     // make param exerciseInfoId instead?
-    /**
-     * 
-     * @param exerciseInfo  Assumes item is already in the ExerciseInfo-database.
-     * @return
-     * @throws SQLException 
-     */
-    public Exercise createNewExercise(ExerciseInfo exerciseInfo, int orderNumber) throws SQLException {
+    public Exercise createExercise(int workoutId, ExerciseInfo exerciseInfo, int orderNumber) throws SQLException {
         try (Connection connection = createConnectionAndEnsureDatabase()) {
             int exerciseId = exerciseDatabase.createExercise(connection, exerciseInfo.getId(), orderNumber);
             if (exerciseId == -1) {
                 return null;
             }
+            
+            workoutToExerciseLinkDatabase.createItem(connection, workoutId, exerciseId);
+            
             return new Exercise(exerciseId, exerciseInfo, orderNumber);
         }
     }
 
     public void addExerciseSetToExercise(int exerciseId, int exerciseSetId) throws SQLException {
         try (Connection connection = createConnectionAndEnsureDatabase()) {
-            exerciseToExerciseSetlinkDatabase.createItem(connection, exerciseId, exerciseSetId);
+            exerciseToExerciseSetLinkDatabase.createItem(connection, exerciseId, exerciseSetId);
         }
     }
     
@@ -170,8 +174,8 @@ public class ManagerImpl {
      */
     public void removeExerciseSet(int exerciseSetId) throws SQLException {
         try (Connection connection = createConnectionAndEnsureDatabase()) {
-            exerciseToExerciseSetlinkDatabase.removeItemsByExerciseSet(connection, exerciseSetId);
-            exerciseSetDatabase.removeItem(connection, exerciseSetId);
+            exerciseToExerciseSetLinkDatabase.removeItemsByExerciseSet(connection, exerciseSetId);
+            exerciseSetDatabase.removeExerciseSet(connection, exerciseSetId);
         }
     }
     
@@ -185,11 +189,11 @@ public class ManagerImpl {
             int exerciseInfoId = exerciseDatabase.getExerciseInfoId(connection, exerciseId);
             int exerciseOrderNumber = exerciseDatabase.getExerciseOrderNumber(connection, exerciseId);
             
-            ExerciseInfo exerciseInfo = exerciseInfoDatabase.getItem(connection, exerciseInfoId);
+            ExerciseInfo exerciseInfo = exerciseInfoDatabase.getExerciseInfo(connection, exerciseInfoId);
 
-            List<Integer> exerciseSetIdList = exerciseToExerciseSetlinkDatabase.getExerciseSetIdList(connection, exerciseId);
+            List<Integer> exerciseSetIdList = exerciseToExerciseSetLinkDatabase.getExerciseSetIdList(connection, exerciseId);
 
-            List<ExerciseSet> exerciseSetList = exerciseSetDatabase.getItems(connection, exerciseSetIdList);
+            List<ExerciseSet> exerciseSetList = exerciseSetDatabase.getExerciseSetList(connection, exerciseSetIdList);
             Collections.sort(exerciseSetList);
 
             return new Exercise(exerciseId, exerciseInfo, exerciseSetList, exerciseOrderNumber);
@@ -208,9 +212,15 @@ public class ManagerImpl {
         }
     }
     
-    public int createWorkout(String name, Date date, int orderNumber) throws SQLException {
+    public Workout createWorkout(String name, Date date, int orderNumber) throws SQLException {
         try (Connection connection = createConnectionAndEnsureDatabase()) {
-            return workoutDatabase.createWorkout(connection, name, date, orderNumber);
+            int workoutId = workoutDatabase.createWorkout(connection, name, date, orderNumber);
+            
+            if (workoutId == -1) {
+                return null;
+            }
+            
+            return new Workout(workoutId, date, orderNumber);
         }
     }
     
@@ -232,10 +242,10 @@ public class ManagerImpl {
                 for (int exerciseId : exerciseIdList) {
                     
                     int exerciseInfoId = exerciseDatabase.getExerciseInfoId(connection, exerciseId);
-                    ExerciseInfo exerciseInfo = exerciseInfoDatabase.getItem(connection, exerciseInfoId);
+                    ExerciseInfo exerciseInfo = exerciseInfoDatabase.getExerciseInfo(connection, exerciseInfoId);
                     
-                    List<Integer> exerciseSetIdList = exerciseToExerciseSetlinkDatabase.getExerciseSetIdList(connection, exerciseId);
-                    List<ExerciseSet> exerciseSetList = exerciseSetDatabase.getItems(connection, exerciseSetIdList);
+                    List<Integer> exerciseSetIdList = exerciseToExerciseSetLinkDatabase.getExerciseSetIdList(connection, exerciseId);
+                    List<ExerciseSet> exerciseSetList = exerciseSetDatabase.getExerciseSetList(connection, exerciseSetIdList);
                     
                     int exerciseOrderNumber = exerciseDatabase.getExerciseOrderNumber(connection, exerciseId);
                     
@@ -250,9 +260,11 @@ public class ManagerImpl {
                 }
                 
                 int workoutOrderNumber = workoutDatabase.getWorkoutOrderNumber(connection, workoutId);
+                String workoutName = workoutDatabase.getWorkoutName(connection, workoutId);
                 workoutList.add(
                     new Workout(
                         workoutId,
+                        workoutName,
                         exerciseList,
                         date,
                         workoutOrderNumber
@@ -261,6 +273,8 @@ public class ManagerImpl {
             }
         }
         
+        // sort by order number
+        Collections.sort(workoutList);
         return workoutList;
     }
     
@@ -272,13 +286,14 @@ public class ManagerImpl {
      */
     public void removeExercise(int exerciseId) throws SQLException {
         try (Connection connection = createConnectionAndEnsureDatabase()) {
-            List<Integer> exerciseSetIdList = exerciseToExerciseSetlinkDatabase.getExerciseSetIdList(connection, exerciseId);
+            List<Integer> exerciseSetIdList = exerciseToExerciseSetLinkDatabase.getExerciseSetIdList(connection, exerciseId);
 
-            // 1. delete link table
-            exerciseToExerciseSetlinkDatabase.removeItemsByExercise(connection, exerciseId);
+            // 1. delete link tables values
+            exerciseToExerciseSetLinkDatabase.removeItemsByExercise(connection, exerciseId);
+            workoutToExerciseLinkDatabase.removeItemsByExercise(connection, exerciseId);
 
             // delete sets
-            exerciseSetDatabase.removeItems(connection, exerciseSetIdList);
+            exerciseSetDatabase.removeExerciseSetList(connection, exerciseSetIdList);
 
             // delete exercise
             exerciseDatabase.removeExercise(connection, exerciseId);
@@ -293,25 +308,56 @@ public class ManagerImpl {
      */
     public void removeExerciseInfo(int exerciseInfoId) throws SQLException {
         try (Connection connection = createConnectionAndEnsureDatabase()) {
-        // exercises associated with deleted exerciseInfo
+            // exercises associated with deleted exerciseInfo
             List<Integer> exerciseIdList = exerciseDatabase.getExerciseIdList(connection, exerciseInfoId);
 
             for (int exerciseId : exerciseIdList) {
                 // get exercise set associated with the exercise
-                List<Integer> exerciseSetIdList = exerciseToExerciseSetlinkDatabase.getExerciseSetIdList(connection, exerciseId);
+                List<Integer> exerciseSetIdList = exerciseToExerciseSetLinkDatabase.getExerciseSetIdList(connection, exerciseId);
 
-                // 1. delete link table
-                exerciseToExerciseSetlinkDatabase.removeItemsByExercise(connection, exerciseId);
+                // 1. delete exercise to exercise set link table values
+                exerciseToExerciseSetLinkDatabase.removeItemsByExercise(connection, exerciseId);
 
-                // 2.1 delete exercise sets
-                exerciseSetDatabase.removeItems(connection, exerciseSetIdList);
+                // 2 delete exercise sets
+                exerciseSetDatabase.removeExerciseSetList(connection, exerciseSetIdList);
+                
+                // 3. delete workout to exercise link table values
+                workoutToExerciseLinkDatabase.removeItemsByExercise(connection, exerciseId);
 
-                // 2. delete exercises
+                // 4. delete exercises
                 exerciseDatabase.removeExercise(connection, exerciseId);
             }
 
-            // 3. delete exerciseInfo
-            exerciseInfoDatabase.removeItem(connection, exerciseInfoId);
+            // 5. delete exerciseInfo
+            exerciseInfoDatabase.removeExerciseInfo(connection, exerciseInfoId);
+        }
+    }
+    
+    public void removeWorkout(int workoutId) throws SQLException {
+        try (Connection connection = createConnectionAndEnsureDatabase()) {
+            // 1. get exercises associated with workout
+            List<Integer> exerciseIdList = workoutToExerciseLinkDatabase.getExerciseIdList(connection, workoutId);
+            System.out.println("1");
+            // 2. remove workout to exercise link table values
+            workoutToExerciseLinkDatabase.removeItemsByWorkout(connection, workoutId);
+            System.out.println("2");
+            for (int exerciseId : exerciseIdList) {
+                // 3. get exercise sets associated with the exercise
+                List<Integer> exerciseSetIdList = exerciseToExerciseSetLinkDatabase.getExerciseSetIdList(connection, exerciseId);
+                System.out.println("3");
+                // 4. remove exercise to exercise set link table values
+                exerciseToExerciseSetLinkDatabase.removeItemsByExercise(connection, exerciseId);
+                System.out.println("4");
+                // 5. remove exercise sets associated with the exercise
+                exerciseSetDatabase.removeExerciseSetList(connection, exerciseSetIdList);
+                System.out.println("5");
+                // 6. remove exercise associated with the workout
+                exerciseDatabase.removeExercise(connection, exerciseId);
+            }
+            System.out.println("6");
+            // 7. remove workout
+            workoutDatabase.removeWorkout(connection, workoutId);
+            System.out.println("7");
         }
     }
 }

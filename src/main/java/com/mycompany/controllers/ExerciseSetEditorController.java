@@ -1,7 +1,5 @@
 package com.mycompany.controllers;
 
-import com.mycompany.application.App;
-import com.mycompany.dao.ExerciseSetDaoImpl;
 import com.mycompany.domain.ExerciseSet;
 import com.mycompany.utilities.InputValidator;
 import com.mycompany.utilities.NumberGenerator;
