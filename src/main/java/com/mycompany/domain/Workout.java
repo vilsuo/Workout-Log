@@ -118,11 +118,24 @@ public class Workout implements Comparable<Workout> {
     }
     
 
+    // sorts by order number
     @Override
     public int compareTo(Workout other) {
-        return getOrderNumber() - other.getOrderNumber();
+        return orderNumber.get() - other.orderNumber.get();
     }
     
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(name.get());
+        for (Exercise exercise : exerciseList.get()) {
+            sb.append("\n");
+            sb.append(exercise);
+        }
+        return sb.toString();
+    }
+    
+    /*
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder("id=");
@@ -142,4 +155,5 @@ public class Workout implements Comparable<Workout> {
         
         return sb.toString();
     }
+    */
 }

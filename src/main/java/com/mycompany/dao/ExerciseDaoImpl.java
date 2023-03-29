@@ -34,7 +34,14 @@ public class ExerciseDaoImpl {
     
     // remove items
     
-    // update order number
+    public void updateExercise(Connection connection, int id, int newExerciseInfoId, int newOrderNumber) throws SQLException {
+        String sql = "UPDATE Exercise SET exerciseInfo_id = ?, orderNumber = ? WHERE id = ?;";
+        PreparedStatement pstmt = connection.prepareStatement(sql);
+        pstmt.setInt(1, newExerciseInfoId);
+        pstmt.setInt(2, newOrderNumber);
+        pstmt.setInt(3, id);
+        pstmt.executeUpdate();
+    }
     
     public int getExerciseOrderNumber(Connection connection, int exerciseId) throws SQLException {
         String sql = "SELECT orderNumber FROM Exercise WHERE id = ?;";

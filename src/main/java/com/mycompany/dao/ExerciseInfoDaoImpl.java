@@ -94,6 +94,7 @@ public class ExerciseInfoDaoImpl {
         return null;
     }
     
+    /*
     public List<ExerciseInfo> getExerciseInfoList(Connection connection, List<Integer> idList) throws SQLException {
         List<ExerciseInfo> exerciseInfoList = new ArrayList<>();
         String sql = "SELECT * FROM ExerciseInfo WHERE id = ?;";
@@ -114,6 +115,7 @@ public class ExerciseInfoDaoImpl {
         }
         return exerciseInfoList;
     }
+    */
     
     public List<ExerciseInfo> getAllExerciseInfos(Connection connection) throws SQLException {
         List<ExerciseInfo> exerciseInfoList = new ArrayList<>();
@@ -132,7 +134,7 @@ public class ExerciseInfoDaoImpl {
         return exerciseInfoList;
     }
     
-    public List<ExerciseInfo> getExerciseInfoListByCategory(Connection connection,String category) throws SQLException {
+    public List<ExerciseInfo> getExerciseInfoListByCategory(Connection connection ,String category) throws SQLException {
         List<ExerciseInfo> exerciseInfos = new ArrayList<>();
         String sql = "SELECT * FROM ExerciseInfo WHERE category = ?;";
         PreparedStatement pstmt = connection.prepareStatement(sql);

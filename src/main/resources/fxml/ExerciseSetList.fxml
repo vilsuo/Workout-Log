@@ -25,32 +25,17 @@
             <children>
                 <HBox spacing="5">
                     <children>
-                        <Button text="New" onAction="#createNew" HBox.hgrow="ALWAYS">
+                        <Button text="New" onAction="#newExerciseSet" HBox.hgrow="ALWAYS">
                             <maxWidth>
                                 <Double fx:constant="MAX_VALUE" />
                             </maxWidth>
                         </Button>
-                        <Button text="Edit" onAction="#edit" fx:id="editButton" HBox.hgrow="ALWAYS">
+                        <Button text="Edit" onAction="#editExerciseSet" fx:id="editButton" HBox.hgrow="ALWAYS">
                             <maxWidth>
                                 <Double fx:constant="MAX_VALUE" />
                             </maxWidth>
                         </Button>
-                    </children>
-                </HBox>
-                
-                <HBox spacing="5">
-                    <children>
-                        <Button text="Save" onAction="#save" fx:id="saveButton" HBox.hgrow="ALWAYS">
-                            <maxWidth>
-                                <Double fx:constant="MAX_VALUE" />
-                            </maxWidth>
-                        </Button>
-                        <Button text="Cancel" onAction="#cancel" HBox.hgrow="ALWAYS">
-                            <maxWidth>
-                                <Double fx:constant="MAX_VALUE" />
-                            </maxWidth>
-                        </Button>
-                        <Button text="Remove" onAction="#remove" fx:id="removeButton" HBox.hgrow="ALWAYS">
+                        <Button text="Remove" onAction="#removeExerciseSet" fx:id="removeButton" HBox.hgrow="ALWAYS">
                             <maxWidth>
                                 <Double fx:constant="MAX_VALUE" />
                             </maxWidth>

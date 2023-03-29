@@ -2,7 +2,9 @@ package com.mycompany.controllers;
 
 import com.mycompany.application.App;
 import com.mycompany.dao.ManagerImpl;
+import com.mycompany.domain.Exercise;
 import com.mycompany.domain.ExerciseInfo;
+import com.mycompany.utilities.NumberGenerator;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -14,13 +16,8 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.ObservableMap;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
-import javafx.stage.Modality;
-import javafx.stage.Stage;
 
 public class ExerciseCreatorController {
     
@@ -32,15 +29,21 @@ public class ExerciseCreatorController {
     
     private ObservableMap<String, Map<String, Integer>> exerciseInfoMap;
 
-    private final ObjectProperty<ExerciseInfo> exerciseInfo = new SimpleObjectProperty<>();
+    private final ObjectProperty<Exercise> exercise =
+        new SimpleObjectProperty<>();
     
-    public ObjectProperty<ExerciseInfo> exerciseInfoProperty() {
-        return exerciseInfo;
+    public ObjectProperty<Exercise> exerciseProperty() {
+        return exercise;
+    }
+    
+    private void setExerciseProperty(Exercise exercise) {
+        this.exercise.set(exercise);
     }
     
     public void initialize() {
         setUpData();
         setUpListeners();
+        setUpProperties();
     }
     
     private void setUpData() {
@@ -85,7 +88,9 @@ public class ExerciseCreatorController {
                 }
             }
         );
-        
+    }
+    
+    private void setUpProperties() {
         nameComboBox.disableProperty().bind(
             Bindings.isNull(categoryComboBox.getSelectionModel().selectedItemProperty())
         );
@@ -96,27 +101,25 @@ public class ExerciseCreatorController {
     }
     
     @FXML
-    private void edit() throws Exception {
-        categoryComboBox.getSelectionModel().clearSelection();
-        nameComboBox.getSelectionModel().clearSelection();
-        
-        String resource = "/fxml/ExerciseInfoEditor.fxml";
-        FXMLLoader loader = new FXMLLoader(getClass().getResource(resource));
-        Parent root = loader.load();
-        showEditorWindow(root);
-        
-        // refresh...
-        setUpData();
-    }
-    
-    @FXML
     private void submit() {
         String category = (String) categoryComboBox.getSelectionModel().getSelectedItem();
         String name = (String) nameComboBox.getSelectionModel().getSelectedItem();
         int exerciseInfoId = exerciseInfoMap.get(category).get(name);
         
         ExerciseInfo newExerciseInfo = new ExerciseInfo(exerciseInfoId, name, category);
-        exerciseInfo.set(newExerciseInfo);
+        
+        int tempId = NumberGenerator.generateNextNegativeNumber();
+        int tempOrderNumber = -1;
+        
+        setExerciseProperty(
+            new Exercise(
+                tempId,
+                newExerciseInfo,
+                tempOrderNumber
+            )
+        );
+        
+        close();
     }
     
     @FXML
@@ -126,16 +129,5 @@ public class ExerciseCreatorController {
     
     private void close() {
         categoryComboBox.getScene().getWindow().hide();
-    }
-    
-    private void showEditorWindow(Parent root) {
-        Stage stage = new Stage();
-        stage.setTitle("Exercise Info Editor");
-        stage.initOwner(categoryComboBox.getScene().getWindow());
-        stage.initModality(Modality.APPLICATION_MODAL);
-        
-        Scene scene = new Scene(root);
-        stage.setScene(scene);
-        stage.showAndWait();
     }
 }

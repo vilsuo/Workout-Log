@@ -88,12 +88,13 @@ public class ExerciseSet implements Comparable<ExerciseSet>{
         this.orderNumber.set(order);
     }
     
-    
+    // sorts by order number
     @Override
     public int compareTo(ExerciseSet other) {
-        return getOrderNumber() - other.getOrderNumber();
+        return orderNumber.get() - other.orderNumber.get();
     }
     
+    // used for testing
     @Override
     public boolean equals(Object other) {
         if (other == null) {
@@ -115,7 +116,14 @@ public class ExerciseSet implements Comparable<ExerciseSet>{
     
     @Override
     public String toString() {
+        return workingSets.get() + " x " + repetitions.get() + " @" + workingWeight.get();
+    }
+    
+    /*
+    @Override
+    public String toString() {
         return "\tid=" + id.get() + ": " + workingSets.get() + " x " + repetitions.get()
                        + " @" + workingWeight.get() + " #" + orderNumber.get();
     }
+    */
 }

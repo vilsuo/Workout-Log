@@ -68,6 +68,10 @@ public final class Exercise implements Comparable<Exercise>{
         return id.get();
     }
     
+    public void setId(int id) {
+        this.id.set(id);
+    }
+    
     
     public ObjectProperty exerciseInfoProperty() {
         return exerciseInfo;
@@ -107,11 +111,24 @@ public final class Exercise implements Comparable<Exercise>{
         this.orderNumber.set(order);
     }
     
+    // sorts by orderNumber
     @Override
     public int compareTo(Exercise other) {
-        return getOrderNumber() - other.getOrderNumber();
+        return orderNumber.get() - other.orderNumber.get();
     }
    
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(exerciseInfo.get());
+        for (ExerciseSet exerciseSet : exerciseSetList.get()) {
+            sb.append("\n\t");
+            sb.append(exerciseSet);
+        }
+        return sb.toString();
+    }
+    
+    /*
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder("id=");
@@ -130,4 +147,5 @@ public final class Exercise implements Comparable<Exercise>{
         
         return sb.toString();
     }
+    */
 }

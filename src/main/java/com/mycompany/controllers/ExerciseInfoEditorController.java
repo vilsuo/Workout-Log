@@ -161,13 +161,19 @@ public class ExerciseInfoEditorController {
     @FXML
     private void add() {
         String name = nameTextField.getText();
-        String catecory = categoryTextField.getText();
+        String category = categoryTextField.getText();
         try {
             // try to create a new ExerciseInfo
-            ExerciseInfo exerciseInfo = manager.createExerciseInfo(name, catecory);
-            if (exerciseInfo != null) {
+            int exerciseInfoId = manager.createExerciseInfo(name, category);
+            if (exerciseInfoId != -1) {
                 // created successfully, now add the item also to the table view
-                exerciseInfoTableView.getItems().add(exerciseInfo);
+                exerciseInfoTableView.getItems().add(
+                    new ExerciseInfo(
+                        exerciseInfoId,
+                        name,
+                        category
+                    )
+                );
                 nameTextField.clear();
                 categoryTextField.clear();
             } else {

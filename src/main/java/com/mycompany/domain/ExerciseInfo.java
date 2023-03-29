@@ -53,6 +53,7 @@ public class ExerciseInfo {
         this.category.set(category);
     }
     
+    // used for testing
     @Override
     public boolean equals(Object other) {
         if (other == null) {
@@ -69,9 +70,16 @@ public class ExerciseInfo {
              && getName().equals(item.getName())
              && getCategory().equals(item.getCategory());
     }
-
+    
+    @Override
+    public String toString() {
+        return name.get() + " (" + category.get() + ")";
+    }
+    
+    /*
     @Override
     public String toString() {
         return "id=" + id.get() + ", name=" + name.get() + ", category=" + category.get();
     }
+    */
 }

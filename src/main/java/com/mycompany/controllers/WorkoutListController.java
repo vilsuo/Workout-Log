@@ -8,6 +8,8 @@ import com.mycompany.domain.Workout;
 import java.sql.Date;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
 import javafx.collections.FXCollections;
@@ -31,23 +33,36 @@ public class WorkoutListController {
     
     private final ManagerImpl manager = new ManagerImpl(App.DATABASE_PATH);
     
+    private List<Date> dateList = new ArrayList<>();
+    
     @FXML private DatePicker datePicker;
     @FXML private ListView<Workout> workoutListView;
     @FXML private Button editButton;
     @FXML private Button removeButton;
     
     public void initialize() {
+        setUpListeners();
         setUpProperties();
         
-        datePicker.setDayCellFactory(param -> new WorkoutDateCell());
+        try {
+            dateList = manager.getWorkoutDates();
+        } catch (SQLException e) {
+            System.out.println("Error in WorkoutListController.initialize(): " + e.getMessage());
+        }
+        
+        datePicker.setDayCellFactory(
+            param -> new WorkoutDateCell(dateList)
+        );
+            
         datePicker.setValue(LocalDate.now());
     }
     
-    private void setUpProperties() {
+    private void setUpListeners() {
         datePicker.valueProperty().addListener(
             (obs, oldLocalDate, newLocalDate) -> {
                 try {
                     if (newLocalDate != null) {
+                        Date newDate = Date.valueOf(newLocalDate);
                         
                         Callback<Workout, Observable[]> extractor =
                             (Workout workout) -> new Observable[] {
@@ -57,8 +72,6 @@ public class WorkoutListController {
                                 workout.dateProperty(),
                                 workout.orderNumberProperty()
                             };
-                        
-                        Date newDate = Date.valueOf(newLocalDate);
                         
                         ObservableList<Workout> workoutList =
                             FXCollections.observableList(
@@ -75,7 +88,9 @@ public class WorkoutListController {
                 }
             }
         );
-        
+    }
+    
+    private void setUpProperties() {
         editButton.disableProperty().bind(
             Bindings.isNull(
                 workoutListView.getSelectionModel().selectedItemProperty()
@@ -101,6 +116,7 @@ public class WorkoutListController {
         
         if (workout != null) {
             workoutListView.getItems().add(workout);
+            dateList.add(workout.getDate());
         } else {
             System.out.println("Error in WorkoutListController.newWorkout()");
         }
@@ -113,27 +129,28 @@ public class WorkoutListController {
         Parent root = loader.load();
         
         ExerciseListController controller = loader.getController();
-        Workout selectedWorkout = workoutListView.getSelectionModel()
-                                                 .getSelectedItem();
+        Workout selectedWorkout =
+            workoutListView.getSelectionModel().getSelectedItem();
         controller.setWorkout(selectedWorkout);
         
-        showWindow(root, "Exercise List Editor");
+        showWindow(root);
     }
     
     @FXML
     private void removeWorkout() throws Exception {
-        final int selectedListIndex = workoutListView.getSelectionModel()
-                                                     .getSelectedIndex();
+        final int selectedListIndex =
+            workoutListView.getSelectionModel().getSelectedIndex();
         int newSelectedListIndex =
             (selectedListIndex == workoutListView.getItems().size() - 1)
             ? (selectedListIndex - 1)
             : selectedListIndex;
         
         try {
-            Workout selectedWorkout = workoutListView.getSelectionModel()
-                                                     .getSelectedItem();
+            Workout selectedWorkout =
+                workoutListView.getSelectionModel().getSelectedItem();
             manager.removeWorkout(selectedWorkout.getId());
             workoutListView.getItems().remove(selectedWorkout);
+            dateList.remove(selectedWorkout.getDate());
             
             if (newSelectedListIndex >= 0) {
                 workoutListView.getSelectionModel()
@@ -148,9 +165,8 @@ public class WorkoutListController {
         }
     }
     
-    private void showWindow(Parent root, String title) {
+    private void showWindow(Parent root) {
         Stage stage = new Stage();
-        stage.setTitle(title);
         stage.initOwner(workoutListView.getScene().getWindow());
         stage.initModality(Modality.APPLICATION_MODAL); 
         

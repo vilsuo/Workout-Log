@@ -20,7 +20,7 @@
         <HBox spacing="10" alignment="CENTER" >
             <children>
                 <Button text="-" onAction="#previousDate" />
-                <DatePicker fx:id="datePicker" promptText="dd/MM/yyyy" showWeekNumbers="true">
+                <DatePicker fx:id="datePicker" promptText="dd-MM-yyyy" showWeekNumbers="true">
                     
                 </DatePicker>
                 <Button text="+" onAction="#nextDate" />

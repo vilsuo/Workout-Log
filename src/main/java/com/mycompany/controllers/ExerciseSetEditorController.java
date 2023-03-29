@@ -16,8 +16,6 @@ import javafx.scene.input.KeyCode;
 
 public class ExerciseSetEditorController {
     
-    @FXML private Label exerciseNameLabel;
-    
     @FXML private Label workingSetsLabel;
     @FXML private Label repetitionsLabel;
     @FXML private Label workingWeightLabel;
@@ -36,30 +34,34 @@ public class ExerciseSetEditorController {
     }
     
     public final void setExerciseSet(ExerciseSet exerciseSet) {
-        exerciseSetProperty().set(exerciseSet);
+        this.exerciseSet.set(exerciseSet);
     }
 
     public void initialize() {
         setUpListeners();
+        setUpProperties();
         setUpShortCuts();
     }
     
     private void setUpListeners() {
-        exerciseSetProperty().addListener((obs, oldExerciseSet, newExerciseSet) -> {
-            if (newExerciseSet != null) {
-                workingSetsTF.setText(
-                    String.valueOf(newExerciseSet.getWorkingSets())
-                );
-                repetitionsTF.setText(
-                    String.valueOf(newExerciseSet.getRepetitions())
-                );
-                workingWeightTF.setText(
-                    String.valueOf(newExerciseSet.getWorkingWeight())
-                );
+        exerciseSetProperty().addListener(
+            (obs, oldExerciseSet, newExerciseSet) -> {
+                if (newExerciseSet != null) {
+                    workingSetsTF.setText(
+                        String.valueOf(newExerciseSet.getWorkingSets())
+                    );
+                    repetitionsTF.setText(
+                        String.valueOf(newExerciseSet.getRepetitions())
+                    );
+                    workingWeightTF.setText(
+                        String.valueOf(newExerciseSet.getWorkingWeight())
+                    );
+                }
             }
-        });
-        
-        // disable submit if a textfild is empty
+        );
+    }
+    
+    private void setUpProperties() {
         okButton.disableProperty().bind(
             Bindings.or(
                 workingSetsTF.textProperty().isEmpty(),
@@ -123,7 +125,6 @@ public class ExerciseSetEditorController {
         } else {
             // edit existing ExerciseSet
             try {
-                //ExerciseSetDatabase.updateItem(exerciseSet.get().getId(), repetitions, workingSets, workingWeight);
                 exerciseSet.get().setWorkingSets(workingSets);
                 exerciseSet.get().setRepetitions(repetitions);
                 exerciseSet.get().setWorkingWeight(workingWeight);
