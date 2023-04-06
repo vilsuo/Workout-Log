@@ -30,7 +30,7 @@ public class App extends Application {
         init();
         
         try {
-            Parent root = (Parent)FXMLLoader.load(getClass().getResource("/fxml/WorkoutList.fxml"));
+            Parent root = (Parent)FXMLLoader.load(getClass().getResource("/fxml/Main.fxml"));
             Scene scene = new Scene(root);
             primaryStage.setScene(scene);
             primaryStage.show();

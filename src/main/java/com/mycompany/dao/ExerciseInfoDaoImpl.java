@@ -153,6 +153,18 @@ public class ExerciseInfoDaoImpl {
         return exerciseInfos;
     }
     
+    // needed?
+    public List<String> getAllExerciseInfoCategories(Connection connection) throws SQLException {
+        List<String> uniqueCategoryList = new ArrayList<>();
+        String sql = "SELECT DISTINCT category FROM ExerciseInfo;";
+        
+        ResultSet results = connection.prepareStatement(sql).executeQuery();
+        while (results.next()) {
+            uniqueCategoryList.add(results.getString("category"));
+        }
+        return uniqueCategoryList;
+    }
+    
     private int getExerciseInfoIdByName(Connection connection, String name) throws SQLException {
         String sql = "SELECT id FROM ExerciseInfo WHERE name = ?;";
         PreparedStatement stmt = connection.prepareStatement(sql);

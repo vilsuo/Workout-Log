@@ -120,6 +120,13 @@ public class ManagerImpl {
         }
     }
     
+    // needed?
+    public List<String> getAllExerciseInfoCategories() throws SQLException {
+        try (Connection connection = createConnectionAndEnsureDatabase()) {
+            return exerciseInfoDatabase.getAllExerciseInfoCategories(connection);
+        }
+    }
+    
     
     public int createExerciseSet(int workingSets, int repetitions, double workingWeight, int orderNumber) throws SQLException {
         try (Connection connection = createConnectionAndEnsureDatabase()) {
@@ -202,9 +209,37 @@ public class ManagerImpl {
         }
     }
     
-    public List<Date> getWorkoutDates() throws SQLException {
+    private Workout getWorkout(Connection connection, int workoutId) throws SQLException {
+        List<Exercise> exerciseList = new ArrayList<>();
+                
+        List<Integer> exerciseIdList = workoutToExerciseLinkDatabase.getExerciseIdList(connection, workoutId);
+        for (int exerciseId : exerciseIdList) {
+            exerciseList.add(this.getExercise(connection, exerciseId));
+        }
+        Collections.sort(exerciseList);
+        
+        Date workoutDate = workoutDatabase.getWorkoutDate(connection, workoutId);
+        int workoutOrderNumber = workoutDatabase.getWorkoutOrderNumber(connection, workoutId);
+        String workoutName = workoutDatabase.getWorkoutName(connection, workoutId);
+        
+        return new Workout(
+                workoutId,
+                workoutName,
+                exerciseList,
+                workoutDate,
+                workoutOrderNumber
+            );
+    }
+    
+    public List<Date> getAllWorkoutDates() throws SQLException {
         try (Connection connection = createConnectionAndEnsureDatabase()) {
             return workoutDatabase.getDateList(connection);
+        }
+    }
+    
+    public List<Date> getWorkoutDatesBetween(Date startDate, Date endDate) throws SQLException {
+        try (Connection connection = createConnectionAndEnsureDatabase()) {
+            return workoutDatabase.getWorkoutDatesBetween(connection, startDate, endDate);
         }
     }
     
@@ -213,31 +248,29 @@ public class ManagerImpl {
         try (Connection connection = createConnectionAndEnsureDatabase()) {
             
             List<Integer> workoutIdList = workoutDatabase.getWorkoutIdListByDate(connection, date);
-            for (int workoutId : workoutIdList) {
-                List<Exercise> exerciseList = new ArrayList<>();
-                
-                List<Integer> exerciseIdList = workoutToExerciseLinkDatabase.getExerciseIdList(connection, workoutId);
-                for (int exerciseId : exerciseIdList) {
-                    exerciseList.add(this.getExercise(connection, exerciseId));
-                }
-                Collections.sort(exerciseList);
-                
-                int workoutOrderNumber = workoutDatabase.getWorkoutOrderNumber(connection, workoutId);
-                String workoutName = workoutDatabase.getWorkoutName(connection, workoutId);
-                workoutList.add(
-                    new Workout(
-                        workoutId,
-                        workoutName,
-                        exerciseList,
-                        date,
-                        workoutOrderNumber
-                    )
+            for (int workoutId : workoutIdList) {workoutList.add(
+                    getWorkout(connection, workoutId)
                 );
             }
         }
         
         // sort by order number
         Collections.sort(workoutList);
+        return workoutList;
+    }
+    
+    // this is used only for statistic: exercises are sorted in vain
+    // workouts are not sorted
+    public List<Workout> getWorkoutsBetweenDates(Date startDate, Date endDate) throws SQLException {
+        List<Workout> workoutList = new ArrayList<>();
+        
+        try (Connection connection = createConnectionAndEnsureDatabase()) {
+            List<Integer> workoutIdList = workoutDatabase.getWorkoutIdListByDate(connection, startDate, endDate);
+            for (int workoutId : workoutIdList) {
+                workoutList.add(getWorkout(connection, workoutId));
+            }
+        }
+        
         return workoutList;
     }
     
@@ -300,27 +333,25 @@ public class ManagerImpl {
         try (Connection connection = createConnectionAndEnsureDatabase()) {
             // 1. get exercises associated with workout
             List<Integer> exerciseIdList = workoutToExerciseLinkDatabase.getExerciseIdList(connection, workoutId);
-            System.out.println("1");
+            
             // 2. remove workout to exercise link table values
             workoutToExerciseLinkDatabase.removeItemsByWorkout(connection, workoutId);
-            System.out.println("2");
+            
             for (int exerciseId : exerciseIdList) {
                 // 3. get exercise sets associated with the exercise
                 List<Integer> exerciseSetIdList = exerciseToExerciseSetLinkDatabase.getExerciseSetIdList(connection, exerciseId);
-                System.out.println("3");
+                
                 // 4. remove exercise to exercise set link table values
                 exerciseToExerciseSetLinkDatabase.removeItemsByExercise(connection, exerciseId);
-                System.out.println("4");
+                
                 // 5. remove exercise sets associated with the exercise
                 exerciseSetDatabase.removeExerciseSetList(connection, exerciseSetIdList);
-                System.out.println("5");
+                
                 // 6. remove exercise associated with the workout
                 exerciseDatabase.removeExercise(connection, exerciseId);
             }
-            System.out.println("6");
             // 7. remove workout
             workoutDatabase.removeWorkout(connection, workoutId);
-            System.out.println("7");
         }
     }
 }

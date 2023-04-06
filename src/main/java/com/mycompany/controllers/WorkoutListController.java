@@ -45,7 +45,7 @@ public class WorkoutListController {
         setUpProperties();
         
         try {
-            dateList = manager.getWorkoutDates();
+            dateList = manager.getAllWorkoutDates();
         } catch (SQLException e) {
             System.out.println("Error in WorkoutListController.initialize(): " + e.getMessage());
         }

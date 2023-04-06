@@ -29,7 +29,6 @@ public class WorkoutDaoImpl {
     
     public String getWorkoutName(Connection connection, int id) throws SQLException {
         String sql = "SELECT name FROM Workout WHERE id = ?;";
-        
         PreparedStatement pstmt = connection.prepareStatement(sql);
         pstmt.setInt(1, id);
         
@@ -42,7 +41,6 @@ public class WorkoutDaoImpl {
     
     public int getWorkoutOrderNumber(Connection connection, int id) throws SQLException {
         String sql = "SELECT orderNumber FROM Workout WHERE id = ?;";
-        
         PreparedStatement pstmt = connection.prepareStatement(sql);
         pstmt.setInt(1, id);
         
@@ -53,7 +51,19 @@ public class WorkoutDaoImpl {
         return -1;
     }
     
-    List<Integer> getWorkoutIdListByDate(Connection connection, Date date) throws SQLException {
+    public Date getWorkoutDate(Connection connection, int workoutId) throws SQLException {
+        String sql = "SELECT date FROM Workout WHERE id = ?;";
+        PreparedStatement pstmt = connection.prepareStatement(sql);
+        pstmt.setInt(1, workoutId);
+        
+        ResultSet results = pstmt.executeQuery();
+        while (results.next()) {
+            return results.getDate("date");
+        }
+        return null;
+    }
+    
+    public List<Integer> getWorkoutIdListByDate(Connection connection, Date date) throws SQLException {
         List<Integer> idList = new ArrayList<>();
         String sql = "SELECT id FROM Workout WHERE date = ?;";
         PreparedStatement pstmt = connection.prepareStatement(sql);
@@ -66,11 +76,41 @@ public class WorkoutDaoImpl {
         return idList;
     }
     
-    List<Date> getDateList(Connection connection) throws SQLException {
+    public List<Integer> getWorkoutIdListByDate(Connection connection, Date startDate, Date endDate) throws SQLException {
+        List<Integer> idList = new ArrayList<>();
+        
+        String sql = "SELECT id FROM Workout WHERE date >= ? AND date <= ?;";
+        PreparedStatement pstmt = connection.prepareStatement(sql);
+        pstmt.setDate(1, startDate);
+        pstmt.setDate(2, endDate);
+        
+        ResultSet results = pstmt.executeQuery();
+        while (results.next()) {
+            idList.add(results.getInt("id"));
+        }
+        return idList;
+    }
+    
+    public List<Date> getDateList(Connection connection) throws SQLException {
         List<Date> dateList = new ArrayList<>();
         
         String sql = "SELECT date FROM Workout;";
         ResultSet results = connection.prepareStatement(sql).executeQuery();
+        while (results.next()) {
+            dateList.add(results.getDate("date"));
+        }
+        return dateList;
+    }
+    
+    public List<Date> getWorkoutDatesBetween(Connection connection, Date startDate, Date endDate) throws SQLException {
+        List<Date> dateList = new ArrayList<>();
+        
+        String sql = "SELECT date FROM Workout WHERE date >= ? AND date <= ?;";
+        PreparedStatement pstmt = connection.prepareStatement(sql);
+        pstmt.setDate(1, startDate);
+        pstmt.setDate(2, endDate);
+        
+        ResultSet results = pstmt.executeQuery();
         while (results.next()) {
             dateList.add(results.getDate("date"));
         }
