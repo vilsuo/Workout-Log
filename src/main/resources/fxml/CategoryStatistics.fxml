@@ -57,7 +57,7 @@
             <xAxis>
                 <CategoryAxis side="BOTTOM" />
             </xAxis>
-            <yAxis label="Working sets" tickUnit="1" minorTickVisible="false">
+            <yAxis>
                 <NumberAxis side="LEFT" />
             </yAxis>
         </BarChart>

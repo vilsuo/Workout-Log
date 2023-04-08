@@ -10,17 +10,6 @@ import javafx.scene.Scene;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 
-/**
- * TODO
- * - extractors needed?
- * - observableArrayList / observableList?
- * 
- * - update test classes
- * 
- * - error handling 
- *   - what exception to catch?
- */
-
 public class App extends Application {
     
     public static final String DATABASE_PATH = "jdbc:h2:./workoutLog-database";

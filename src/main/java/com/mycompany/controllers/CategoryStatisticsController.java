@@ -5,11 +5,10 @@ import com.mycompany.application.App;
 import com.mycompany.dao.ManagerImpl;
 import com.mycompany.domain.Exercise;
 import com.mycompany.domain.Workout;
+import com.mycompany.utilities.Statistics.CustomLocalDateFormatter;
 import java.sql.Date;
 import java.sql.SQLException;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,6 +20,18 @@ import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.DateCell;
 import javafx.scene.control.DatePicker;
 import javafx.util.Callback;
+
+/*
+TODO
+
+- highligh bars on hower
+- implment choicebox to show selected categories
+
+- show ticks/labels correctly
+
+- draw graph?
+- show piechart (about what?)
+*/
 
 public class CategoryStatisticsController {
     
@@ -77,6 +88,8 @@ public class CategoryStatisticsController {
     }
     
     private void createChart() throws SQLException {
+        barChart.getData().clear();
+        
         LocalDate startLocalDate = startDatePicker.getValue();
         LocalDate endLocalDate = endDatePicker.getValue();
         
@@ -85,11 +98,12 @@ public class CategoryStatisticsController {
             Date.valueOf(startLocalDate), Date.valueOf(endLocalDate)
         );
         
+        //<category, <date, #sets>>
         Map<String, Map<String, Integer>> data = setUpData(workoutList);
-        
-        barChart.getData().clear();
-        List<String> formattedLocalDateList = new ArrayList<>();
-        
+        List<String> formattedLocalDateList =
+            CustomLocalDateFormatter.getFormattedLocalDatesBetween(
+                startLocalDate, endLocalDate, (String) choiceBox.getValue()
+            );
         
         for (String category : categoryList) {
             XYChart.Series series = new XYChart.Series();
@@ -97,14 +111,16 @@ public class CategoryStatisticsController {
             
             Map<String, Integer> dateMap = data.get(category);
             for (String dateString : formattedLocalDateList) {
+                int totalSets = 0;
                 if (dateMap != null) {
-                    series.getData().add(
-                        new XYChart.Data(
-                            dateString,
-                            dateMap.getOrDefault(dateString, 0)
-                        )
-                    );
+                    totalSets = dateMap.getOrDefault(dateString, 0);
                 }
+                series.getData().add(
+                    new XYChart.Data(
+                        dateString,
+                        totalSets
+                    )
+                );
             }
             
             barChart.getData().add(series);
@@ -113,12 +129,14 @@ public class CategoryStatisticsController {
     }
     
     private Map<String, Map<String, Integer>> setUpData(List<Workout> workoutList) throws SQLException {
+        //<category, <date, #sets>>
         Map<String, Map<String, Integer>> data = new HashMap<>();
         
         for (Workout workout : workoutList) {
             LocalDate workoutLocalDate = workout.getDate().toLocalDate();
-            
-            String dateString = formatLocalDateBasedOnChoice(workoutLocalDate);
+            String dateString = CustomLocalDateFormatter.formatLocalDate(
+                workoutLocalDate, (String) choiceBox.getValue()
+            );
             
             for (Exercise exercise : workout.getExerciseList()) {
                 String category = exercise.getExerciseInfo().getCategory();
@@ -136,52 +154,6 @@ public class CategoryStatisticsController {
             }   
         }
         return data;
-    }
-    
-    private String formatLocalDateBasedOnChoice(LocalDate localDate) {
-        String choice = (String) choiceBox.getValue();
-        
-        String pattern = "";
-        if (choice.equals("Week")) {
-            pattern = "ww/YYYY";
-            
-        } else if (choice.equals("Month")) {
-            pattern = "MM/yyyy";
-        }
-        
-        return localDate.format(DateTimeFormatter.ofPattern(pattern));
-    }
-    
-    private List<String> getFormattedLocalDatesBetween(LocalDate startLocalDate, LocalDate endLocalDate) {
-        List<String> formattedLocalDateList = new ArrayList<>();
-        String choice = (String) choiceBox.getValue();
-        
-        String pattern = "";
-        if (choice.equals("Week")) {
-            pattern = "ww/YYYY";
-            
-            int i = 0;
-            while (startLocalDate.plusWeeks(i).isBefore(endLocalDate)) {
-                formattedLocalDateList.add(
-                    startLocalDate.plusWeeks(i).format(
-                        DateTimeFormatter.ofPattern(pattern)
-                    )
-                );
-                ++i;
-            }
-        } else if (choice.equals("Month")) {
-            pattern = "MM/yyyy";
-            int i = 0;
-            while (startLocalDate.plusWeeks(i).isBefore(endLocalDate)) {
-                formattedLocalDateList.add(
-                    startLocalDate.plusMonths(i).format(
-                        DateTimeFormatter.ofPattern(pattern)
-                    )
-                );
-                ++i;
-            }
-        }
-        return formattedLocalDateList;
     }
     
     /*

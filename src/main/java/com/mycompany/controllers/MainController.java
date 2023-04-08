@@ -14,16 +14,12 @@ public class MainController {
 
     @FXML private BorderPane root;
     
-    public void initialize() {
-        
-    }
-    
     @FXML
     private void openExerciseInfoEditor() throws IOException {
         String resource = "/fxml/ExerciseInfoEditor.fxml";
         FXMLLoader loader = new FXMLLoader(getClass().getResource(resource));
         Parent parent = loader.load();
-        showEditorWindow(parent);
+        showWindowWithModal(parent);
         
         // refresh...
         
@@ -34,10 +30,10 @@ public class MainController {
         String resource = "/fxml/CategoryStatistics.fxml";
         FXMLLoader loader = new FXMLLoader(getClass().getResource(resource));
         Parent parent = loader.load();
-        showEditorWindow(parent);
+        showWindowWithoutModal(parent);
     }
  
-    private void showEditorWindow(Parent parent) {
+    private void showWindowWithModal(Parent parent) {
         Stage stage = new Stage();
         stage.setTitle("Exercise Info Editor");
         stage.initOwner(root.getScene().getWindow());
@@ -46,5 +42,15 @@ public class MainController {
         Scene scene = new Scene(parent);
         stage.setScene(scene);
         stage.showAndWait();
+    }
+    
+    private void showWindowWithoutModal(Parent parent) {
+        Stage stage = new Stage();
+        stage.setTitle("Exercise Info Editor");
+        stage.initOwner(root.getScene().getWindow());
+        
+        Scene scene = new Scene(parent);
+        stage.setScene(scene);
+        stage.show();
     }
 }
