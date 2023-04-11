@@ -2,6 +2,7 @@
 package com.mycompany.controllers;
 
 import com.mycompany.application.App;
+import com.mycompany.charts.HoverBarChart;
 import com.mycompany.dao.ManagerImpl;
 import com.mycompany.domain.Exercise;
 import com.mycompany.domain.Workout;
@@ -14,11 +15,14 @@ import java.util.List;
 import java.util.Map;
 import javafx.fxml.FXML;
 import javafx.scene.chart.BarChart;
+import javafx.scene.chart.CategoryAxis;
+import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.DateCell;
 import javafx.scene.control.DatePicker;
+import javafx.scene.layout.BorderPane;
 import javafx.util.Callback;
 
 /*
@@ -27,17 +31,17 @@ TODO
 - highligh bars on hower
 - implment choicebox to show selected categories
 
-- show ticks/labels correctly
-
 - draw graph?
 - show piechart (about what?)
 */
 
 public class CategoryStatisticsController {
     
+    @FXML private BorderPane borderPane;
+    
     private final ManagerImpl manager = new ManagerImpl(App.DATABASE_PATH);
 
-    @FXML private BarChart barChart;
+    private BarChart barChart;
     
     @FXML private DatePicker startDatePicker;
     @FXML private DatePicker endDatePicker;
@@ -47,6 +51,14 @@ public class CategoryStatisticsController {
     @FXML private ChoiceBox choiceBox;
     
     public void initialize() {
+        final CategoryAxis xAxis = new CategoryAxis();
+        final NumberAxis yAxis = new NumberAxis();
+        xAxis.setAnimated(false);
+        yAxis.setAnimated(false);
+        barChart = new HoverBarChart<String, Number>(xAxis, yAxis);
+        
+        borderPane.setCenter(barChart);
+        
         setUpProperties();
         
         startDatePicker.setValue(LocalDate.of(2023, 3, 1));
@@ -100,6 +112,7 @@ public class CategoryStatisticsController {
         
         //<category, <date, #sets>>
         Map<String, Map<String, Integer>> data = setUpData(workoutList);
+        
         List<String> formattedLocalDateList =
             CustomLocalDateFormatter.getFormattedLocalDatesBetween(
                 startLocalDate, endLocalDate, (String) choiceBox.getValue()
@@ -115,16 +128,13 @@ public class CategoryStatisticsController {
                 if (dateMap != null) {
                     totalSets = dateMap.getOrDefault(dateString, 0);
                 }
-                series.getData().add(
-                    new XYChart.Data(
-                        dateString,
-                        totalSets
-                    )
-                );
+                
+                XYChart.Data<String, Number> dataPoint = new XYChart.Data(dateString, totalSets);
+                series.getData().add(dataPoint);
+                
             }
             
             barChart.getData().add(series);
-            //darkenSeriesOnHover(series);
         }
     }
     
@@ -155,29 +165,4 @@ public class CategoryStatisticsController {
         }
         return data;
     }
-    
-    /*
-    private void darkenSeriesOnHover(XYChart.Series<String, Number> series) {
-        Node seriesNode = series.getNode();
-        if (seriesNode != null && seriesNode instanceof Path){
-            Path seriesPath = (Path) seriesNode;
-            seriesPath.setOnMouseEntered(event -> {
-                updatePath(seriesPath, ((Color) seriesPath.getStroke()).darker(), 2 * seriesPath.getStrokeWidth(), true);
-            });
-            seriesPath.setOnMouseExited(event -> {
-                updatePath(seriesPath, ((Color) seriesPath.getStroke()).brighter(), 0.5 * seriesPath.getStrokeWidth(), false);
-            });
-        }
-        
-    }
-    
-    private void updatePath(Path seriesPath, Paint strokeColor, double strokeWidth, boolean toFront){
-        seriesPath.setStroke(strokeColor);
-        seriesPath.setStrokeWidth(strokeWidth);
-        if (!toFront){
-            return;
-        }
-        seriesPath.toFront();
-    }
-    */
 }

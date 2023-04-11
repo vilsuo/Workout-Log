@@ -53,13 +53,15 @@
         </HBox>
     </top>
     <center>
+        <!--
         <BarChart fx:id="barChart" barGap="3" categoryGap="20" >
             <xAxis>
-                <CategoryAxis side="BOTTOM" />
+                <CategoryAxis side="BOTTOM" animated="false" />
             </xAxis>
             <yAxis>
                 <NumberAxis side="LEFT" />
             </yAxis>
         </BarChart>
+        -->
     </center>
 </BorderPane>
