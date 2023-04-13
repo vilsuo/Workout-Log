@@ -9,7 +9,6 @@ import com.mycompany.utilities.Statistics.CustomLocalDateFormatter;
 import java.sql.Date;
 import java.sql.SQLException;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -19,16 +18,16 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.collections.ObservableMap;
 import javafx.fxml.FXML;
+import javafx.geometry.Insets;
 import javafx.scene.chart.BarChart;
-import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.DateCell;
 import javafx.scene.control.DatePicker;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.VBox;
 import javafx.util.Callback;
 
@@ -36,7 +35,6 @@ import javafx.util.Callback;
 TODO
 
 - highligh bars on hower
-- implment choicebox to show selected categories
 
 - draw graph?
 - show piechart (about what?)
@@ -55,7 +53,7 @@ public class CategoryStatisticsController {
     
     @FXML private ChoiceBox choiceBox;
     
-    @FXML private VBox categoryVBox;
+    @FXML private ScrollPane categoryScrollPane;
     
     private final BooleanProperty needToRecalculate =
         new SimpleBooleanProperty(true);
@@ -122,6 +120,10 @@ public class CategoryStatisticsController {
         List<String> categoryList = manager.getAllExerciseInfoCategories();
         Collections.sort(categoryList);
         
+        VBox vb = new VBox();
+        vb.setSpacing(10);
+        vb.setPadding(new Insets(10));
+        
         for (String category : categoryList) {
             final CheckBox categoryCheckBox = new CheckBox(category);
             
@@ -132,8 +134,9 @@ public class CategoryStatisticsController {
             );
             
             selectedCategoriesMap.put(category, false);
-            categoryVBox.getChildren().add(categoryCheckBox);
+            vb.getChildren().add(categoryCheckBox);
         }
+        categoryScrollPane.setContent(vb);
     }
     
     @FXML
