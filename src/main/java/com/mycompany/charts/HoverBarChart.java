@@ -43,11 +43,30 @@ public class HoverBarChart<X, Y> extends BarChart<X, Y> {
     }
     
     private void select(XYChart.Data<X, Y> dataPoint) {
-        
         textNode.setText(dataPoint.getYValue().toString());
         
-        Paint p = ((StackPane) dataPoint.getNode()).getBackground().getFills().get(0).getFill();
+        Paint p = ((StackPane) dataPoint.getNode()).getBackground()
+            .getFills().get(0).getFill();
+        
         textNode.setFill(p);
+        
+        /*
+        DOES NOT WORK!
+        
+        Color color = (Color)(((StackPane) dataPoint.getNode()).getBackground()
+            .getFills().get(0).getFill());
+        
+        ((StackPane) dataPoint.getNode()).setBackground(
+            new Background(
+                new BackgroundFill(
+                    color.darker(),
+                    CornerRadii.EMPTY,
+                    Insets.EMPTY
+                )
+            )
+        );
+        */
+        //((StackPane) dataPoint.getNode()).setStyle("-fx-background-color: #00FFFF");
         
         double textNodeHalfWay = textNode.maxWidth(USE_PREF_SIZE) / 2;
         Bounds barBoundsInParent = dataPoint.getNode().getBoundsInParent();
