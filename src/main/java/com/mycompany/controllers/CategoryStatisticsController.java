@@ -19,10 +19,11 @@ import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.DateCell;
 import javafx.scene.control.DatePicker;
-import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
 import javafx.util.Callback;
 
 /*
@@ -37,11 +38,11 @@ TODO
 
 public class CategoryStatisticsController {
     
-    @FXML private BorderPane borderPane;
+    @FXML private HBox root;
     
     private final ManagerImpl manager = new ManagerImpl(App.DATABASE_PATH);
 
-    private BarChart barChart;
+    @FXML private BarChart barChart;
     
     @FXML private DatePicker startDatePicker;
     @FXML private DatePicker endDatePicker;
@@ -50,17 +51,15 @@ public class CategoryStatisticsController {
     
     @FXML private ChoiceBox choiceBox;
     
+    @FXML private CheckBox checkBox;
+    
     public void initialize() {
-        final CategoryAxis xAxis = new CategoryAxis();
-        final NumberAxis yAxis = new NumberAxis();
-        xAxis.setAnimated(false);
-        yAxis.setAnimated(false);
-        barChart = new HoverBarChart<String, Number>(xAxis, yAxis);
-        
-        borderPane.setCenter(barChart);
-        
+        initializeDatePickers();
         setUpProperties();
-        
+    }
+    
+    private void initializeDatePickers() {
+        // temporary
         startDatePicker.setValue(LocalDate.of(2023, 3, 1));
         endDatePicker.setValue(LocalDate.now());
                 
@@ -92,6 +91,10 @@ public class CategoryStatisticsController {
         calculateButton.disableProperty().bind(
             endDatePicker.valueProperty().isNull()
         );
+    }
+    
+    private void setUpCheckBoxes() {
+        
     }
     
     @FXML

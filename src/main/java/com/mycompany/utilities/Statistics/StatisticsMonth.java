@@ -2,23 +2,32 @@
 package com.mycompany.utilities.Statistics;
 
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 
-public class StatisticsMonth extends StatisticsPeriod {
-
-    private static final String MONTH_PATTERN = "MM/YYYY";
+public final class StatisticsMonth extends StatisticsPeriod {
 
     public StatisticsMonth(LocalDate ld) {
         super(ld);
     }
     
     @Override
+    public boolean isBeforeOrInTheSamePeriodAs(StatisticsPeriod sp) {
+        if (ld.getYear() < sp.ld.getYear()) {
+            return true;
+            
+        } else if (ld.getYear() == sp.ld.getYear()) {
+            return ld.getMonthValue() <= sp.ld.getMonthValue();
+            
+        }
+        return false;
+    }
+    
+    @Override
     public void advance() {
-        super.ld = super.ld.plusMonths(1);
+        ld = ld.plusMonths(1);
     }
     
     @Override
     public String formatted() {
-        return super.ld.format(DateTimeFormatter.ofPattern(MONTH_PATTERN));
+        return ld.getMonthValue() + "/" + ld.getYear();
     }
 }

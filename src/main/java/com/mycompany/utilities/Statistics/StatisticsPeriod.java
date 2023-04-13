@@ -2,6 +2,7 @@
 package com.mycompany.utilities.Statistics;
 
 import java.time.LocalDate;
+import java.time.temporal.WeekFields;
 
 public abstract class StatisticsPeriod {
     
@@ -16,11 +17,15 @@ public abstract class StatisticsPeriod {
         return ld;
     }
     
-    public boolean isBeforeOrEqual(LocalDate ld) {
-        return !this.ld.isAfter(ld);
-    }
+    public abstract boolean isBeforeOrInTheSamePeriodAs(StatisticsPeriod sp);
     
     public abstract void advance();
     
     public abstract String formatted();
+    
+    protected int getWeekNumber() {
+        // can be the the last week of previous year:
+        // (if 1.1.2023 the week number is 52
+        return ld.get(WeekFields.ISO.weekOfWeekBasedYear());
+    }
 }

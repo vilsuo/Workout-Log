@@ -1,20 +1,23 @@
 
 package com.mycompany.charts;
 
+import javafx.beans.NamedArg;
+import javafx.geometry.Bounds;
 import javafx.scene.Cursor;
-import javafx.scene.Node;
 import javafx.scene.chart.Axis;
 import javafx.scene.chart.BarChart;
 import javafx.scene.chart.XYChart;
+import javafx.scene.layout.StackPane;
+import javafx.scene.paint.Paint;
 import javafx.scene.text.Text;
 
 public class HoverBarChart<X, Y> extends BarChart<X, Y> {
     
-    private Node bar = null;
-    private Text textNode = null;
+    private final Text textNode;
     
-    public HoverBarChart(Axis xAxis, Axis yAxis) {
+    public HoverBarChart(@NamedArg("xAxis") Axis xAxis, @NamedArg("yAxis") Axis yAxis) {
         super(xAxis, yAxis);
+        textNode = new Text();
     }
     
     @Override
@@ -34,41 +37,32 @@ public class HoverBarChart<X, Y> extends BarChart<X, Y> {
             );
             */
             
-            dataPoint.getNode().setOnMouseEntered(event -> {
-                String text = series.getName() + " (" + dataPoint.getYValue() + ")";
-                textNode = new Text(text);
-                
-                bar = dataPoint.getNode();
-                textNode.relocate(
-                    bar.getBoundsInParent().getMinX(),
-                    bar.getBoundsInParent().getMinY() - 30
-                );
-                
-                getPlotChildren().add(textNode);
-                
-                dataPoint.getNode().setCursor(Cursor.HAND);
-            });
-
-            
-            dataPoint.getNode().setOnMouseExited(event -> {
-                getPlotChildren().remove(textNode);
-                
-                dataPoint.getNode().setCursor(Cursor.DEFAULT);
-            });
+            dataPoint.getNode().setOnMouseEntered(event -> select(dataPoint));
+            dataPoint.getNode().setOnMouseExited(event -> deselect(dataPoint));
         }
     }
     
-    // Adjust text of bars, position them on top
-    @Override
-    protected void layoutPlotChildren() {
-        super.layoutPlotChildren();
+    private void select(XYChart.Data<X, Y> dataPoint) {
         
-        if (bar != null && textNode != null) {
-            
-            textNode.relocate(
-                bar.getBoundsInParent().getMinX(),
-                bar.getBoundsInParent().getMinY() - 30
-            );
-        }
+        textNode.setText(dataPoint.getYValue().toString());
+        
+        Paint p = ((StackPane) dataPoint.getNode()).getBackground().getFills().get(0).getFill();
+        textNode.setFill(p);
+        
+        double textNodeHalfWay = textNode.maxWidth(USE_PREF_SIZE) / 2;
+        Bounds barBoundsInParent = dataPoint.getNode().getBoundsInParent();
+        
+        textNode.relocate(
+            barBoundsInParent.getCenterX() - textNodeHalfWay,
+            barBoundsInParent.getMinY() - 20
+        );
+        
+        getPlotChildren().add(textNode);
+        dataPoint.getNode().setCursor(Cursor.HAND);
+    }
+    
+    private void deselect(XYChart.Data<X, Y> dataPoint) {
+        getPlotChildren().remove(textNode);
+        dataPoint.getNode().setCursor(Cursor.DEFAULT);
     }
 }

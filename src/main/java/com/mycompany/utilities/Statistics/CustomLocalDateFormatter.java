@@ -21,21 +21,24 @@ public final class CustomLocalDateFormatter {
     public static List<String> getFormattedLocalDatesBetween(LocalDate startLocalDate, LocalDate endLocalDate, String choice) {
         List<String> formattedLocalDateList = new ArrayList<>();
         
-        StatisticsPeriod sp;
+        StatisticsPeriod startSp;
+        StatisticsPeriod endSp;
         switch (choice) {
             case "Week":
-                sp = new StatisticsWeek(startLocalDate);
+                startSp = new StatisticsWeek(startLocalDate);
+                endSp = new StatisticsWeek(endLocalDate);
                 break;
             case "Month":
-                sp = new StatisticsMonth(startLocalDate);
+                startSp = new StatisticsMonth(startLocalDate);
+                endSp = new StatisticsMonth(endLocalDate);
                 break;
             default:
                 return null;
         }
         
-        while (sp.isBeforeOrEqual(endLocalDate)) {
-            formattedLocalDateList.add(sp.formatted());
-            sp.advance();
+        while (startSp.isBeforeOrInTheSamePeriodAs(endSp)) {
+            formattedLocalDateList.add(startSp.formatted());
+            startSp.advance();
         }
         return formattedLocalDateList;
     }
