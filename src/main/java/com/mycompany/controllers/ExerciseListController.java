@@ -73,7 +73,7 @@ public class ExerciseListController {
     
     private final ButtonType yesButton = new ButtonType("Yes");
     private final ButtonType noButton = new ButtonType("No");
-    private final ButtonType backButton = new ButtonType("Back");
+    private final ButtonType cancelButton = new ButtonType("Cancel");
     
     public void initialize() {
         exerciseListView.setCellFactory(
@@ -362,10 +362,10 @@ public class ExerciseListController {
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
         alert.setTitle("Confirmation");
         alert.setHeaderText(workout.getName());
-        alert.setContentText("Do you want to save the changes?");
+        alert.setContentText("Save the changes?");
         
         alert.getButtonTypes().clear();
-        alert.getButtonTypes().addAll(yesButton, noButton, backButton);
+        alert.getButtonTypes().addAll(yesButton, noButton, cancelButton);
         
         return alert.showAndWait();
     }
@@ -374,7 +374,7 @@ public class ExerciseListController {
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
         alert.setTitle("Confirmation");
         alert.setHeaderText(workout.getName());
-        alert.setContentText("Do you want to cancel the changes?");
+        alert.setContentText("Cancel the changes?");
         
         alert.getButtonTypes().clear();
         alert.getButtonTypes().addAll(yesButton, noButton);

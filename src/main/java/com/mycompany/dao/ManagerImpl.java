@@ -205,7 +205,7 @@ public class ManagerImpl {
                 return null;
             }
             
-            return new Workout(workoutId, date, orderNumber);
+            return new Workout(workoutId, name, date, orderNumber);
         }
     }
     
@@ -272,6 +272,14 @@ public class ManagerImpl {
         }
         
         return workoutList;
+    }
+    
+    public void updateWorkoutOrderNumbers(List<Workout> workoutList) throws SQLException {
+        try (Connection connection = createConnectionAndEnsureDatabase()) {
+            for (int i = 0; i < workoutList.size(); ++i) {
+                workoutDatabase.updateWorkoutOrderNumber(connection, workoutList.get(i).getId(), i + 1);
+            }
+        }
     }
     
     /**

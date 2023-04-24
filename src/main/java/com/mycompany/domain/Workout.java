@@ -48,8 +48,8 @@ public class Workout implements Comparable<Workout> {
         this.orderNumber = new SimpleIntegerProperty(orderNumber);
     }
     
-    public Workout(int id, Date date, int orderNumber) {
-        this(id, "temporary name", new ArrayList<>(), date, orderNumber);
+    public Workout(int id, String name, Date date, int orderNumber) {
+        this(id, name, new ArrayList<>(), date, orderNumber);
     }
     
     public void addExercise(Exercise exercise) {
@@ -127,7 +127,7 @@ public class Workout implements Comparable<Workout> {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append(name.get());
+        sb.append(name.get() + " #" + orderNumber.get());
         for (Exercise exercise : exerciseList.get()) {
             sb.append("\n");
             sb.append(exercise);

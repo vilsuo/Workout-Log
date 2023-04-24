@@ -33,8 +33,9 @@ import javafx.util.Callback;
 
 /*
 TODO
-
-- highligh bars on hower
+- set color for ExerciseInfo category?
+- highligh bar on hower (hard to implement)
+- implement zooming/scrolling to chart
 
 - draw graph?
 - show piechart (about what?)
