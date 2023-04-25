@@ -30,10 +30,9 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 
-/* TODO!
-- set -/+ buttons the same size
-- give workout name
-- drag and drop update order number
+/*
+TODO
+- refresh when returning from exercise info editing window
 */
 public class WorkoutListController {
     

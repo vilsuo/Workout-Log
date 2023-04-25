@@ -51,6 +51,14 @@ public class WorkoutDaoImpl {
         return -1;
     }
     
+    public void updateWorkoutName(Connection connection, int id, String newName) throws SQLException {
+        String sql = "UPDATE Workout SET name = ? WHERE id = ?;";
+        PreparedStatement pstmt = connection.prepareStatement(sql);
+        pstmt.setString(1, newName);
+        pstmt.setInt(2, id);
+        pstmt.executeUpdate();
+    }
+    
     public void updateWorkoutOrderNumber(Connection connection, int id, int newOrderNumber) throws SQLException {
         String sql = "UPDATE Workout SET orderNumber = ? WHERE id = ?;";
         PreparedStatement pstmt = connection.prepareStatement(sql);

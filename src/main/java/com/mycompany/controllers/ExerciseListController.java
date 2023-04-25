@@ -29,21 +29,20 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
-import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
+import javafx.scene.control.TextField;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 
 /* TODO!
-- drag and drop update order number?
 
 */
 public class ExerciseListController {
     
     private final ManagerImpl manager = new ManagerImpl(App.DATABASE_PATH);
     
-    @FXML private Label workoutLabel;
+    @FXML private TextField workoutTextField;
     
     @FXML private ListView<Exercise> exerciseListView;
     
@@ -98,7 +97,7 @@ public class ExerciseListController {
         workoutProperty().addListener(
             (obs, oldWorkout, newWorkout) -> {
                 if (newWorkout != null) {
-                    workoutLabel.setText(newWorkout.getName());
+                    workoutTextField.setText(newWorkout.getName());
                     
                     // copy exercises
                     for (Exercise exercise : newWorkout.getExerciseList()) {
@@ -139,6 +138,14 @@ public class ExerciseListController {
                 });
             }
         );
+        
+        workoutTextField.textProperty().addListener(
+            (obs, oldValue, newValue) -> {
+                if (!newValue.equals(workout.get().getName())) {
+                    changeMadeProperty.set(true);
+                }
+            }
+        );
     }
     
     private void setUpProperties() {
@@ -162,6 +169,13 @@ public class ExerciseListController {
     private void save() throws Exception {
         Optional<ButtonType> optional = showSaveAlert();
         if (optional.get() == yesButton) {
+            // update the workout name
+            if (!workoutTextField.getText().equals(workout.get().getName())) {
+                manager.updateWorkoutName(
+                    workout.get().getId(), workoutTextField.getText()
+                );
+                workout.get().setName(workoutTextField.getText());
+            }
             
             // handle removed exercises
             for (int removedExerciseId : removedExercisesIdList) {
@@ -290,8 +304,6 @@ public class ExerciseListController {
         );
 
         showWindow(root);
-        
-        // refresh in case of renames ?
     }
     
     @FXML

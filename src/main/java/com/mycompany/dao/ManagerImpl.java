@@ -282,6 +282,12 @@ public class ManagerImpl {
         }
     }
     
+    public void updateWorkoutName(int id, String newName) throws SQLException {
+        try (Connection connection = createConnectionAndEnsureDatabase()) {
+            workoutDatabase.updateWorkoutName(connection, id, newName);
+        }
+    }
+    
     /**
      * Removes also all ExerciseSets associated with the Exercise.
      * 

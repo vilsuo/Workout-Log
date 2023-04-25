@@ -127,7 +127,7 @@ public class Workout implements Comparable<Workout> {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append(name.get() + " #" + orderNumber.get());
+        sb.append(name.get());
         for (Exercise exercise : exerciseList.get()) {
             sb.append("\n");
             sb.append(exercise);
