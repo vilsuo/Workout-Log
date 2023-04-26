@@ -18,6 +18,12 @@
                 <MenuItem fx:id="categoryStatistics" text="Open category statistics"
                           onAction="#openStatistics" />
             </Menu>
+            <!--
+            <Menu>
+                <MenuItem fx:id="" text=""
+                          onAction="#" />
+            </Menu>
+            -->
         </MenuBar>
     </top>
     <center>
