@@ -74,17 +74,33 @@
         <TabPane HBox.hgrow="ALWAYS">
             <tabs>
                 <Tab text="Bar">
-                    <HoverBarChart fx:id="barChart" barGap="3" categoryGap="10" animated="false">
-                        <xAxis>
-                            <CategoryAxis side="BOTTOM" animated="false" />
-                        </xAxis>
-                        <yAxis>
-                            <NumberAxis side="LEFT" animated="false" label="Total sets"/>
-                        </yAxis>
-                        <maxWidth>
-                            <Double fx:constant="MAX_VALUE" />
-                        </maxWidth>
-                    </HoverBarChart>
+                    <VBox>
+                        <children>
+                            <HoverBarChart fx:id="categorySetsBarChart" barGap="3" categoryGap="10" animated="false">
+                                <xAxis>
+                                    <CategoryAxis side="BOTTOM" animated="false" />
+                                </xAxis>
+                                <yAxis>
+                                    <NumberAxis side="LEFT" animated="false" label="Total sets"/>
+                                </yAxis>
+                                <maxWidth>
+                                    <Double fx:constant="MAX_VALUE" />
+                                </maxWidth>
+                            </HoverBarChart>
+                            
+                            <HoverBarChart fx:id="categoryWorkoutsBarChart" barGap="3" categoryGap="10" animated="false">
+                                <xAxis>
+                                    <CategoryAxis side="BOTTOM" animated="false" />
+                                </xAxis>
+                                <yAxis>
+                                    <NumberAxis side="LEFT" animated="false" label="Total exercises"/>
+                                </yAxis>
+                                <maxWidth>
+                                    <Double fx:constant="MAX_VALUE" />
+                                </maxWidth>
+                            </HoverBarChart>
+                        </children>
+                    </VBox>
                 </Tab>
                 <Tab text="Pie">
                     <ScrollPane fx:id="pieChartScrollPane" />

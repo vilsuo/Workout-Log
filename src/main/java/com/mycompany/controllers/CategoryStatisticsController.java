@@ -2,6 +2,7 @@
 package com.mycompany.controllers;
 
 import com.mycompany.application.App;
+import com.mycompany.charts.LabeledPieChart;
 import com.mycompany.dao.ManagerImpl;
 import com.mycompany.domain.Exercise;
 import com.mycompany.domain.Workout;
@@ -21,27 +22,21 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.scene.chart.BarChart;
-import javafx.scene.chart.PieChart;
+import javafx.scene.chart.PieChart.Data;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.DateCell;
 import javafx.scene.control.DatePicker;
-import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
-import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.Pane;
-import javafx.scene.layout.TilePane;
 import javafx.scene.layout.VBox;
-import javafx.scene.shape.Arc;
 import javafx.util.Callback;
 
 /*
 TODO
-- add select/deselect button for check boxes
-
-- remove dublicate code from setUpBar/PieData
+- add 'select/deselect all' button for check boxes
+- add refresh option for category check boxes
 
 - implement zooming/scrolling to chart?
 
@@ -53,7 +48,9 @@ public class CategoryStatisticsController {
     
     private final ManagerImpl manager = new ManagerImpl(App.DATABASE_PATH);
 
-    @FXML private BarChart barChart;
+    @FXML private BarChart categorySetsBarChart;
+    @FXML private BarChart categoryWorkoutsBarChart;
+    
     @FXML private ScrollPane pieChartScrollPane;
     
     @FXML private DatePicker startDatePicker;
@@ -151,178 +148,134 @@ public class CategoryStatisticsController {
     
     @FXML
     private void onCalculateButtonPressed() throws SQLException {
-        createBarChart();
-        createPieChart();
+        //createBarChart();
+        //createPieChart();
+        
+        setUpCharts();
     }
     
-    private void createBarChart() throws SQLException {
+    private void setUpCharts() throws SQLException {
         LocalDate startLocalDate = startDatePicker.getValue();
         LocalDate endLocalDate = endDatePicker.getValue();
-        
-        List<Workout> workoutList = manager.getWorkoutsBetweenDates(
-            Date.valueOf(startLocalDate), Date.valueOf(endLocalDate)
-        );
-        
-        //<category, <date, #sets>>
-        Map<String, Map<String, Integer>> data = setUpBarData(workoutList);
         
         List<String> formattedLocalDateList =
             CustomLocalDateFormatter.getFormattedLocalDatesBetween(
                 startLocalDate, endLocalDate, (String) choiceBox.getValue()
             );
         
-        ObservableList obsList = FXCollections.observableArrayList();
+        List<Workout> workoutList = manager.getWorkoutsBetweenDates(
+            Date.valueOf(startLocalDate), Date.valueOf(endLocalDate)
+        );
+        
+        //<category, <date, #categorySets>>
+        Map<String, Map<String, Integer>> totalCategorySetsMap = new HashMap<>();
+        
+        //<category, <date, #categoryExercises>>
+        Map<String, Map<String, Integer>> totalCategoryExercisesMap = new HashMap<>();
+        
+        for (Workout workout : workoutList) {
+            LocalDate workoutLocalDate = workout.getDate().toLocalDate();
+            String dateString = CustomLocalDateFormatter.formatLocalDate(
+                workoutLocalDate, (String) choiceBox.getValue()
+            );
+            
+            for (Exercise exercise : workout.getExerciseList()) {
+                String category = exercise.getExerciseInfo().getCategory();
+                
+                int totalSets = exercise.getExerciseSetList().stream()
+                    .mapToInt(exerciseSet -> exerciseSet.getWorkingSets())
+                    .reduce(0, Integer::sum);
+                
+                addToMap(totalCategorySetsMap, category, dateString, totalSets);
+                
+                // adds one even if exercise exists in a workout but does
+                // not have any sets
+                addToMap(totalCategoryExercisesMap, category, dateString, 1);
+            }   
+        }
+        
+        setUpBarChart(totalCategorySetsMap, formattedLocalDateList, this.categorySetsBarChart);
+        setUpBarChart(totalCategoryExercisesMap, formattedLocalDateList, this.categoryWorkoutsBarChart);
+        
+        createLabeledPieChart(totalCategorySetsMap);
+    }
+    
+    private void addToMap(Map<String, Map<String, Integer>> mapMap,
+            String mapKey, String mapMapKey, int totalSets) {
+        
+        mapMap.putIfAbsent(mapKey, new HashMap<>());
+        
+        mapMap.get(mapKey).put(
+            mapMapKey,
+            mapMap.get(mapKey).getOrDefault(mapMapKey, 0) + totalSets
+        );
+    }
+    
+    private void setUpBarChart(Map<String, Map<String, Integer>> data,
+            List<String> formattedLocalDateList, BarChart barChart) {
+        
+        ObservableList totalSetsList = FXCollections.observableArrayList();
         for (String category : selectedCategoriesMap.keySet()) {
-            // category is not selected
             if (!selectedCategoriesMap.getOrDefault(category, false)) {
                 continue;
             }
             
-            XYChart.Series series = new XYChart.Series();
-            series.setName(category);
+            XYChart.Series totalSetsSeries = new XYChart.Series();
+            totalSetsSeries.setName(category);
             
             Map<String, Integer> dateMap = data.get(category);
             for (String dateString : formattedLocalDateList) {
                 int totalSets = 0;
                 if (dateMap != null) {
-                    // check if the given date period does not contain any sets
-                    // of the given category
                     totalSets = dateMap.getOrDefault(dateString, 0);
                 }
                 
-                series.getData().add(
+                totalSetsSeries.getData().add(
                     new XYChart.Data(dateString, totalSets)
                 );
             }
             
-            obsList.add(series);
+            totalSetsList.add(totalSetsSeries);
         }
         // this way there are no two animations going on at the same time
         // (clear data and set data)
-        barChart.setData(obsList);
+        barChart.setData(totalSetsList);
     }
     
-    private void createPieChart() throws SQLException {
-        LocalDate startLocalDate = startDatePicker.getValue();
-        LocalDate endLocalDate = endDatePicker.getValue();
+    private void createLabeledPieChart(Map<String, Map<String, Integer>> data) {
+        LabeledPieChart chart = new LabeledPieChart();
+        chart.setTitle("labeled chart");
         
-        List<Workout> workoutList = manager.getWorkoutsBetweenDates(
-            Date.valueOf(startLocalDate), Date.valueOf(endLocalDate)
-        );
-        
-        //<date, <category, #sets>>
-        Map<String, Map<String, Integer>> data = setUpPieData(workoutList);
-        
-        List<String> formattedLocalDateList =
-            CustomLocalDateFormatter.getFormattedLocalDatesBetween(
-                startLocalDate, endLocalDate, (String) choiceBox.getValue()
-            );
-        
-        TilePane tilePane = new TilePane();
-        for (String date : formattedLocalDateList) {
-            ObservableList obsList = FXCollections.observableArrayList();
-            
-            int totalSetsInDateGroup = 0;
-            Map<String, Integer> categoryMap = data.getOrDefault(date, new HashMap<>());
-            for (String category : categoryMap.keySet()) {
-                // category is not selected
-                if (!selectedCategoriesMap.getOrDefault(category, false)) {
-                    continue;
-                }
-                
-                int nSets = categoryMap.getOrDefault(category, 0);
-                totalSetsInDateGroup += nSets;
-                obsList.add(new PieChart.Data(category, nSets));
-            }
-            
-            PieChart chart = new PieChart(obsList);
-            chart.setTitle(date);
-            chart.setLegendVisible(false);
-            
-            final Label pieChartLabel = new Label();
-            
-            final Pane pane = new Pane();
-            pane.getChildren().addAll(chart, pieChartLabel);
-            
-            final int totalSets = totalSetsInDateGroup;
-            for (final PieChart.Data pieData : chart.getData()) {
-                pieData.getNode().addEventHandler(MouseEvent.MOUSE_PRESSED,
-                    event -> {
-                        if (totalSets != 0) {
-                            pieChartLabel.setTranslateX(event.getX() + pane.getWidth() / 2);
-                            pieChartLabel.setTranslateY(event.getY() + pane.getHeight() / 2);
-                            
-                            pieChartLabel.setText(
-                                100 * pieData.getPieValue() / totalSets + "%"
-                            );
-                            
-                            Arc arc = (Arc) pieData.getNode();
-                        }
-                        
-                    }
-                );
-                
-            }
-            tilePane.getChildren().add(pane);
-        }
-        
-        pieChartScrollPane.setContent(tilePane);
-    }
-    
-    private Map<String, Map<String, Integer>> setUpBarData(List<Workout> workoutList) throws SQLException {
-        //<category, <date, #sets>>
-        Map<String, Map<String, Integer>> data = new HashMap<>();
-        
-        for (Workout workout : workoutList) {
-            LocalDate workoutLocalDate = workout.getDate().toLocalDate();
-            String dateString = CustomLocalDateFormatter.formatLocalDate(
-                workoutLocalDate, (String) choiceBox.getValue()
-            );
-            
-            for (Exercise exercise : workout.getExerciseList()) {
-                String category = exercise.getExerciseInfo().getCategory();
-                
-                int totalSets = exercise.getExerciseSetList().stream()
-                    .mapToInt(exerciseSet -> exerciseSet.getWorkingSets())
+        int totalSetsNotTracked = 0;
+        for (String category : selectedCategoriesMap.keySet()) {
+            if (!selectedCategoriesMap.getOrDefault(category, false)) {
+                totalSetsNotTracked += data.getOrDefault(category, new HashMap<>())
+                    .values()
+                    .stream()
                     .reduce(0, Integer::sum);
                 
-                data.putIfAbsent(category, new HashMap<>());
-                
-                data.get(category).put(
-                    dateString,
-                    data.get(category).getOrDefault(dateString, 0) + totalSets
-                );
-            }   
-        }
-        return data;
-    }
-    
-    private Map<String, Map<String, Integer>> setUpPieData(List<Workout> workoutList) throws SQLException {
-        //<date, <category, #sets>>
-        Map<String, Map<String, Integer>> data = new HashMap<>();
-        
-        for (Workout workout : workoutList) {
-            LocalDate workoutLocalDate = workout.getDate().toLocalDate();
-            String dateString = CustomLocalDateFormatter.formatLocalDate(
-                workoutLocalDate, (String) choiceBox.getValue()
-            );
-            
-            data.putIfAbsent(dateString, new HashMap<>());
-            
-            for (Exercise exercise : workout.getExerciseList()) {
-                String category = exercise.getExerciseInfo().getCategory();
-                
-                int totalSets = exercise.getExerciseSetList().stream()
-                    .mapToInt(exerciseSet -> exerciseSet.getWorkingSets())
+            } else {
+                int categorySets = data.getOrDefault(category, new HashMap<>())
+                    .values()
+                    .stream()
                     .reduce(0, Integer::sum);
                 
-                data.get(dateString).put(
-                    category,
-                    data.get(dateString).getOrDefault(category, 0) + totalSets
-                );
-            }   
+                addPieChartData(chart, category, categorySets);
+            }
+        }
+        if (totalSetsNotTracked != 0) {
+            addPieChartData(chart, "other", totalSetsNotTracked);
         }
         
-        return data;
+        String title = "temp title";
+        chart.setTitle(title);
+        chart.setLegendVisible(false);
+        
+        pieChartScrollPane.setContent(chart);
+    }
+    
+    private void addPieChartData(LabeledPieChart pChart, String name, double value) {
+        final Data data = new Data(name, value);
+        pChart.getData().add(data);
     }
 }
