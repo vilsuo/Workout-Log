@@ -3,10 +3,10 @@
 <?import java.lang.Double?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
-<?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Control?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.RowConstraints?>
@@ -36,13 +36,13 @@
     <Label text="Exercise"
         GridPane.columnIndex="0" GridPane.rowIndex="1" />
 
-    <ComboBox fx:id="categoryComboBox"
+    <ComboBox fx:id="exerciseCategoryComboBox"
         GridPane.columnIndex="1" GridPane.rowIndex="0">
         <maxWidth>
             <Double fx:constant="MAX_VALUE" />
         </maxWidth>
     </ComboBox>
-    <ComboBox fx:id="nameComboBox"
+    <ComboBox fx:id="exerciseNameComboBox"
         GridPane.columnIndex="1" GridPane.rowIndex="1">
         <maxWidth>
             <Double fx:constant="MAX_VALUE" />

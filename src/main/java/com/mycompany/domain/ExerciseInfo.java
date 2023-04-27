@@ -53,7 +53,6 @@ public class ExerciseInfo {
         this.category.set(category);
     }
     
-    // used for testing
     @Override
     public boolean equals(Object other) {
         if (other == null) {

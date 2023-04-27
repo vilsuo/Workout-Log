@@ -23,8 +23,8 @@ public class ExerciseCreatorController {
     
     private final ManagerImpl manager = new ManagerImpl(App.DATABASE_PATH);
     
-    @FXML private ComboBox categoryComboBox;
-    @FXML private ComboBox nameComboBox;
+    @FXML private ComboBox exerciseCategoryComboBox;
+    @FXML private ComboBox exerciseNameComboBox;
     @FXML private Button addButton;
     
     private ObservableMap<String, Map<String, Integer>> exerciseInfoMap;
@@ -41,12 +41,14 @@ public class ExerciseCreatorController {
     }
     
     public void initialize() {
-        setUpData();
+        setUpExerciseData();
         setUpListeners();
         setUpProperties();
     }
     
-    private void setUpData() {
+    private void setUpExerciseData() {
+        // add exercise info categories to exerciseCategoryComboBox and sets up
+        // a look up table for exercise info category to exercise info name
         List<ExerciseInfo> data = loadExerciseInfoList();
         Map<String, Map<String , Integer>> map = new HashMap<>();
         for (ExerciseInfo item : data) {
@@ -64,49 +66,58 @@ public class ExerciseCreatorController {
         );
         FXCollections.sort(categoryList);
         
-        categoryComboBox.getItems().setAll(categoryList);
+        exerciseCategoryComboBox.getItems().setAll(categoryList);
     }
     
     private List<ExerciseInfo> loadExerciseInfoList() {
         try {
             return manager.getAllExerciseInfos();
+            
         } catch (Exception e) {
-            System.out.println("Error in ExerciseCreatorController.loadExerciseInfoList(): " + e.getMessage());
+            System.out.println(
+                "Error in ExerciseCreatorController.loadExerciseInfoList(): "
+                + e.getMessage()
+            );
         }
         return new ArrayList<>();
     }
     
     private void setUpListeners() {
-        categoryComboBox.getSelectionModel().selectedItemProperty().addListener(
+        // when category is selected, the name comboBox gets updated
+        exerciseCategoryComboBox.getSelectionModel().selectedItemProperty().addListener(
             (obs, oldCategory, newCategory) -> {
                 if (newCategory != null) {
                     ObservableList<String> observableList = FXCollections.observableArrayList(
                         exerciseInfoMap.get((String) newCategory).keySet()
                     );
                     FXCollections.sort(observableList);
-                    nameComboBox.getItems().setAll(observableList);
+                    exerciseNameComboBox.getItems().setAll(observableList);
                 }
             }
         );
     }
     
     private void setUpProperties() {
-        nameComboBox.disableProperty().bind(
-            Bindings.isNull(categoryComboBox.getSelectionModel().selectedItemProperty())
+        exerciseNameComboBox.disableProperty().bind(
+            Bindings.isNull(
+                exerciseCategoryComboBox.getSelectionModel().selectedItemProperty()
+            )
         );
         
         addButton.disableProperty().bind(
-            Bindings.isNull(nameComboBox.getSelectionModel().selectedItemProperty())
+            Bindings.isNull(
+                exerciseNameComboBox.getSelectionModel().selectedItemProperty()
+            )
         );
     }
     
     @FXML
     private void submit() {
-        String category = (String) categoryComboBox.getSelectionModel().getSelectedItem();
-        String name = (String) nameComboBox.getSelectionModel().getSelectedItem();
+        String category = (String) exerciseCategoryComboBox.getSelectionModel().getSelectedItem();
+        String name = (String) exerciseNameComboBox.getSelectionModel().getSelectedItem();
         int exerciseInfoId = exerciseInfoMap.get(category).get(name);
         
-        ExerciseInfo newExerciseInfo = new ExerciseInfo(exerciseInfoId, name, category);
+        final ExerciseInfo newExerciseInfo = new ExerciseInfo(exerciseInfoId, name, category);
         
         int tempId = NumberGenerator.generateNextNegativeNumber();
         int tempOrderNumber = -1;
@@ -128,6 +139,6 @@ public class ExerciseCreatorController {
     }
     
     private void close() {
-        categoryComboBox.getScene().getWindow().hide();
+        exerciseCategoryComboBox.getScene().getWindow().hide();
     }
 }

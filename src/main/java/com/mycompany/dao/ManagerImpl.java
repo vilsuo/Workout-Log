@@ -196,7 +196,6 @@ public class ManagerImpl {
         return new Exercise(exerciseId, exerciseInfo, exerciseSetList, exerciseOrderNumber);
     }
     
-    
     public Workout createWorkout(String name, Date date, int orderNumber) throws SQLException {
         try (Connection connection = createConnectionAndEnsureDatabase()) {
             int workoutId = workoutDatabase.createWorkout(connection, name, date, orderNumber);

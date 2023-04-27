@@ -10,6 +10,7 @@ import com.mycompany.utilities.Statistics.CustomLocalDateFormatter;
 import java.sql.Date;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -35,7 +36,6 @@ import javafx.util.Callback;
 
 /*
 TODO
-- add 'select/deselect all' button for check boxes
 - add refresh option for category check boxes
 
 - implement zooming/scrolling to chart?
@@ -66,6 +66,8 @@ public class CategoryStatisticsController {
         new SimpleBooleanProperty(true);
     
     private Map<String, Boolean> selectedCategoriesMap = new HashMap<>();
+    
+    private boolean selectAll = true;
     
     public void initialize() {
         initializeControls();
@@ -131,8 +133,19 @@ public class CategoryStatisticsController {
         vb.setSpacing(10);
         vb.setPadding(new Insets(10));
         
+        List<CheckBox> categoryCheckBoxes = new ArrayList<>();
+        
+        Button btnToggle = new Button("Toggle all");
+        btnToggle.setOnAction(event -> {
+            categoryCheckBoxes.forEach(checkBox -> checkBox.setSelected(selectAll));
+            selectAll = !selectAll;
+        });
+        
+        vb.getChildren().add(btnToggle);
+        
         for (String category : categoryList) {
             final CheckBox categoryCheckBox = new CheckBox(category);
+            categoryCheckBoxes.add(categoryCheckBox);
             
             categoryCheckBox.selectedProperty().addListener(
                 (obs, oldValue, newValue) -> {
@@ -148,9 +161,6 @@ public class CategoryStatisticsController {
     
     @FXML
     private void onCalculateButtonPressed() throws SQLException {
-        //createBarChart();
-        //createPieChart();
-        
         setUpCharts();
     }
     

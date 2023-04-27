@@ -30,7 +30,15 @@ public class MainController {
         String resource = "/fxml/CategoryStatistics.fxml";
         FXMLLoader loader = new FXMLLoader(getClass().getResource(resource));
         Parent parent = loader.load();
-        showWindowWithoutModal(parent);
+        showWindowWithoutModal(parent, "Category Statistics");
+    }
+    
+    @FXML
+    private void openExerciseHistory() throws IOException {
+        String resource = "/fxml/ExerciseHistory.fxml";
+        FXMLLoader loader = new FXMLLoader(getClass().getResource(resource));
+        Parent parent = loader.load();
+        showWindowWithoutModal(parent, "Exercise History");
     }
  
     private void showWindowWithModal(Parent parent) {
@@ -44,9 +52,9 @@ public class MainController {
         stage.showAndWait();
     }
     
-    private void showWindowWithoutModal(Parent parent) {
+    private void showWindowWithoutModal(Parent parent, String title) {
         Stage stage = new Stage();
-        stage.setTitle("Exercise Info Editor");
+        stage.setTitle(title);
         stage.initOwner(root.getScene().getWindow());
         
         Scene scene = new Scene(parent);
