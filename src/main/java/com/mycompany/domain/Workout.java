@@ -122,10 +122,13 @@ public class Workout implements Comparable<Workout> {
     }
     
     // sorts by order number
+    // and date?
     @Override
     public int compareTo(Workout other) {
         
-        //if (date.get().)
+        if (date.get().before(other.getDate())) {
+            return -1;
+        }
         
         return orderNumber.get() - other.orderNumber.get();
     }

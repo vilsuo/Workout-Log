@@ -242,6 +242,12 @@ public class ManagerImpl {
         }
     }
     
+    /**
+     * 
+     * @param date
+     * @return Sorted list
+     * @throws SQLException 
+     */
     public List<Workout> getWorkoutsByDate(Date date) throws SQLException {
         List<Workout> workoutList = new ArrayList<>();
         try (Connection connection = createConnectionAndEnsureDatabase()) {
@@ -252,14 +258,17 @@ public class ManagerImpl {
                 );
             }
         }
-        
-        // sort by order number
         Collections.sort(workoutList);
         return workoutList;
     }
     
-    // this is used only for statistic: exercises are sorted in vain
-    // workouts are not sorted
+    /**
+     * 
+     * @param startDate
+     * @param endDate
+     * @return  Sorted list
+     * @throws SQLException 
+     */
     public List<Workout> getWorkoutsBetweenDates(Date startDate, Date endDate) throws SQLException {
         List<Workout> workoutList = new ArrayList<>();
         
@@ -269,7 +278,7 @@ public class ManagerImpl {
                 workoutList.add(getWorkout(connection, workoutId));
             }
         }
-        
+        Collections.sort(workoutList);
         return workoutList;
     }
     

@@ -16,18 +16,18 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.ObservableMap;
 import javafx.fxml.FXML;
+import javafx.scene.chart.BarChart;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.DatePicker;
+import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TableView;
-import javafx.util.Callback;
 
 public class ExerciseHistoryController {
     
@@ -41,8 +41,12 @@ public class ExerciseHistoryController {
     
     @FXML private Button calculateButton;
     
+    @FXML private Label calculatedExerciseInfoLabel;
     @FXML private ListView historyListView;
     @FXML private TableView recordsTableView;
+    
+    @FXML private BarChart exerciseTotalVolumeBarChart;
+    @FXML private BarChart exerciseTotalSetsBarChart;
     
     private ObservableMap<String, Map<String, Integer>> exerciseInfoMap;
     
@@ -122,15 +126,23 @@ public class ExerciseHistoryController {
     
     @FXML
     private void onCalculateButtonPressed() {
-        showHistory();
+        calculateAndDisplay();
     }
     
-    private void showHistory() {
-        String category = (String) exerciseCategoryComboBox.getSelectionModel().getSelectedItem();
-        String name = (String) exerciseNameComboBox.getSelectionModel().getSelectedItem();
+    private void calculateAndDisplay() {
+        String category = (String) exerciseCategoryComboBox.getSelectionModel()
+                .getSelectedItem();
+        
+        String name = (String) exerciseNameComboBox.getSelectionModel()
+                .getSelectedItem();
+        
         int exerciseInfoId = exerciseInfoMap.get(category).get(name);
         
-        final ExerciseInfo exerciseInfo = new ExerciseInfo(exerciseInfoId, name, category);
+        final ExerciseInfo exerciseInfo = new ExerciseInfo(
+            exerciseInfoId, name, category
+        );
+        
+        calculatedExerciseInfoLabel.setText(exerciseInfo.toString());
         
         Date startDate = Date.valueOf(startDatePicker.getValue());
         Date endDate = Date.valueOf(endDatePicker.getValue());
@@ -146,17 +158,67 @@ public class ExerciseHistoryController {
             );
         }
         
-        calculateHistory(workoutList, exerciseInfo);
-        calculateRecords(workoutList, exerciseInfo);
+        setUpHistoryListView(workoutList, exerciseInfo);
+        setUpRecordsTableView(workoutList, exerciseInfo);
+        setUpBarCharts(workoutList, exerciseInfo);
     }
     
-    private void calculateHistory(final List<Workout> workoutList, final ExerciseInfo exerciseInfo) {
-        // TODO
+    private void setUpHistoryListView(final List<Workout> workoutList,
+            final ExerciseInfo exerciseInfo) {
         
-        // the same date can have multiple same exercises
+        ObservableList<String> obsList = FXCollections.observableArrayList();
+        
+        for (Workout workout : workoutList) {
+            boolean dateAdded = false;
+            
+            StringBuilder sb = new StringBuilder();
+            for (Exercise exercise : workout.getExerciseList()) {
+                if (exercise.getExerciseInfo().equals(exerciseInfo)) {
+                    if (exercise.getExerciseSetList().isEmpty())  {
+                        continue;
+                    }
+                    
+                    if (!dateAdded) {
+                        sb.append(workout.getDate());
+                        sb.append(", ");
+                        sb.append(workout.getName());
+                        dateAdded = true;
+                    }
+                    for (ExerciseSet exerciseSet : exercise.getExerciseSetList()) {
+                        sb.append("\n\t");
+                        sb.append(exerciseSet.toString());
+                    }
+                }
+            }
+            if (dateAdded) {
+                obsList.add(sb.toString());
+            }
+        }
+        FXCollections.reverse(obsList);
+        historyListView.setItems(obsList);
     }
     
-    private void calculateRecords(final List<Workout> workoutList, final ExerciseInfo exerciseInfo) {
+    private void setUpRecordsTableView(final List<Workout> workoutList,
+            final ExerciseInfo exerciseInfo) {
+        
+        Map<Integer, ExerciseRecordEntry> recordsMap =
+            calculateRecords(workoutList, exerciseInfo);
+        
+        List<ExerciseRecordEntry> sortedExerciseRecordEntryList
+                = recordsMap.values().stream().sorted(
+                    (entry1, entry2) -> {
+                        return entry1.getRepetitions() - entry2.getRepetitions();
+                    }
+                ).collect(Collectors.toList());
+        
+        recordsTableView.setItems(
+            FXCollections.observableList(sortedExerciseRecordEntryList)
+        );
+    }
+    
+    private Map<Integer, ExerciseRecordEntry> calculateRecords(
+            final List<Workout> workoutList, final ExerciseInfo exerciseInfo) {
+        
         // <repetitions, ExerciseRecordEnty>
         Map<Integer, ExerciseRecordEntry> recordsMap = new HashMap<>();
         
@@ -189,25 +251,12 @@ public class ExerciseHistoryController {
                 }
             }
         }
-        
-        setUpRecordsTableView(recordsMap);
+        return recordsMap;
     }
     
-    private void setUpRecordsTableView(Map<Integer, ExerciseRecordEntry> recordsMap) {
+    private void setUpBarCharts(final List<Workout> workoutList,
+            final ExerciseInfo exerciseInfo) {
         
-        List<ExerciseRecordEntry> sortedExerciseRecordEntryList = recordsMap.values().stream().sorted(
-            (entry1, entry2) -> {
-                return entry1.getRepetitions() - entry2.getRepetitions();
-            }
-        ).collect(Collectors.toList());
-        
-        recordsTableView.setItems(
-            FXCollections.observableList(sortedExerciseRecordEntryList)
-        );
-        
-    }
-    
-    private void setUpHistoryListView() {
-        
+        // todo
     }
 }
