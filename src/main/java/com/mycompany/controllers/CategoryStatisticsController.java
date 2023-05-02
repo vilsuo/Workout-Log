@@ -253,6 +253,7 @@ public class CategoryStatisticsController {
     }
     
     private void createLabeledPieChart(Map<String, Map<String, Integer>> data) {
+        
         LabeledPieChart chart = new LabeledPieChart();
         chart.setTitle("labeled chart");
         
@@ -274,18 +275,18 @@ public class CategoryStatisticsController {
             }
         }
         if (totalSetsNotTracked != 0) {
-            addPieChartData(chart, "other", totalSetsNotTracked);
+            addPieChartData(chart, "Other", totalSetsNotTracked);
         }
         
-        String title = "temp title";
+        String title = "Total sets";
         chart.setTitle(title);
         chart.setLegendVisible(false);
         
         pieChartScrollPane.setContent(chart);
     }
     
-    private void addPieChartData(LabeledPieChart pChart, String name, double value) {
-        final Data data = new Data(name, value);
+    private void addPieChartData(LabeledPieChart pChart, String name, int value) {
+        final Data data = new Data(name + " (" + value + ")", value);
         pChart.getData().add(data);
     }
 }

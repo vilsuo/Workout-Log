@@ -1,6 +1,7 @@
 
 package com.mycompany.charts;
 
+import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.Map;
 import javafx.collections.ListChangeListener;
@@ -12,6 +13,7 @@ import javafx.scene.text.Text;
 public class LabeledPieChart extends PieChart {
 
     private final Map<Data, Text> labels = new HashMap<>();
+    private double total = 0.0;
 
     public LabeledPieChart () {
         super();
@@ -38,24 +40,24 @@ public class LabeledPieChart extends PieChart {
         for (Text label : labels.values()) {
             this.getChartChildren().remove(label);
         }
-        
         labels.clear();
+        
+        total = 0.0;
+        for (Data d : this.getData()) {
+            total += d.getPieValue();
+        }
         
         for (Data vData : getData()) {
             final Text dataText;
             final double yValue = vData.getPieValue();
-            dataText = new Text(Double.toString(yValue));
+            double ratio = (total != 0) ? (yValue / total) : 1.0;
+            dataText = new Text(new DecimalFormat("#0.0%").format(ratio));
             labels.put(vData, dataText);
             this.getChartChildren().add(dataText);
         }
     }
 
     private void layoutLabels(double centerX, double centerY) {
-        double total = 0.0;
-        for (Data d : this.getData()) {
-            total += d.getPieValue();
-        }
-        
         double scale = (total != 0) ? 360 / total : 0;
 
         for (Map.Entry<Data, Text> entry : labels.entrySet()) {
@@ -72,8 +74,8 @@ public class LabeledPieChart extends PieChart {
                 : (scale * Math.abs(vData.getPieValue()));
             
             final double angle = normalizeAngle(start + (size / 2));
-            final double sproutX = calcX(angle, 0.7 * arc.getRadiusX(), centerX);
-            final double sproutY = calcY(angle, 0.7 * arc.getRadiusY(), centerY);
+            final double sproutX = calcX(angle, 0.8 * arc.getRadiusX(), centerX);
+            final double sproutY = calcY(angle, 0.8 * arc.getRadiusY(), centerY);
 
             vText.relocate(
                 sproutX - vText.getBoundsInLocal().getWidth() / 2,
@@ -100,5 +102,4 @@ public class LabeledPieChart extends PieChart {
     private static double calcY(double angle, double radius, double centerY) {
         return (double) (centerY + radius * Math.sin(Math.toRadians(-angle)));
     }
-
 }
