@@ -29,6 +29,12 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TableView;
 
+/*
+TODO
+- implement total volume/total sets charts
+
+- implement 1/3/5/8/10/12/15 max graph???
+*/
 public class ExerciseHistoryController {
     
     private final ManagerImpl manager = new ManagerImpl(App.DATABASE_PATH);
