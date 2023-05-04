@@ -14,6 +14,8 @@ public class MainController {
 
     @FXML private BorderPane root;
     
+    @FXML private WorkoutListController workoutListController;
+    
     @FXML
     private void openExerciseInfoEditor() throws IOException {
         String resource = "/fxml/ExerciseInfoEditor.fxml";
@@ -21,8 +23,7 @@ public class MainController {
         Parent parent = loader.load();
         showWindowWithModal(parent);
         
-        // refresh...
-        
+        workoutListController.refreshCurrentWorkout();
     }
     
     @FXML
@@ -30,7 +31,7 @@ public class MainController {
         String resource = "/fxml/CategoryStatistics.fxml";
         FXMLLoader loader = new FXMLLoader(getClass().getResource(resource));
         Parent parent = loader.load();
-        showWindowWithoutModal(parent, "Category Statistics");
+        showWindowWithoutModal(parent, "Category Statistics", 800, 600);
     }
     
     @FXML
@@ -38,7 +39,7 @@ public class MainController {
         String resource = "/fxml/ExerciseHistory.fxml";
         FXMLLoader loader = new FXMLLoader(getClass().getResource(resource));
         Parent parent = loader.load();
-        showWindowWithoutModal(parent, "Exercise History");
+        showWindowWithoutModal(parent, "Exercise History", 500, 600);
     }
  
     private void showWindowWithModal(Parent parent) {
@@ -52,12 +53,12 @@ public class MainController {
         stage.showAndWait();
     }
     
-    private void showWindowWithoutModal(Parent parent, String title) {
+    private void showWindowWithoutModal(Parent parent, String title, double height, double width) {
         Stage stage = new Stage();
         stage.setTitle(title);
         stage.initOwner(root.getScene().getWindow());
         
-        Scene scene = new Scene(parent);
+        Scene scene = new Scene(parent, height, width);
         stage.setScene(scene);
         stage.show();
     }

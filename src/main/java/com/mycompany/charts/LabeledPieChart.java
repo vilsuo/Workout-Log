@@ -23,6 +23,10 @@ public class LabeledPieChart extends PieChart {
             }
         );
     }
+    
+    public final double getTotal() {
+        return total;
+    }
 
     @Override
     protected void layoutChartChildren(double top, double left,
@@ -74,8 +78,8 @@ public class LabeledPieChart extends PieChart {
                 : (scale * Math.abs(vData.getPieValue()));
             
             final double angle = normalizeAngle(start + (size / 2));
-            final double sproutX = calcX(angle, 0.8 * arc.getRadiusX(), centerX);
-            final double sproutY = calcY(angle, 0.8 * arc.getRadiusY(), centerY);
+            final double sproutX = calcX(angle, 0.7 * arc.getRadiusX(), centerX);
+            final double sproutY = calcY(angle, 0.7 * arc.getRadiusY(), centerY);
 
             vText.relocate(
                 sproutX - vText.getBoundsInLocal().getWidth() / 2,

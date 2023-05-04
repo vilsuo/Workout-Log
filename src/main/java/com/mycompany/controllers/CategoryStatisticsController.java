@@ -23,6 +23,7 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.scene.chart.BarChart;
+import javafx.scene.chart.PieChart;
 import javafx.scene.chart.PieChart.Data;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.Button;
@@ -37,21 +38,17 @@ import javafx.util.Callback;
 /*
 TODO
 - add refresh option for category check boxes
-
-- implement zooming/scrolling to chart?
-
-- make percentages to pie chart instead of actual number of sets
-- add the piechart label to pop up in correct position
 */
-
 public class CategoryStatisticsController {
     
     private final ManagerImpl manager = new ManagerImpl(App.DATABASE_PATH);
 
     @FXML private BarChart categorySetsBarChart;
-    @FXML private BarChart categoryWorkoutsBarChart;
+    @FXML private BarChart categoryExercisesBarChart;
     
-    @FXML private ScrollPane pieChartScrollPane;
+    @FXML private LabeledPieChart categorySetsPieChart;
+    @FXML private LabeledPieChart categoryExercisesPieChart;
+    @FXML private VBox pieChartContainer;
     
     @FXML private DatePicker startDatePicker;
     @FXML private DatePicker endDatePicker;
@@ -165,12 +162,14 @@ public class CategoryStatisticsController {
     }
     
     private void setUpCharts() throws SQLException {
-        LocalDate startLocalDate = startDatePicker.getValue();
-        LocalDate endLocalDate = endDatePicker.getValue();
+        final LocalDate startLocalDate = startDatePicker.getValue();
+        final LocalDate endLocalDate = endDatePicker.getValue();
+        
+        final String choice = (String) choiceBox.getValue();
         
         List<String> formattedLocalDateList =
             CustomLocalDateFormatter.getFormattedLocalDatesBetween(
-                startLocalDate, endLocalDate, (String) choiceBox.getValue()
+                startLocalDate, endLocalDate, choice
             );
         
         List<Workout> workoutList = manager.getWorkoutsBetweenDates(
@@ -186,7 +185,7 @@ public class CategoryStatisticsController {
         for (Workout workout : workoutList) {
             LocalDate workoutLocalDate = workout.getDate().toLocalDate();
             String dateString = CustomLocalDateFormatter.formatLocalDate(
-                workoutLocalDate, (String) choiceBox.getValue()
+                workoutLocalDate, choice
             );
             
             for (Exercise exercise : workout.getExerciseList()) {
@@ -205,12 +204,13 @@ public class CategoryStatisticsController {
         }
         
         setUpBarChart(totalCategorySetsMap, formattedLocalDateList, this.categorySetsBarChart);
-        setUpBarChart(totalCategoryExercisesMap, formattedLocalDateList, this.categoryWorkoutsBarChart);
+        setUpBarChart(totalCategoryExercisesMap, formattedLocalDateList, this.categoryExercisesBarChart);
         
-        createLabeledPieChart(totalCategorySetsMap);
+        createLabeledPieChart(totalCategorySetsMap, this.categorySetsPieChart, "Total sets");
+        createLabeledPieChart(totalCategoryExercisesMap, this.categoryExercisesPieChart, "Total exercises");
     }
     
-    private void addToMap(Map<String, Map<String, Integer>> mapMap,
+    private void addToMap(final Map<String, Map<String, Integer>> mapMap,
             String mapKey, String mapMapKey, int totalSets) {
         
         mapMap.putIfAbsent(mapKey, new HashMap<>());
@@ -221,41 +221,43 @@ public class CategoryStatisticsController {
         );
     }
     
-    private void setUpBarChart(Map<String, Map<String, Integer>> data,
+    private void setUpBarChart(final Map<String, Map<String, Integer>> data,
             List<String> formattedLocalDateList, BarChart barChart) {
         
-        ObservableList totalSetsList = FXCollections.observableArrayList();
+        ObservableList seriesList = FXCollections.observableArrayList();
         for (String category : selectedCategoriesMap.keySet()) {
             if (!selectedCategoriesMap.getOrDefault(category, false)) {
                 continue;
             }
             
-            XYChart.Series totalSetsSeries = new XYChart.Series();
-            totalSetsSeries.setName(category);
+            XYChart.Series totalSeries = new XYChart.Series();
+            totalSeries.setName(category);
             
-            Map<String, Integer> dateMap = data.get(category);
+            final Map<String, Integer> dateMap = data.get(category);
             for (String dateString : formattedLocalDateList) {
-                int totalSets = 0;
+                int total = 0;
                 if (dateMap != null) {
-                    totalSets = dateMap.getOrDefault(dateString, 0);
+                    total = dateMap.getOrDefault(dateString, 0);
                 }
                 
-                totalSetsSeries.getData().add(
-                    new XYChart.Data(dateString, totalSets)
+                totalSeries.getData().add(
+                    new XYChart.Data(dateString, total)
                 );
             }
             
-            totalSetsList.add(totalSetsSeries);
+            seriesList.add(totalSeries);
         }
         // this way there are no two animations going on at the same time
         // (clear data and set data)
-        barChart.setData(totalSetsList);
+        barChart.setData(seriesList);
     }
     
-    private void createLabeledPieChart(Map<String, Map<String, Integer>> data) {
+    private void createLabeledPieChart(final Map<String, Map<String, Integer>> data,
+            LabeledPieChart chart, String title) {
         
-        LabeledPieChart chart = new LabeledPieChart();
-        chart.setTitle("labeled chart");
+        chart.getData().clear();
+        
+        pieChartContainer.layout();
         
         int totalSetsNotTracked = 0;
         for (String category : selectedCategoriesMap.keySet()) {
@@ -278,14 +280,10 @@ public class CategoryStatisticsController {
             addPieChartData(chart, "Other", totalSetsNotTracked);
         }
         
-        String title = "Total sets";
-        chart.setTitle(title);
-        chart.setLegendVisible(false);
-        
-        pieChartScrollPane.setContent(chart);
+        chart.setTitle(title + " (" + chart.getTotal() + ")");
     }
     
-    private void addPieChartData(LabeledPieChart pChart, String name, int value) {
+    private void addPieChartData(PieChart pChart, String name, int value) {
         final Data data = new Data(name + " (" + value + ")", value);
         pChart.getData().add(data);
     }

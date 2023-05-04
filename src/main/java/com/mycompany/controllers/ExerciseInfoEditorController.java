@@ -219,6 +219,7 @@ public class ExerciseInfoEditorController {
     private Optional<ButtonType> showDeleteAlert(ExerciseInfo exerciseInfo) {
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
         alert.setTitle("Confirmation");
+        alert.setHeight(400);
         alert.setHeaderText(exerciseInfo.getName());
         alert.setContentText("Do you want to delete the item? Deleting the item"
                            + " will also delete all exercise records associated"

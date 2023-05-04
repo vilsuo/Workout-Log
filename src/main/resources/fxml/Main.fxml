@@ -19,12 +19,12 @@
                           onAction="#openStatistics" />
             </Menu>
             <Menu text="History">
-                <MenuItem fx:id="exerciseHistory" text="Exercise history"
+                <MenuItem fx:id="exerciseHistory" text="Exercise history/records"
                           onAction="#openExerciseHistory" />
             </Menu>
         </MenuBar>
     </top>
     <center>
-        <fx:include source="WorkoutList.fxml"/>
+        <fx:include fx:id="workoutList" source="WorkoutList.fxml"/>
     </center>
 </BorderPane>

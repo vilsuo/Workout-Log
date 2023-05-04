@@ -104,10 +104,10 @@ public class ExerciseHistoryController {
     private void setUpListeners() {
         // when category is selected, the name comboBox gets updated
         exerciseCategoryComboBox.getSelectionModel().selectedItemProperty().addListener(
-            (obs, oldCategory, newCategory) -> {
-                if (newCategory != null) {
+            (obs, oldValue, newValue) -> {
+                if (newValue != null) {
                     ObservableList<String> observableList = FXCollections.observableArrayList(
-                        exerciseInfoMap.get((String) newCategory).keySet()
+                        exerciseInfoMap.get((String) newValue).keySet()
                     );
                     FXCollections.sort(observableList);
                     exerciseNameComboBox.getItems().setAll(observableList);

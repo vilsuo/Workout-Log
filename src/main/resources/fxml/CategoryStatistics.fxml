@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import com.mycompany.charts.HoverBarChart?>
+<?import com.mycompany.charts.LabeledPieChart?>
 <?import java.lang.Double?>
 <?import java.lang.String?>
 <?import javafx.collections.FXCollections?>
@@ -76,7 +77,7 @@
                 <Tab text="Bar">
                     <VBox>
                         <children>
-                            <HoverBarChart fx:id="categorySetsBarChart" barGap="3" categoryGap="10" animated="false">
+                            <HoverBarChart fx:id="categorySetsBarChart" animated="false">
                                 <xAxis>
                                     <CategoryAxis side="BOTTOM" animated="false" />
                                 </xAxis>
@@ -87,8 +88,8 @@
                                     <Double fx:constant="MAX_VALUE" />
                                 </maxWidth>
                             </HoverBarChart>
-                            
-                            <HoverBarChart fx:id="categoryWorkoutsBarChart" barGap="3" categoryGap="10" animated="false">
+                                    
+                            <HoverBarChart fx:id="categoryExercisesBarChart" barGap="3" categoryGap="10" animated="false">
                                 <xAxis>
                                     <CategoryAxis side="BOTTOM" animated="false" />
                                 </xAxis>
@@ -103,7 +104,12 @@
                     </VBox>
                 </Tab>
                 <Tab text="Pie">
-                    <ScrollPane fx:id="pieChartScrollPane" />
+                    <VBox fx:id="pieChartContainer">
+                        <children>
+                            <LabeledPieChart fx:id="categorySetsPieChart" title="Total sets" legendVisible="false" animated="false" />
+                            <LabeledPieChart fx:id="categoryExercisesPieChart" title="Total exercises" legendVisible="false" animated="false" />
+                        </children>
+                    </VBox>
                 </Tab>
             </tabs>
         </TabPane>

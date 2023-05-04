@@ -79,6 +79,13 @@ public class WorkoutListController {
         datePicker.setValue(LocalDate.now());
     }
     
+    public void refreshCurrentWorkout() {
+        if (datePicker.getValue() != null) {
+            Date currentDate = Date.valueOf(datePicker.getValue());
+            workoutListView.setItems(createWorkoutList(currentDate));
+        }
+    }
+    
     private ObservableList<Workout> createWorkoutList(Date newDate) {
         Callback<Workout, Observable[]> extractor =
             (Workout workout) -> new Observable[] {
