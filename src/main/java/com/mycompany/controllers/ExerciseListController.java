@@ -2,7 +2,7 @@
 package com.mycompany.controllers;
 
 import com.mycompany.application.App;
-import com.mycompany.cells.DragAndDropListCell;
+import com.mycompany.controls.DragAndDropListCell;
 import com.mycompany.dao.ManagerImpl;
 import com.mycompany.domain.Exercise;
 import com.mycompany.domain.ExerciseInfo;

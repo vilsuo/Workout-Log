@@ -3,7 +3,7 @@ package com.mycompany.controllers;
 
 import com.mycompany.application.App;
 import com.mycompany.domain.ExerciseInfo;
-import com.mycompany.cells.ExerciseInfoEditingCell;
+import com.mycompany.controls.ExerciseInfoEditingCell;
 import com.mycompany.dao.ManagerImpl;
 import java.util.ArrayList;
 import java.util.List;

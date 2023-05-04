@@ -2,8 +2,8 @@
 package com.mycompany.controllers;
 
 import com.mycompany.application.App;
-import com.mycompany.cells.DragAndDropListCell;
-import com.mycompany.cells.WorkoutPopupDateCell;
+import com.mycompany.controls.DragAndDropListCell;
+import com.mycompany.controls.WorkoutPopupDateCell;
 import com.mycompany.dao.ManagerImpl;
 import com.mycompany.domain.Workout;
 import java.sql.Date;
@@ -63,9 +63,10 @@ public class WorkoutListController {
             );
         }
         
-        datePicker.setDayCellFactory(param -> new WorkoutPopupDateCell(datePicker, dateList)
+        datePicker.setDayCellFactory(
+            param -> new WorkoutPopupDateCell(datePicker, dateList)
         );
-        
+
         datePicker.valueProperty().addListener(
             (obs, oldLocalDate, newLocalDate) -> {
                 if (newLocalDate != null) {

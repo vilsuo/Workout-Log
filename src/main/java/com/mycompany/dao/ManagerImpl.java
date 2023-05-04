@@ -397,4 +397,10 @@ public class ManagerImpl {
             workoutDatabase.removeWorkout(connection, workoutId);
         }
     }
+    
+    public void copyWorkout(int workoutId, Date dateToSet) throws SQLException {
+        try (Connection connection = createConnectionAndEnsureDatabase()) {
+            
+        }
+    }
 }
