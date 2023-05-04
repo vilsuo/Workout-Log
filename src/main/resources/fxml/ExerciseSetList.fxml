@@ -11,6 +11,7 @@
 <?import javafx.scene.layout.VBox?>
 
 <VBox alignment="CENTER" spacing="5"
+    fx:id="root"
     xmlns:fx="http://javafx.com/fxml/1"
     fx:controller="com.mycompany.controllers.ExerciseSetListController">
     <padding>
@@ -31,6 +32,11 @@
                             </maxWidth>
                         </Button>
                         <Button text="Edit" onAction="#editExerciseSet" fx:id="editButton" HBox.hgrow="ALWAYS">
+                            <maxWidth>
+                                <Double fx:constant="MAX_VALUE" />
+                            </maxWidth>
+                        </Button>
+                        <Button text="History" onAction="#showExerciseHistory" fx:id="historyButton" HBox.hgrow="ALWAYS">
                             <maxWidth>
                                 <Double fx:constant="MAX_VALUE" />
                             </maxWidth>

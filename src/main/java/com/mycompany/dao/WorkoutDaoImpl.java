@@ -107,6 +107,17 @@ public class WorkoutDaoImpl {
         return idList;
     }
     
+    public List<Integer> getAllWorkoutIds(Connection connection) throws SQLException {
+        List<Integer> idList = new ArrayList<>();
+        
+        String sql = "SELECT id FROM Workout;";
+        ResultSet results = connection.prepareStatement(sql).executeQuery();
+        while (results.next()) {
+            idList.add(results.getInt("id"));
+        }
+        return idList;
+    }
+    
     public List<Date> getDateList(Connection connection) throws SQLException {
         List<Date> dateList = new ArrayList<>();
         

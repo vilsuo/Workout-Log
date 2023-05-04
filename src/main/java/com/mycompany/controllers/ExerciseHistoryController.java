@@ -8,6 +8,7 @@ import com.mycompany.domain.ExerciseInfo;
 import com.mycompany.history.ExerciseRecordEntry;
 import com.mycompany.domain.ExerciseSet;
 import com.mycompany.domain.Workout;
+import com.mycompany.history.ExerciseInfoHistoryBuilder;
 import java.sql.Date;
 import java.sql.SQLException;
 import java.time.LocalDate;
@@ -21,7 +22,6 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.ObservableMap;
 import javafx.fxml.FXML;
-import javafx.scene.chart.BarChart;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.DatePicker;
@@ -50,9 +50,6 @@ public class ExerciseHistoryController {
     @FXML private Label calculatedExerciseInfoLabel;
     @FXML private ListView historyListView;
     @FXML private TableView recordsTableView;
-    
-    @FXML private BarChart exerciseTotalVolumeBarChart;
-    @FXML private BarChart exerciseTotalSetsBarChart;
     
     private ObservableMap<String, Map<String, Integer>> exerciseInfoMap;
     
@@ -119,13 +116,26 @@ public class ExerciseHistoryController {
     private void setUpProperties() {
         exerciseNameComboBox.disableProperty().bind(
             Bindings.isNull(
-                exerciseCategoryComboBox.getSelectionModel().selectedItemProperty()
+                exerciseCategoryComboBox.getSelectionModel()
+                                        .selectedItemProperty()
+            )
+        );
+        
+        endDatePicker.disableProperty().bind(
+            Bindings.or(
+                startDatePicker.valueProperty().isNull(),
+                startDatePicker.disableProperty()
             )
         );
         
         calculateButton.disableProperty().bind(
-            Bindings.isNull(
-                exerciseNameComboBox.getSelectionModel().selectedItemProperty()
+            Bindings.or(
+                exerciseNameComboBox.getSelectionModel()
+                    .selectedItemProperty().isNull(),
+                Bindings.or(
+                    endDatePicker.disableProperty(),
+                    endDatePicker.valueProperty().isNull()
+                )
             )
         );
     }
@@ -166,42 +176,16 @@ public class ExerciseHistoryController {
         
         setUpHistoryListView(workoutList, exerciseInfo);
         setUpRecordsTableView(workoutList, exerciseInfo);
-        setUpBarCharts(workoutList, exerciseInfo);
     }
     
     private void setUpHistoryListView(final List<Workout> workoutList,
             final ExerciseInfo exerciseInfo) {
         
-        ObservableList<String> obsList = FXCollections.observableArrayList();
-        
-        for (Workout workout : workoutList) {
-            boolean dateAdded = false;
-            
-            StringBuilder sb = new StringBuilder();
-            for (Exercise exercise : workout.getExerciseList()) {
-                if (exercise.getExerciseInfo().equals(exerciseInfo)) {
-                    if (exercise.getExerciseSetList().isEmpty())  {
-                        continue;
-                    }
-                    
-                    if (!dateAdded) {
-                        sb.append(workout.getDate());
-                        sb.append(", ");
-                        sb.append(workout.getName());
-                        dateAdded = true;
-                    }
-                    for (ExerciseSet exerciseSet : exercise.getExerciseSetList()) {
-                        sb.append("\n\t");
-                        sb.append(exerciseSet.toString());
-                    }
-                }
-            }
-            if (dateAdded) {
-                obsList.add(sb.toString());
-            }
-        }
-        FXCollections.reverse(obsList);
-        historyListView.setItems(obsList);
+        historyListView.setItems(
+            ExerciseInfoHistoryBuilder.createHistoryStringList(
+                workoutList, exerciseInfo
+            )
+        );
     }
     
     private void setUpRecordsTableView(final List<Workout> workoutList,
@@ -258,11 +242,5 @@ public class ExerciseHistoryController {
             }
         }
         return recordsMap;
-    }
-    
-    private void setUpBarCharts(final List<Workout> workoutList,
-            final ExerciseInfo exerciseInfo) {
-        
-        // todo
     }
 }

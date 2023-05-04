@@ -3,7 +3,7 @@ package com.mycompany.controllers;
 
 import com.mycompany.application.App;
 import com.mycompany.cells.DragAndDropListCell;
-import com.mycompany.cells.WorkoutDateCell;
+import com.mycompany.cells.WorkoutPopupDateCell;
 import com.mycompany.dao.ManagerImpl;
 import com.mycompany.domain.Workout;
 import java.sql.Date;
@@ -63,8 +63,7 @@ public class WorkoutListController {
             );
         }
         
-        datePicker.setDayCellFactory(
-            param -> new WorkoutDateCell(dateList)
+        datePicker.setDayCellFactory(param -> new WorkoutPopupDateCell(datePicker, dateList)
         );
         
         datePicker.valueProperty().addListener(

@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.Optional;
 import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
+import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -35,9 +36,6 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 
-/* TODO!
-
-*/
 public class ExerciseListController {
     
     private final ManagerImpl manager = new ManagerImpl(App.DATABASE_PATH);
@@ -151,17 +149,12 @@ public class ExerciseListController {
     private void setUpProperties() {
         saveButton.disableProperty().bind(Bindings.not(changeMadeProperty));
         
-        editButton.disableProperty().bind(
-            Bindings.isNull(
-                exerciseListView.getSelectionModel().selectedItemProperty()
-            )
+        BooleanBinding exerciseNotSelectedBinding = Bindings.isNull(
+            exerciseListView.getSelectionModel().selectedItemProperty()
         );
         
-        removeButton.disableProperty().bind(
-            Bindings.isNull(
-                exerciseListView.getSelectionModel().selectedItemProperty()
-            )
-        );
+        editButton.disableProperty().bind(exerciseNotSelectedBinding);
+        removeButton.disableProperty().bind(exerciseNotSelectedBinding);
     }
     
     // split into smaller/simpler functions?
@@ -330,7 +323,7 @@ public class ExerciseListController {
     }
     
     @FXML
-    private void removeExercise() throws Exception {
+    private void removeExercise() {
         final int selectedListViewIndex =
             exerciseListView.getSelectionModel().getSelectedIndex();
         

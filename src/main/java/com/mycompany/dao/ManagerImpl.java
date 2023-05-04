@@ -208,6 +208,14 @@ public class ManagerImpl {
         }
     }
     
+    /**
+     * 
+     * 
+     * @param connection
+     * @param workoutId
+     * @return workout, with exercise list sorted by order number
+     * @throws SQLException 
+     */
     private Workout getWorkout(Connection connection, int workoutId) throws SQLException {
         List<Exercise> exerciseList = new ArrayList<>();
                 
@@ -274,6 +282,19 @@ public class ManagerImpl {
         
         try (Connection connection = createConnectionAndEnsureDatabase()) {
             List<Integer> workoutIdList = workoutDatabase.getWorkoutIdListByDate(connection, startDate, endDate);
+            for (int workoutId : workoutIdList) {
+                workoutList.add(getWorkout(connection, workoutId));
+            }
+        }
+        Collections.sort(workoutList);
+        return workoutList;
+    }
+    
+    public List<Workout> getAllWorkouts() throws SQLException {
+        List<Workout> workoutList = new ArrayList<>();
+        
+        try (Connection connection = createConnectionAndEnsureDatabase()) {
+            List<Integer> workoutIdList = workoutDatabase.getAllWorkoutIds(connection);
             for (int workoutId : workoutIdList) {
                 workoutList.add(getWorkout(connection, workoutId));
             }

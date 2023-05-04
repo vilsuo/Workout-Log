@@ -15,6 +15,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ChangeListener;
@@ -37,7 +38,7 @@ import javafx.util.Callback;
 
 /*
 TODO
-- add refresh option for category check boxes
+- add refresh option for category check boxes (use needToRecalculate)
 */
 public class CategoryStatisticsController {
     
@@ -74,7 +75,8 @@ public class CategoryStatisticsController {
             
         } catch (SQLException e) {
             System.out.println(
-                "Error in CategoryStatisticsController.setUpCategoryList(): " + e.getMessage()
+                "Error in CategoryStatisticsController.setUpCategoryList(): "
+                + e.getMessage()
             );
         }
     }
@@ -103,7 +105,7 @@ public class CategoryStatisticsController {
                            
                             if (item.isBefore(startDatePicker.getValue())) {
                                 setDisable(true);
-                                setStyle("-fx-background-color: #ffc0cb;");
+                                setStyle("-fx-background-color: red;");
                             }
                         }
                     };
@@ -114,11 +116,17 @@ public class CategoryStatisticsController {
     
     private void setUpProperties() {
         endDatePicker.disableProperty().bind(
-            startDatePicker.valueProperty().isNull()
+            Bindings.or(
+                startDatePicker.valueProperty().isNull(),
+                startDatePicker.disableProperty()
+            )
         );
         
         calculateButton.disableProperty().bind(
-            endDatePicker.valueProperty().isNull()
+            Bindings.or(
+                endDatePicker.valueProperty().isNull(),
+                endDatePicker.disableProperty()
+            )
         );
     }
     
