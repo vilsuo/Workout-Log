@@ -3,7 +3,7 @@ package com.mycompany.controllers;
 
 import com.mycompany.application.App;
 import com.mycompany.controls.DragAndDropListCell;
-import com.mycompany.controls.WorkoutPopupDateCell;
+import com.mycompany.controls.WorkoutPopupAndCopyDateCell;
 import com.mycompany.dao.ManagerImpl;
 import com.mycompany.domain.Workout;
 import java.sql.Date;
@@ -64,7 +64,7 @@ public class WorkoutListController {
         }
         
         datePicker.setDayCellFactory(
-            param -> new WorkoutPopupDateCell(datePicker, dateList)
+            param -> new WorkoutPopupAndCopyDateCell(datePicker, dateList)
         );
 
         datePicker.valueProperty().addListener(
@@ -72,6 +72,15 @@ public class WorkoutListController {
                 if (newLocalDate != null) {
                     Date newDate = Date.valueOf(newLocalDate);
                     workoutListView.setItems(createWorkoutList(newDate));
+                    
+                } else {
+                    if (oldLocalDate != null) {
+                        datePicker.setValue(oldLocalDate);
+                    } else {
+                        // if all else fails, set the current date,
+                        // datepickers value should never be null
+                        datePicker.setValue(LocalDate.now());
+                    }
                 }
             }
         );

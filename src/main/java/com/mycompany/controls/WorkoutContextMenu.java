@@ -8,13 +8,14 @@ import java.sql.Date;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.ContextMenu;
+import javafx.scene.control.DatePicker;
 import javafx.scene.control.MenuItem;
 
 public class WorkoutContextMenu extends ContextMenu {
     
     private final ManagerImpl manager = new ManagerImpl(App.DATABASE_PATH);
     
-    public WorkoutContextMenu(Date date) {
+    public WorkoutContextMenu(final DatePicker datePicker, /*Date dateToCopyWorkoutTo,*/ Date dateToShowContextMenuOf) {
         super();
         
         // context menu does not show if it is empty,
@@ -27,7 +28,7 @@ public class WorkoutContextMenu extends ContextMenu {
                 try {
                     ObservableList<Workout> workoutList =
                         FXCollections.observableList(
-                            manager.getWorkoutsByDate(date)
+                            manager.getWorkoutsByDate(dateToShowContextMenuOf)
                         );
                     
                     getItems().clear();
@@ -37,8 +38,11 @@ public class WorkoutContextMenu extends ContextMenu {
                         );
                         menuItem.setOnAction(
                             menuItemEvent -> {
-                                System.out.println(
-                                    "menu item pressed: " + menuItem.getText()
+                                // Needed to use datePicker here instead of
+                                // simply just a date, since the date value
+                                // would not be updated correctly
+                                copyWorkout(
+                                    workout, Date.valueOf(datePicker.getValue())
                                 );
                             }
                         );
@@ -47,11 +51,15 @@ public class WorkoutContextMenu extends ContextMenu {
                     
                 } catch (Exception e) {
                     System.out.println(
-                        "Error in WorkoutPopupDateCell contextMenu.setOnShowing"
+                        "Error in WorkoutContextMenu setOnShowing: "
                         + e.getMessage()
                     );
                 }
             }
         );
+    }
+    
+    private void copyWorkout(final Workout workoutToCopy, final Date dateToCopyWorkoutTo) {
+        System.out.println("copied: " + workoutToCopy.getName() + " to " + dateToCopyWorkoutTo);
     }
 }

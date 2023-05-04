@@ -32,7 +32,7 @@ public class WorkoutPopup extends Popup {
 
         } catch (Exception e) {
             System.out.println(
-                "Error in WorkoutPopupDateCell setOnMouseEntered"
+                "Error in WorkoutPopup.display: "
                 + e.getMessage()
             );
         }
