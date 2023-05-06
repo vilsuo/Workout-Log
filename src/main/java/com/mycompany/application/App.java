@@ -10,6 +10,16 @@ import javafx.scene.Scene;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 
+/*
+TODO
+- WorkoutListView
+    - double click edit
+    - copying workouts
+    - smolov jr / wendler531 templates
+
+- rep range graph progression
+- category workout pie chart (exercises inside one category)
+*/
 public class App extends Application {
     
     public static final String DATABASE_PATH = "jdbc:h2:./workoutLog-database";

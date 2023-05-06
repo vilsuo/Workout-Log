@@ -8,6 +8,9 @@ import com.mycompany.domain.Exercise;
 import com.mycompany.domain.ExerciseInfo;
 import com.mycompany.domain.ExerciseSet;
 import com.mycompany.domain.Workout;
+import com.mycompany.events.CustomMouseEvent;
+import com.mycompany.events.DoubleClickEventDispatcher;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -23,6 +26,8 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
+import javafx.event.EventTarget;
+import javafx.event.EventType;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -30,6 +35,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
 import javafx.stage.Modality;
@@ -39,6 +45,8 @@ import javafx.util.Callback;
 public class ExerciseListController {
     
     private final ManagerImpl manager = new ManagerImpl(App.DATABASE_PATH);
+    private final String EXERCISE_CREATOR_PATH = "/fxml/ExerciseCreator.fxml";
+    private final String EXERCISE_SET_LIST_PATH = "/fxml/ExerciseSetList.fxml";
     
     @FXML private TextField workoutTextField;
     
@@ -47,7 +55,6 @@ public class ExerciseListController {
     private ObservableList<Exercise> copiedExerciseList;
     
     @FXML private Button saveButton;
-    @FXML private Button editButton;
     @FXML private Button removeButton;
     
     private final ObjectProperty<Workout> workout =
@@ -73,9 +80,7 @@ public class ExerciseListController {
     private final ButtonType cancelButton = new ButtonType("Cancel");
     
     public void initialize() {
-        exerciseListView.setCellFactory(
-            param -> new DragAndDropListCell(Exercise.class)
-        );
+        setUpListView();
         
         Callback<Exercise, Observable[]> extractor =
         (Exercise exercise) -> new Observable[] {
@@ -89,6 +94,32 @@ public class ExerciseListController {
         
         setUpListeners();
         setUpProperties();
+    }
+    
+    private void setUpListView() {
+        Callback<ListView<Exercise>, ListCell<Exercise>> cellWithDoubleClickCB =
+            (ListView<Exercise> exerciseListView) -> {
+                DragAndDropListCell cell = new DragAndDropListCell(Exercise.class);
+
+                cell.addEventHandler(
+                    CustomMouseEvent.MOUSE_DOUBLE_CLICKED,
+                    event -> {
+                        if (cell.getItem() != null) {
+                            try {
+                                editExercise((Exercise) cell.getItem());
+                            } catch (IOException e) {
+                                System.out.println(
+                                    "Error in ExerciseListController.setUpListView "
+                                    + e.getMessage()
+                                );
+                            }
+                        }
+                    }
+                );
+                return cell;
+            };
+        
+        exerciseListView.setCellFactory(cellWithDoubleClickCB);
     }
     
     private void setUpListeners() {
@@ -153,7 +184,6 @@ public class ExerciseListController {
             exerciseListView.getSelectionModel().selectedItemProperty()
         );
         
-        editButton.disableProperty().bind(exerciseNotSelectedBinding);
         removeButton.disableProperty().bind(exerciseNotSelectedBinding);
     }
     
@@ -281,8 +311,8 @@ public class ExerciseListController {
     }
     
     @FXML
-    private void newExercise() throws Exception {
-        String resource = "/fxml/ExerciseCreator.fxml";
+    private void newExercise() throws IOException {
+        String resource = EXERCISE_CREATOR_PATH;
         FXMLLoader loader = new FXMLLoader(getClass().getResource(resource));
         Parent root = loader.load();
         
@@ -299,24 +329,20 @@ public class ExerciseListController {
         showWindow(root);
     }
     
-    @FXML
-    private void editExercise() throws Exception {
-        String resource = "/fxml/ExerciseSetList.fxml";
+    private void editExercise(Exercise exercise) throws IOException {
+        String resource = EXERCISE_SET_LIST_PATH;
         FXMLLoader loader = new FXMLLoader(getClass().getResource(resource));
         Parent root = loader.load();
         
-        Exercise selectedExercise =
-            exerciseListView.getSelectionModel().getSelectedItem();
-        
         ExerciseSetListController controller = loader.getController();
-        controller.setExercise(selectedExercise);
+        controller.setExercise(exercise);
         
         removedExerciseSetsIdMap.putIfAbsent(
-            selectedExercise.getId(), new ArrayList<>()
+            exercise.getId(), new ArrayList<>()
         );
         
         controller.setRemovedExerciseSetsIdList(
-            removedExerciseSetsIdMap.get(selectedExercise.getId())
+            removedExerciseSetsIdMap.get(exercise.getId())
         );
         
         showWindow(root);
@@ -359,6 +385,12 @@ public class ExerciseListController {
         stage.initModality(Modality.APPLICATION_MODAL); 
         
         Scene scene = new Scene(root);
+        
+        // SETTING CUSTOM EVENT DISPATCHER TO SCENE
+        scene.setEventDispatcher(
+            new DoubleClickEventDispatcher(scene.getEventDispatcher())
+        );
+        
         stage.setScene(scene);
         stage.showAndWait();
     }

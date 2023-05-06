@@ -6,6 +6,7 @@ import com.mycompany.controls.DragAndDropListCell;
 import com.mycompany.controls.WorkoutPopupAndCopyDateCell;
 import com.mycompany.dao.ManagerImpl;
 import com.mycompany.domain.Workout;
+import com.mycompany.events.DoubleClickEventDispatcher;
 import java.sql.Date;
 import java.sql.SQLException;
 import java.time.LocalDate;
@@ -236,6 +237,12 @@ public class WorkoutListController {
         stage.initModality(Modality.APPLICATION_MODAL); 
         
         Scene scene = new Scene(root);
+        
+        // SETTING CUSTOM EVENT DISPATCHER TO SCENE
+        scene.setEventDispatcher(
+            new DoubleClickEventDispatcher(scene.getEventDispatcher())
+        );
+        
         stage.setScene(scene);
         stage.showAndWait();
     }

@@ -7,22 +7,27 @@ import com.mycompany.domain.Exercise;
 import com.mycompany.domain.ExerciseInfo;
 import com.mycompany.domain.ExerciseSet;
 import com.mycompany.domain.Workout;
+import com.mycompany.events.CustomMouseEvent;
 import com.mycompany.history.ExerciseInfoHistoryBuilder;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.event.EventTarget;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.util.Callback;
 
 public class ExerciseSetListController {
     
@@ -35,7 +40,7 @@ public class ExerciseSetListController {
     @FXML private ListView<ExerciseSet> exerciseSetListView;
     @FXML private ListView exerciseHistoryListView;
     
-    @FXML private Button editButton;
+    //@FXML private Button editButton;
     @FXML private Button removeButton;
     
     private final ObjectProperty<Exercise> exercise =
@@ -55,11 +60,42 @@ public class ExerciseSetListController {
     }
     
     public void initialize() {
+        setUpListView();
+        /*
         exerciseSetListView.setCellFactory(
             param -> new DragAndDropListCell(ExerciseSet.class)
         );
+        */
         setUpListeners();
         setUpProperties();
+        //setUpEventHandlers();
+    }
+    
+    private void setUpListView() {
+        Callback<ListView<ExerciseSet>, ListCell<ExerciseSet>> cellWithDoubleClickCB =
+            (ListView<ExerciseSet> lv) -> {
+                DragAndDropListCell dragAndDropListCell =
+                    new DragAndDropListCell(ExerciseSet.class);
+
+                dragAndDropListCell.addEventHandler(
+                    CustomMouseEvent.MOUSE_DOUBLE_CLICKED,
+                    event -> {
+                        if (dragAndDropListCell.getItem() != null) {
+                            try {
+                                editExerciseSet((ExerciseSet) dragAndDropListCell.getItem());
+                            } catch (IOException e) {
+                                System.out.println(
+                                    "Error in ExerciseSetListController.setUpListView(): "
+                                    + e.getMessage()
+                                );
+                            }
+                        }
+                    }
+                );
+                return dragAndDropListCell;
+            };
+        
+        exerciseSetListView.setCellFactory(cellWithDoubleClickCB);
     }
     
     private void setUpListeners() {
@@ -84,13 +120,11 @@ public class ExerciseSetListController {
         
         try {
             List<Workout> workoutList = manager.getAllWorkouts();
-            
             exerciseHistoryListView.setItems(
                 ExerciseInfoHistoryBuilder.createHistoryStringList(
                     workoutList, selectedExerciseInfo
                 )
             );
-            
         } catch (Exception e) {
             System.out.println(
                 "Error in ExerciseSetListContoller.setUpHistory(): "
@@ -104,10 +138,37 @@ public class ExerciseSetListController {
             exerciseSetListView.getSelectionModel().selectedItemProperty()
         );
         
-        editButton.disableProperty().bind(exerciseSetNotSelectedBinding);
         removeButton.disableProperty().bind(exerciseSetNotSelectedBinding);
     }
-
+    /*
+    private void setUpEventHandlers() {
+        exerciseSetListView.addEventHandler(
+            CustomMouseEvent.MOUSE_DOUBLE_CLICKED,
+            event -> {
+                final EventTarget eventTarget = event.getTarget();
+                if (eventTarget instanceof DragAndDropListCell) {
+                    DragAndDropListCell target =
+                        (DragAndDropListCell) eventTarget;
+                    
+                    if (target.getItem() == null || !(target.getItem() instanceof ExerciseSet)) {
+                        System.out.println("is null or not instance");
+                        return;
+                    }
+                    
+                    try {
+                        editExerciseSet((ExerciseSet) target.getItem());
+                        
+                    } catch (IOException e) {
+                        System.out.println(
+                            "Error in ExerciseSetListController exerciseSetListView "
+                            + "MOUSE_DOUBLE_CLICKED handler: " + e.getMessage()
+                        );
+                    }
+                }
+            }
+        );
+    }
+    */
     @FXML
     private void newExerciseSet() throws Exception {
         String resource = EXERCISE_SET_EDITOR_PATH;
@@ -126,18 +187,14 @@ public class ExerciseSetListController {
 
         showEditorWindow(root);
     }
-
-    @FXML
-    private void editExerciseSet() throws Exception {
+    
+    private void editExerciseSet(ExerciseSet exerciseSet) throws IOException {
         String resource = EXERCISE_SET_EDITOR_PATH;
         FXMLLoader loader = new FXMLLoader(getClass().getResource(resource));
         Parent root = loader.load();
 
-        ExerciseSet editedExerciseSet = 
-            exerciseSetListView.getSelectionModel().getSelectedItem();
-        
         ExerciseSetEditorController controller = loader.getController();
-        controller.setExerciseSet(editedExerciseSet);
+        controller.setExerciseSet(exerciseSet);
         
         showEditorWindow(root);
     }
