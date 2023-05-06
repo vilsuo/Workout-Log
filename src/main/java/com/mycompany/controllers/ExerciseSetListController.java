@@ -12,12 +12,8 @@ import java.util.ArrayList;
 import java.util.List;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
-import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -31,16 +27,16 @@ import javafx.stage.Stage;
 public class ExerciseSetListController {
     
     private final ManagerImpl manager = new ManagerImpl(App.DATABASE_PATH);
-    
-    @FXML private Parent root;
+    private final String EXERCISE_SET_EDITOR_PATH =
+        "/fxml/ExerciseSetEditor.fxml";
     
     @FXML private Label exerciseInfoNameLabel;
     
     @FXML private ListView<ExerciseSet> exerciseSetListView;
+    @FXML private ListView exerciseHistoryListView;
     
     @FXML private Button editButton;
     @FXML private Button removeButton;
-    @FXML private Button historyButton;
     
     private final ObjectProperty<Exercise> exercise =
         new SimpleObjectProperty<>();
@@ -52,12 +48,11 @@ public class ExerciseSetListController {
     private List<Integer> removedExerciseSetsIdList =
         new ArrayList<>();
     
-    public void setRemovedExerciseSetsIdList(List<Integer> removedExerciseSetsIdList) {
+    public void setRemovedExerciseSetsIdList(
+            List<Integer> removedExerciseSetsIdList) {
+        
         this.removedExerciseSetsIdList = removedExerciseSetsIdList;
     }
-    
-    private final BooleanProperty historyIsShowing =
-        new SimpleBooleanProperty(false);
     
     public void initialize() {
         exerciseSetListView.setCellFactory(
@@ -77,8 +72,31 @@ public class ExerciseSetListController {
                 exerciseInfoNameLabel.setText(
                     newExercise.getExerciseInfo().toString()
                 );
+                
+                setUpHistory();
             }
         });
+    }
+    
+    private void setUpHistory() {
+        final ExerciseInfo selectedExerciseInfo =
+            exercise.get().getExerciseInfo();
+        
+        try {
+            List<Workout> workoutList = manager.getAllWorkouts();
+            
+            exerciseHistoryListView.setItems(
+                ExerciseInfoHistoryBuilder.createHistoryStringList(
+                    workoutList, selectedExerciseInfo
+                )
+            );
+            
+        } catch (Exception e) {
+            System.out.println(
+                "Error in ExerciseSetListContoller.setUpHistory(): "
+                + e.getMessage()
+            );
+        }
     }
     
     private void setUpProperties() {
@@ -88,15 +106,11 @@ public class ExerciseSetListController {
         
         editButton.disableProperty().bind(exerciseSetNotSelectedBinding);
         removeButton.disableProperty().bind(exerciseSetNotSelectedBinding);
-        
-        historyButton.disableProperty().bind(
-            historyIsShowing
-        );
     }
 
     @FXML
     private void newExerciseSet() throws Exception {
-        String resource = "/fxml/ExerciseSetEditor.fxml";
+        String resource = EXERCISE_SET_EDITOR_PATH;
         FXMLLoader loader = new FXMLLoader(getClass().getResource(resource));
         Parent root = loader.load();
 
@@ -115,7 +129,7 @@ public class ExerciseSetListController {
 
     @FXML
     private void editExerciseSet() throws Exception {
-        String resource = "/fxml/ExerciseSetEditor.fxml";
+        String resource = EXERCISE_SET_EDITOR_PATH;
         FXMLLoader loader = new FXMLLoader(getClass().getResource(resource));
         Parent root = loader.load();
 
@@ -155,30 +169,6 @@ public class ExerciseSetListController {
         }
     }
     
-    @FXML
-    private void showExerciseHistory() {
-        final ExerciseInfo selectedExerciseInfo = exercise.get().getExerciseInfo();
-        
-        try {
-            List<Workout> workoutList = manager.getAllWorkouts();
-            
-            ListView exerciseHistoryListView = new ListView();
-            exerciseHistoryListView.setItems(
-                ExerciseInfoHistoryBuilder.createHistoryStringList(
-                    workoutList, selectedExerciseInfo
-                )
-            );
-            
-            showHistoryWindow(exerciseHistoryListView, selectedExerciseInfo);
-            
-        } catch (Exception e) {
-            System.out.println(
-                "Error in ExerciseSetListContoller.showExerciseHistory(): "
-                + e.getMessage()
-            );
-        }
-    }
-    
     private void close() {
         exerciseSetListView.getScene().getWindow().hide();
     }
@@ -191,23 +181,5 @@ public class ExerciseSetListController {
         Scene scene = new Scene(parent);
         stage.setScene(scene);
         stage.showAndWait();
-    }
-    
-    private void showHistoryWindow(ListView listView, ExerciseInfo exerciseInfo) {
-        historyIsShowing.set(true);
-        
-        Stage stage = new Stage();
-        stage.setTitle(exerciseInfo.toString());
-        stage.initOwner(root.getScene().getWindow());
-        
-        Scene scene = new Scene(listView);
-        stage.setScene(scene);
-        stage.show();
-        
-        stage.setOnHiding(
-            event -> {
-                historyIsShowing.set(false);
-            }
-        );
     }
 }

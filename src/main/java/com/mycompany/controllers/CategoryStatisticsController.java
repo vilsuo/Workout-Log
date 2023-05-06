@@ -288,7 +288,7 @@ public class CategoryStatisticsController {
             addPieChartData(chart, "Other", totalSetsNotTracked);
         }
         
-        chart.setTitle(title + " (" + chart.getTotal() + ")");
+        chart.setTitle(title + " (" + ((int) chart.getTotal()) + ")");
     }
     
     private void addPieChartData(PieChart pChart, String name, int value) {

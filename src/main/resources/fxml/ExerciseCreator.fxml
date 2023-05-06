@@ -36,13 +36,13 @@
     <Label text="Exercise"
         GridPane.columnIndex="0" GridPane.rowIndex="1" />
 
-    <ComboBox fx:id="exerciseCategoryComboBox"
+    <ComboBox fx:id="exerciseCategoryComboBox" promptText="Select category"
         GridPane.columnIndex="1" GridPane.rowIndex="0">
         <maxWidth>
             <Double fx:constant="MAX_VALUE" />
         </maxWidth>
     </ComboBox>
-    <ComboBox fx:id="exerciseNameComboBox"
+    <ComboBox fx:id="exerciseNameComboBox" promptText="Select exercise"
         GridPane.columnIndex="1" GridPane.rowIndex="1">
         <maxWidth>
             <Double fx:constant="MAX_VALUE" />

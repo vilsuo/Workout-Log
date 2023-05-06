@@ -7,11 +7,12 @@
 <?import javafx.scene.control.ListView?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
 <?import javafx.scene.layout.TilePane?>
 <?import javafx.scene.layout.VBox?>
 
 <VBox alignment="CENTER" spacing="5"
-    fx:id="root"
     xmlns:fx="http://javafx.com/fxml/1"
     fx:controller="com.mycompany.controllers.ExerciseSetListController">
     <padding>
@@ -20,35 +21,40 @@
     <children>
         <Label fx:id="exerciseInfoNameLabel" />
         
-        <ListView fx:id="exerciseSetListView" VBox.vgrow="ALWAYS"/>
-        
-        <VBox spacing="5">
-            <children>
-                <HBox spacing="5">
-                    <children>
-                        <Button text="New" onAction="#newExerciseSet" HBox.hgrow="ALWAYS">
-                            <maxWidth>
-                                <Double fx:constant="MAX_VALUE" />
-                            </maxWidth>
-                        </Button>
-                        <Button text="Edit" onAction="#editExerciseSet" fx:id="editButton" HBox.hgrow="ALWAYS">
-                            <maxWidth>
-                                <Double fx:constant="MAX_VALUE" />
-                            </maxWidth>
-                        </Button>
-                        <Button text="History" onAction="#showExerciseHistory" fx:id="historyButton" HBox.hgrow="ALWAYS">
-                            <maxWidth>
-                                <Double fx:constant="MAX_VALUE" />
-                            </maxWidth>
-                        </Button>
-                        <Button text="Remove" onAction="#removeExerciseSet" fx:id="removeButton" HBox.hgrow="ALWAYS">
-                            <maxWidth>
-                                <Double fx:constant="MAX_VALUE" />
-                            </maxWidth>
-                        </Button>
-                    </children>
-                </HBox>
-            </children>
-        </VBox>
+        <TabPane VBox.vgrow="ALWAYS" tabClosingPolicy="UNAVAILABLE">
+            <tabs>
+                <Tab text="Sets">
+                    <VBox spacing="5">
+                        <children>
+                           <ListView fx:id="exerciseSetListView" VBox.vgrow="ALWAYS"/>
+                    
+                            <HBox spacing="5">
+                                <children>
+                                    <Button text="New" onAction="#newExerciseSet" HBox.hgrow="ALWAYS">
+                                        <maxWidth>
+                                            <Double fx:constant="MAX_VALUE" />
+                                        </maxWidth>
+                                    </Button>
+                                    <Button text="Edit" onAction="#editExerciseSet" fx:id="editButton" HBox.hgrow="ALWAYS">
+                                        <maxWidth>
+                                            <Double fx:constant="MAX_VALUE" />
+                                        </maxWidth>
+                                    </Button>
+                                    <Button text="Remove" onAction="#removeExerciseSet" fx:id="removeButton" HBox.hgrow="ALWAYS">
+                                        <maxWidth>
+                                            <Double fx:constant="MAX_VALUE" />
+                                        </maxWidth>
+                                    </Button>
+                                </children>
+                            </HBox> 
+                        </children>
+                    </VBox>
+                </Tab>
+                
+                <Tab text="History">
+                    <ListView fx:id="exerciseHistoryListView" />
+                </Tab>
+            </tabs>
+        </TabPane>
     </children>
 </VBox>
