@@ -398,9 +398,72 @@ public class ManagerImpl {
         }
     }
     
-    public void copyWorkout(int workoutId, Date dateToSet) throws SQLException {
+    public Workout copyWorkout(int workoutId, Date dateToSet, int orderNumberToSet) throws SQLException {
         try (Connection connection = createConnectionAndEnsureDatabase()) {
+            Workout workoutToCopy = getWorkout(connection, workoutId);
             
+            Workout newWorkout = createWorkout(
+                workoutToCopy.getName(),    // copy name
+                dateToSet,
+                orderNumberToSet
+            );
+            int newWorkoutId = newWorkout.getId();
+            
+            // copy exercise list
+            for (final Exercise exerciseToCopy : workoutToCopy.getExerciseList()) {
+                
+                int newExerciseId = createExercise(
+                    newWorkoutId,
+                    exerciseToCopy.getExerciseInfo().getId(),
+                    exerciseToCopy.getOrderNumber()
+                );
+               
+                for (final ExerciseSet exerciseSetToCopy : exerciseToCopy.getExerciseSetList()) {
+                    int newExerciseSetId = createExerciseSet(
+                        exerciseSetToCopy.getWorkingSets(),
+                        exerciseSetToCopy.getRepetitions(),
+                        exerciseSetToCopy.getWorkingWeight(),
+                        exerciseSetToCopy.getOrderNumber()
+                    );
+                    addExerciseSetToExercise(newExerciseId, newExerciseSetId);
+                }
+            }
+            
+            return getWorkout(connection, newWorkoutId);
         }
     }
+    
+    /*
+    private ExerciseInfo copyExerciseInfo(final ExerciseInfo exerciseInfo) {
+        return new ExerciseInfo(
+            exerciseInfo.getId(),
+            exerciseInfo.getName(),
+            exerciseInfo.getCategory()
+        );
+    }
+    
+    private ExerciseSet copyExerciseSet(final ExerciseSet exerciseSet) {
+        return new ExerciseSet(
+            exerciseSet.getId(),
+            exerciseSet.getWorkingSets(),
+            exerciseSet.getRepetitions(),
+            exerciseSet.getWorkingWeight(),
+            exerciseSet.getOrderNumber()
+        );
+    }
+    
+    private Exercise copyExercise(final Exercise exercise) {
+        List<ExerciseSet> exerciseSetList = new ArrayList<>();
+        for (final ExerciseSet exerciseSetToCopy : exercise.getExerciseSetList()) {
+            exerciseSetList.add(copyExerciseSet(exerciseSetToCopy));
+        }
+        
+        return new Exercise(
+            exercise.getId(),
+            copyExerciseInfo(exercise.getExerciseInfo()),
+            exerciseSetList,
+            exercise.getOrderNumber()
+        );
+    }
+    */
 }

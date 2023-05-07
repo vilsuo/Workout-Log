@@ -14,8 +14,6 @@ import javafx.scene.Parent;
 /*
 TODO
 - WorkoutListView
-    - double click edit
-    - copying workouts
     - smolov jr / wendler531 templates
 
 - rep range graph progression

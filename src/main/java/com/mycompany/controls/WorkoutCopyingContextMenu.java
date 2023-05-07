@@ -5,17 +5,22 @@ import com.mycompany.application.App;
 import com.mycompany.dao.ManagerImpl;
 import com.mycompany.domain.Workout;
 import java.sql.Date;
+import java.util.List;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.DatePicker;
+import javafx.scene.control.ListView;
 import javafx.scene.control.MenuItem;
 
-public class WorkoutContextMenu extends ContextMenu {
+public class WorkoutCopyingContextMenu extends ContextMenu {
     
     private final ManagerImpl manager = new ManagerImpl(App.DATABASE_PATH);
     
-    public WorkoutContextMenu(final DatePicker datePicker, /*Date dateToCopyWorkoutTo,*/ Date dateToShowContextMenuOf) {
+    public WorkoutCopyingContextMenu(
+            ListView<Workout> workoutListView, final DatePicker datePicker,
+            List<Date> dateList, Date dateToShowContextMenuOf) {
+        
         super();
         
         // context menu does not show if it is empty,
@@ -26,24 +31,38 @@ public class WorkoutContextMenu extends ContextMenu {
         setOnShowing(
             contextMenuEvent -> {
                 try {
-                    ObservableList<Workout> workoutList =
+                    ObservableList<Workout> workoutListBySelectedDate =
                         FXCollections.observableList(
                             manager.getWorkoutsByDate(dateToShowContextMenuOf)
                         );
                     
                     getItems().clear();
-                    for (final Workout workout : workoutList) {
+                    for (final Workout workout : workoutListBySelectedDate) {
                         MenuItem menuItem = new MenuItem(
                             "Copy '" + workout.getName() + "'"
                         );
+                        
                         menuItem.setOnAction(
                             menuItemEvent -> {
-                                // Needed to use datePicker here instead of
-                                // simply just a date, since the date value
-                                // would not be updated correctly
-                                copyWorkout(
-                                    workout, Date.valueOf(datePicker.getValue())
-                                );
+                                try {
+                                    int orderNumberToSet = workoutListBySelectedDate.size() + 1;
+                                    Date dateToCopyTo = Date.valueOf(datePicker.getValue());
+                                    
+                                    Workout copiedWorkout = manager.copyWorkout(
+                                        workout.getId(),
+                                        dateToCopyTo,
+                                        orderNumberToSet
+                                    );
+                                    
+                                    dateList.add(dateToCopyTo);
+                                    workoutListView.getItems().add(copiedWorkout);
+                                    
+                                } catch (Exception e) {
+                                    System.out.println(
+                                        "Error in WorkoutCopyingContextMenu MenuItemEvent: "
+                                        + e.getMessage()
+                                    );
+                                }
                             }
                         );
                         getItems().add(menuItem);
@@ -57,9 +76,5 @@ public class WorkoutContextMenu extends ContextMenu {
                 }
             }
         );
-    }
-    
-    private void copyWorkout(final Workout workoutToCopy, final Date dateToCopyWorkoutTo) {
-        System.out.println("copied: " + workoutToCopy.getName() + " to " + dateToCopyWorkoutTo);
     }
 }

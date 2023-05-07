@@ -34,10 +34,6 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 
-/*
-TODO
-
-*/
 public class WorkoutListController {
     
     private final ManagerImpl manager = new ManagerImpl(App.DATABASE_PATH);
@@ -91,7 +87,11 @@ public class WorkoutListController {
         }
         
         datePicker.setDayCellFactory(
-            param -> new WorkoutPopupAndCopyDateCell(datePicker, dateList)
+            param -> {
+                return new WorkoutPopupAndCopyDateCell(
+                    datePicker, dateList, workoutListView
+                );
+            }
         );
 
         datePicker.valueProperty().addListener(
@@ -151,7 +151,7 @@ public class WorkoutListController {
                                         workoutList
                                     );
                                     
-                                    // update order numbers in screen
+                                    // update order numbers on screen
                                     for (int i = 0; i < workoutList.size(); ++i) {
                                         workoutList.get(i).setOrderNumber(i + 1);
                                     }
@@ -230,6 +230,7 @@ public class WorkoutListController {
             try {
                 Workout selectedWorkout =
                     workoutListView.getSelectionModel().getSelectedItem();
+                
                 manager.removeWorkout(selectedWorkout.getId());
                 workoutListView.getItems().remove(selectedWorkout);
                 dateList.remove(selectedWorkout.getDate());

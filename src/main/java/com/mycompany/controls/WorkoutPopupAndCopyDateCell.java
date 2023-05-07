@@ -1,18 +1,22 @@
 
 package com.mycompany.controls;
 
+import com.mycompany.domain.Workout;
 import java.sql.Date;
 import java.time.LocalDate;
 import java.util.List;
 import javafx.scene.control.DateCell;
 import javafx.scene.control.DatePicker;
+import javafx.scene.control.ListView;
 
 public class WorkoutPopupAndCopyDateCell extends DateCell {
     
     private final List<Date> dateList;
-    //private final Popup popup = new Popup();
     
-    public WorkoutPopupAndCopyDateCell(final DatePicker datePicker, List<Date> dateList) {
+    public WorkoutPopupAndCopyDateCell(
+            final DatePicker datePicker, List<Date> dateList,
+            ListView<Workout> workoutlistView) {
+        
         super();
         
         this.dateList = dateList;
@@ -20,10 +24,11 @@ public class WorkoutPopupAndCopyDateCell extends DateCell {
         itemProperty().addListener(
             (obs, oldValue, newValue) -> {
                 if (newValue != null) {
-                    final WorkoutContextMenu contextMenu =
-                        new WorkoutContextMenu(
-                            //Date.valueOf(datePicker.getValue()),
+                    final WorkoutCopyingContextMenu contextMenu =
+                        new WorkoutCopyingContextMenu(
+                            workoutlistView,
                             datePicker,
+                            dateList,
                             Date.valueOf(newValue)
                         );
                     
