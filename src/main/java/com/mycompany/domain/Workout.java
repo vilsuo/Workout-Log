@@ -19,10 +19,6 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.util.Callback;
 
-/*
-    TODO
--  sort by date also?
-*/
 public class Workout implements Comparable<Workout> {
     
     private final ReadOnlyIntegerWrapper id;
@@ -121,16 +117,21 @@ public class Workout implements Comparable<Workout> {
         this.orderNumber.set(order);
     }
     
-    // sorts by order number
-    // and date?
     @Override
     public int compareTo(Workout other) {
-        
+        /*
         if (date.get().before(other.getDate())) {
             return -1;
+            
+        } 
+        return orderNumber.get() - other.orderNumber.get();
+        */
+        
+        if (date.get().equals(other.getDate())) {
+            return orderNumber.get() - other.orderNumber.get();
         }
         
-        return orderNumber.get() - other.orderNumber.get();
+        return date.get().before(other.getDate()) ? -1 : 1;
     }
     
     @Override
@@ -143,26 +144,4 @@ public class Workout implements Comparable<Workout> {
         }
         return sb.toString();
     }
-    
-    /*
-    @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder("id=");
-        sb.append(id.get());
-        sb.append(", name=");
-        sb.append(name.get());
-        sb.append(", date=");
-        sb.append(date.get().toString());
-        sb.append(", #");
-        sb.append(orderNumber.get());
-        sb.append("\n");
-        
-        for (Exercise exercise : exerciseList) {
-            sb.append(exercise);
-            sb.append("\n");
-        }
-        
-        return sb.toString();
-    }
-    */
 }

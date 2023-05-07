@@ -12,6 +12,7 @@ import com.mycompany.history.ExerciseInfoHistoryBuilder;
 import java.sql.Date;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,20 +22,24 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.ObservableMap;
 import javafx.fxml.FXML;
+import javafx.geometry.Insets;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TableView;
+import javafx.scene.layout.HBox;
 
 /*
 TODO
-- set records if at least the required rep count
-
 - add option to add more lines to graph
+- add minRepCount textfield
 
+- make sure the min rep count label has an integer value
 
 - implement total volume/total sets charts
 
@@ -46,6 +51,8 @@ public class ExerciseHistoryController {
     @FXML private ComboBox exerciseCategoryComboBox;
     @FXML private ComboBox exerciseNameComboBox;
     
+    @FXML private ScrollPane maximumRepetitionCountScrollPane;
+    
     @FXML private Button calculateButton;
     
     @FXML private Label calculatedExerciseInfoLabel;
@@ -54,10 +61,13 @@ public class ExerciseHistoryController {
     
     @FXML private LineChart progressionLineChart;
     
+    private Map<String, Boolean> selectedMaximumRepetitionCountsMap = new HashMap<>();
+    
     private ObservableMap<String, Map<String, Integer>> exerciseInfoMap;
     
     public void initialize() {
         setUpExerciseData();
+        setUpMaximumRepetitionCountCheckBoxes();
         setUpListeners();
         setUpProperties();
     }
@@ -91,11 +101,34 @@ public class ExerciseHistoryController {
             
         } catch (Exception e) {
             System.out.println(
-                "Error in ExerciseCreatorController.loadExerciseInfoList(): "
+                "Error in ExerciseHistoryController.loadExerciseInfoList(): "
                 + e.getMessage()
             );
         }
         return new ArrayList<>();
+    }
+    
+    private void setUpMaximumRepetitionCountCheckBoxes() {
+        HBox hb = new HBox();
+        hb.setPadding(new Insets(10));
+        hb.setSpacing(5);
+        
+        final List<String> maximumRepetitionCountOptions = new ArrayList<>(
+            Arrays.asList(
+                "1", "2", "3", "4", "5", "6", "8", "10", "12", "15", "20"
+            )
+        );
+        
+        for (String str : maximumRepetitionCountOptions) {
+            final CheckBox maximumRepetitionCountCheckBox = new CheckBox(str);
+            maximumRepetitionCountCheckBox.selectedProperty().addListener(
+                (obs, oldValue, newValue) -> {
+                    selectedMaximumRepetitionCountsMap.put(str, newValue);
+                }
+            );
+            hb.getChildren().add(maximumRepetitionCountCheckBox);
+        }
+        maximumRepetitionCountScrollPane.setContent(hb);
     }
     
     private void setUpListeners() {
@@ -149,7 +182,6 @@ public class ExerciseHistoryController {
         calculatedExerciseInfoLabel.setText(exerciseInfo.toString());
         
         List<Workout> workoutList = new ArrayList<>();
-        
         try {
             workoutList = manager.getAllWorkouts();
         } catch (SQLException e) {
@@ -162,8 +194,8 @@ public class ExerciseHistoryController {
         setUpHistoryListView(workoutList, exerciseInfo);
         setUpRecordsTableView(workoutList, exerciseInfo);
         
-        int minRepCount = 1;
-        setUpProgressionChart(workoutList, exerciseInfo, minRepCount);
+        progressionLineChart.getData().clear();
+        setUpProgressionLineChart(workoutList, exerciseInfo);
     }
     
     private void setUpHistoryListView(final List<Workout> workoutList,
@@ -200,6 +232,7 @@ public class ExerciseHistoryController {
         // <repetitions, ExerciseRecordEnty>
         Map<Integer, ExerciseRecordEntry> recordsMap = new HashMap<>();
         
+        // 1. calculate actual exact rep records
         for (Workout workout : workoutList) {
             Date workoutDate = workout.getDate();
             
@@ -229,27 +262,59 @@ public class ExerciseHistoryController {
                 }
             }
         }
+        
+        // 2. fill in the missing values and if higher rep count has higher 
+        // weight, update the lower rep count maxes
+        if (recordsMap.size() > 1) {
+            int maxRepetitions = recordsMap.keySet().stream()
+                .max(Integer::compare).get();
+            
+            for (int repetitions = maxRepetitions - 1; repetitions > 0; --repetitions) {
+                double previousWeight = recordsMap.get(repetitions + 1).getWeight();
+                Date previousDate = recordsMap.get(repetitions + 1).getDate();
+                
+                if (!recordsMap.containsKey(repetitions) || 
+                        (previousWeight > recordsMap.get(repetitions).getWeight())) {
+                    
+                    recordsMap.put(
+                        repetitions,
+                        new ExerciseRecordEntry(
+                            repetitions, 
+                            previousWeight,
+                            previousDate
+                        )
+                    );
+                }
+            }
+        }
         return recordsMap;
     }
     
-    private void setUpProgressionChart(final List<Workout> workoutList, final ExerciseInfo exerciseInfo, int minRepCount) {
-        Map<Date, Double> progressionMap = calculateProgression(workoutList, exerciseInfo, minRepCount);
-        
-        progressionLineChart.setTitle("Progression for rep count >= " + minRepCount);
-        
-        XYChart.Series series = new XYChart.Series<>();
-        progressionMap.keySet().stream().sorted().forEach(
-            date -> {
-                series.getData().add(
-                    new XYChart.Data<>(date.toString(), progressionMap.get(date))
+    private void setUpProgressionLineChart(final List<Workout> workoutList, final ExerciseInfo exerciseInfo) {
+        for (String maximumRepetitionCount : selectedMaximumRepetitionCountsMap.keySet()) {
+            // check if repetition count is selected
+            if (selectedMaximumRepetitionCountsMap.get(maximumRepetitionCount)) {
+                Map<Date, Double> progressionMap = calculateProgression(
+                    workoutList, exerciseInfo, Integer.valueOf(maximumRepetitionCount)
                 );
+
+                XYChart.Series series = new XYChart.Series<>();
+                series.setName(maximumRepetitionCount + "+");
+                progressionMap.keySet().stream().sorted().forEach(
+                    date -> {
+                        series.getData().add(
+                            new XYChart.Data<>(date.toString(), progressionMap.get(date))
+                        );
+                    }
+                );
+                progressionLineChart.getData().add(series);
             }
-        );
-        
-        progressionLineChart.getData().setAll(series);
+        }
     }
     
-    private Map<Date, Double> calculateProgression(final List<Workout> workoutList, final ExerciseInfo exerciseInfo, int minRepCount) {
+    private Map<Date, Double> calculateProgression(final List<Workout> workoutList,
+            final ExerciseInfo exerciseInfo, int maximumRepetitionCount) {
+        
         Map<Date, Double> progressionMap = new HashMap<>();
         
         double lastRecordWeight = 0.0;
@@ -264,13 +329,10 @@ public class ExerciseHistoryController {
                         int reps = exerciseSet.getRepetitions();
                         double weight = exerciseSet.getWorkingWeight();
                         
-                        if (reps >= minRepCount && weight > lastRecordWeight) {
-                            
+                        if (reps >= maximumRepetitionCount && weight > lastRecordWeight) {
                             progressionMap.put(date, weight);
-                            
                             lastRecordWeight = weight;
                         }
-                        
                     }
                 }
             }

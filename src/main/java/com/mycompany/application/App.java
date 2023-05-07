@@ -1,10 +1,14 @@
 package com.mycompany.application;
 
+import com.mycompany.domain.Workout;
 import com.mycompany.events.DoubleClickEventDispatcher;
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.time.LocalDate;
+import java.time.Month;
 import javafx.application.Application;
 import javafx.stage.Stage;
 import javafx.scene.Scene;
@@ -26,6 +30,15 @@ public class App extends Application {
     @Override
     public void start(Stage primaryStage) throws SQLException {
         init();
+        
+        Workout w1 = new Workout(
+            1, "Workout 1", Date.valueOf(LocalDate.of(2023, Month.JANUARY, 1)), 1
+        );
+        Workout w2 = new Workout(
+            2, "Workout 1", Date.valueOf(LocalDate.of(2023, Month.MAY, 7)), 2
+        );
+        
+        System.out.println(w1.compareTo(w2));
         
         try {
             Parent root = (Parent)FXMLLoader.load(getClass().getResource("/fxml/Main.fxml"));
