@@ -1,5 +1,6 @@
 package com.mycompany.application;
 
+import com.mycompany.events.DoubleClickEventDispatcher;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -31,6 +32,12 @@ public class App extends Application {
         try {
             Parent root = (Parent)FXMLLoader.load(getClass().getResource("/fxml/Main.fxml"));
             Scene scene = new Scene(root);
+            
+            // SETTING CUSTOM EVENT DISPATCHER TO SCENE
+            scene.setEventDispatcher(
+                new DoubleClickEventDispatcher(scene.getEventDispatcher())
+            );
+            
             primaryStage.setScene(scene);
             primaryStage.show();
         } catch(Exception e) {

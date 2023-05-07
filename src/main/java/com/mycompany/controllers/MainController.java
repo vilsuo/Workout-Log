@@ -12,13 +12,17 @@ import javafx.stage.Stage;
 
 public class MainController {
 
+    private final String EXERCISE_INFO_EDITOR_PATH = "/fxml/ExerciseInfoEditor.fxml";
+    private final String CATEGORY_STATISTICS_PATH = "/fxml/CategoryStatistics.fxml";
+    private final String EXERCISE_HISTORY_PATH = "/fxml/ExerciseHistory.fxml";
+    
     @FXML private BorderPane root;
     
     @FXML private WorkoutListController workoutListController;
     
     @FXML
     private void openExerciseInfoEditor() throws IOException {
-        String resource = "/fxml/ExerciseInfoEditor.fxml";
+        String resource = EXERCISE_INFO_EDITOR_PATH;
         FXMLLoader loader = new FXMLLoader(getClass().getResource(resource));
         Parent parent = loader.load();
         showWindowWithModal(parent);
@@ -28,7 +32,7 @@ public class MainController {
     
     @FXML
     private void openStatistics() throws IOException {
-        String resource = "/fxml/CategoryStatistics.fxml";
+        String resource = CATEGORY_STATISTICS_PATH;
         FXMLLoader loader = new FXMLLoader(getClass().getResource(resource));
         Parent parent = loader.load();
         showWindowWithoutModal(parent, "Category Statistics", 800, 600);
@@ -36,7 +40,7 @@ public class MainController {
     
     @FXML
     private void openExerciseHistory() throws IOException {
-        String resource = "/fxml/ExerciseHistory.fxml";
+        String resource = EXERCISE_HISTORY_PATH;
         FXMLLoader loader = new FXMLLoader(getClass().getResource(resource));
         Parent parent = loader.load();
         showWindowWithoutModal(parent, "Exercise History", 500, 600);

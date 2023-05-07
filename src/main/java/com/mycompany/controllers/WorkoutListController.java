@@ -6,7 +6,9 @@ import com.mycompany.controls.DragAndDropListCell;
 import com.mycompany.controls.WorkoutPopupAndCopyDateCell;
 import com.mycompany.dao.ManagerImpl;
 import com.mycompany.domain.Workout;
+import com.mycompany.events.CustomMouseEvent;
 import com.mycompany.events.DoubleClickEventDispatcher;
+import java.io.IOException;
 import java.sql.Date;
 import java.sql.SQLException;
 import java.time.LocalDate;
@@ -26,6 +28,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.DatePicker;
+import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -33,26 +36,49 @@ import javafx.util.Callback;
 
 /*
 TODO
-- refresh when returning from exercise info editing window
+
 */
 public class WorkoutListController {
     
     private final ManagerImpl manager = new ManagerImpl(App.DATABASE_PATH);
-    
-    private List<Date> dateList = new ArrayList<>();
+    private final String EXERCISE_LIST_PATH= "/fxml/ExerciseList.fxml";
     
     @FXML private DatePicker datePicker;
     @FXML private ListView<Workout> workoutListView;
-    @FXML private Button editButton;
     @FXML private Button removeButton;
     
+    private List<Date> dateList = new ArrayList<>();
+    
     public void initialize() {
-        workoutListView.setCellFactory(
-            param -> new DragAndDropListCell(Workout.class)
-        );
-        
+        setUpListView();
         setUpDatePicker();
         setUpButtonProperties();
+    }
+    
+    private void setUpListView() {
+        Callback<ListView<Workout>, ListCell<Workout>> cellWithDoubleClickCB =
+            (ListView<Workout> exerciseListView) -> {
+                DragAndDropListCell cell = new DragAndDropListCell(Workout.class);
+
+                cell.addEventHandler(
+                    CustomMouseEvent.MOUSE_DOUBLE_CLICKED,
+                    event -> {
+                        if (cell.getItem() != null) {
+                            try {
+                                editWorkout((Workout) cell.getItem());
+                            } catch (IOException e) {
+                                System.out.println(
+                                    "Error in WorkoutListController.setUpListView(): "
+                                    + e.getMessage()
+                                );
+                            }
+                        }
+                    }
+                );
+                return cell;
+            };
+        
+        workoutListView.setCellFactory(cellWithDoubleClickCB);
     }
     
     private void setUpDatePicker() {
@@ -153,12 +179,6 @@ public class WorkoutListController {
     }
     
     private void setUpButtonProperties() {
-        editButton.disableProperty().bind(
-            Bindings.isNull(
-                workoutListView.getSelectionModel().selectedItemProperty()
-            )
-        );
-        
         removeButton.disableProperty().bind(
             Bindings.isNull(
                 workoutListView.getSelectionModel().selectedItemProperty()
@@ -184,16 +204,13 @@ public class WorkoutListController {
         }
     }
     
-    @FXML
-    private void editWorkout() throws Exception {
-        String resource = "/fxml/ExerciseList.fxml";
+    private void editWorkout(Workout workout) throws IOException {
+        String resource = EXERCISE_LIST_PATH;
         FXMLLoader loader = new FXMLLoader(getClass().getResource(resource));
         Parent root = loader.load();
         
         ExerciseListController controller = loader.getController();
-        Workout selectedWorkout =
-            workoutListView.getSelectionModel().getSelectedItem();
-        controller.setWorkout(selectedWorkout);
+        controller.setWorkout(workout);
         
         showWindow(root);
     }
