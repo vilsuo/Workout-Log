@@ -43,7 +43,7 @@ public class MainController {
         String resource = EXERCISE_HISTORY_PATH;
         FXMLLoader loader = new FXMLLoader(getClass().getResource(resource));
         Parent parent = loader.load();
-        showWindowWithoutModal(parent, "Exercise History", 500, 600);
+        showWindowWithoutModal(parent, "Exercise History", 800, 600);
     }
  
     private void showWindowWithModal(Parent parent) {

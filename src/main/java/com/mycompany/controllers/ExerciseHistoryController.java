@@ -11,7 +11,6 @@ import com.mycompany.domain.Workout;
 import com.mycompany.history.ExerciseInfoHistoryBuilder;
 import java.sql.Date;
 import java.sql.SQLException;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -22,25 +21,27 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.ObservableMap;
 import javafx.fxml.FXML;
+import javafx.scene.chart.LineChart;
+import javafx.scene.chart.XYChart;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
-import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TableView;
 
 /*
 TODO
+- set records if at least the required rep count
+
+- add option to add more lines to graph
+
+
 - implement total volume/total sets charts
 
-- implement 1/3/5/8/10/12/15 max graph???
 */
 public class ExerciseHistoryController {
     
     private final ManagerImpl manager = new ManagerImpl(App.DATABASE_PATH);
-    
-    @FXML private DatePicker startDatePicker;
-    @FXML private DatePicker endDatePicker;
     
     @FXML private ComboBox exerciseCategoryComboBox;
     @FXML private ComboBox exerciseNameComboBox;
@@ -51,12 +52,11 @@ public class ExerciseHistoryController {
     @FXML private ListView historyListView;
     @FXML private TableView recordsTableView;
     
+    @FXML private LineChart progressionLineChart;
+    
     private ObservableMap<String, Map<String, Integer>> exerciseInfoMap;
     
     public void initialize() {
-        startDatePicker.setValue(LocalDate.now().minusMonths(1));
-        endDatePicker.setValue(LocalDate.now());
-        
         setUpExerciseData();
         setUpListeners();
         setUpProperties();
@@ -121,21 +121,9 @@ public class ExerciseHistoryController {
             )
         );
         
-        endDatePicker.disableProperty().bind(
-            Bindings.or(
-                startDatePicker.valueProperty().isNull(),
-                startDatePicker.disableProperty()
-            )
-        );
-        
         calculateButton.disableProperty().bind(
-            Bindings.or(
-                exerciseNameComboBox.getSelectionModel()
-                    .selectedItemProperty().isNull(),
-                Bindings.or(
-                    endDatePicker.disableProperty(),
-                    endDatePicker.valueProperty().isNull()
-                )
+            Bindings.isNull(
+                exerciseNameComboBox.getSelectionModel().selectedItemProperty()
             )
         );
     }
@@ -160,13 +148,10 @@ public class ExerciseHistoryController {
         
         calculatedExerciseInfoLabel.setText(exerciseInfo.toString());
         
-        Date startDate = Date.valueOf(startDatePicker.getValue());
-        Date endDate = Date.valueOf(endDatePicker.getValue());
-        
         List<Workout> workoutList = new ArrayList<>();
         
         try {
-            workoutList = manager.getWorkoutsBetweenDates(startDate, endDate);
+            workoutList = manager.getAllWorkouts();
         } catch (SQLException e) {
             System.out.println(
                 "Error in ExerciseHistoryController.showHistory(): "
@@ -176,6 +161,9 @@ public class ExerciseHistoryController {
         
         setUpHistoryListView(workoutList, exerciseInfo);
         setUpRecordsTableView(workoutList, exerciseInfo);
+        
+        int minRepCount = 1;
+        setUpProgressionChart(workoutList, exerciseInfo, minRepCount);
     }
     
     private void setUpHistoryListView(final List<Workout> workoutList,
@@ -242,5 +230,51 @@ public class ExerciseHistoryController {
             }
         }
         return recordsMap;
+    }
+    
+    private void setUpProgressionChart(final List<Workout> workoutList, final ExerciseInfo exerciseInfo, int minRepCount) {
+        Map<Date, Double> progressionMap = calculateProgression(workoutList, exerciseInfo, minRepCount);
+        
+        progressionLineChart.setTitle("Progression for rep count >= " + minRepCount);
+        
+        XYChart.Series series = new XYChart.Series<>();
+        progressionMap.keySet().stream().sorted().forEach(
+            date -> {
+                series.getData().add(
+                    new XYChart.Data<>(date.toString(), progressionMap.get(date))
+                );
+            }
+        );
+        
+        progressionLineChart.getData().setAll(series);
+    }
+    
+    private Map<Date, Double> calculateProgression(final List<Workout> workoutList, final ExerciseInfo exerciseInfo, int minRepCount) {
+        Map<Date, Double> progressionMap = new HashMap<>();
+        
+        double lastRecordWeight = 0.0;
+        for (final Workout workout : workoutList) {
+            
+            Date date = workout.getDate();
+            for (final Exercise exercise : workout.getExerciseList()) {
+                
+                if (exercise.getExerciseInfo().equals(exerciseInfo)) {
+                    for (final ExerciseSet exerciseSet : exercise.getExerciseSetList()) {
+                        
+                        int reps = exerciseSet.getRepetitions();
+                        double weight = exerciseSet.getWorkingWeight();
+                        
+                        if (reps >= minRepCount && weight > lastRecordWeight) {
+                            
+                            progressionMap.put(date, weight);
+                            
+                            lastRecordWeight = weight;
+                        }
+                        
+                    }
+                }
+            }
+        }
+        return progressionMap;
     }
 }

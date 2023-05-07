@@ -10,6 +10,7 @@ import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
 
 public class ExerciseRecordEntry {
+    
     private final IntegerProperty repetitions;
     private final DoubleProperty weight;
     private final ObjectProperty<Date> date;
