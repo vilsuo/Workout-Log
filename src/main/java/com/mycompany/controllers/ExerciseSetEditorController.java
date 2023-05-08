@@ -100,9 +100,9 @@ public class ExerciseSetEditorController {
             return;
         }
         
-        int workingSets = Integer.valueOf(workingSetsTF.getText());
-        int repetitions = Integer.valueOf(repetitionsTF.getText());
-        double workingWeight = Double.valueOf(workingWeightTF.getText());
+        int workingSets = Integer.parseInt(workingSetsTF.getText());
+        int repetitions = Integer.parseInt(repetitionsTF.getText());
+        double workingWeight = Double.parseDouble(workingWeightTF.getText());
             
         if (exerciseSet.get() == null) {
             // add new

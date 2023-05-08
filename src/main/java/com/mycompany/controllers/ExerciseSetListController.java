@@ -16,7 +16,6 @@ import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.event.EventTarget;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -34,6 +33,8 @@ public class ExerciseSetListController {
     private final ManagerImpl manager = new ManagerImpl(App.DATABASE_PATH);
     private final String EXERCISE_SET_EDITOR_PATH =
         "/fxml/ExerciseSetEditor.fxml";
+    private final String EXERCISE_SET_TEMPLATE_CALCULATOR_PATH =
+        "/fxml/ExerciseSetTemplateCalculator.fxml";
     
     @FXML private Label exerciseInfoNameLabel;
     
@@ -61,14 +62,8 @@ public class ExerciseSetListController {
     
     public void initialize() {
         setUpListView();
-        /*
-        exerciseSetListView.setCellFactory(
-            param -> new DragAndDropListCell(ExerciseSet.class)
-        );
-        */
         setUpListeners();
         setUpProperties();
-        //setUpEventHandlers();
     }
     
     private void setUpListView() {
@@ -140,35 +135,7 @@ public class ExerciseSetListController {
         
         removeButton.disableProperty().bind(exerciseSetNotSelectedBinding);
     }
-    /*
-    private void setUpEventHandlers() {
-        exerciseSetListView.addEventHandler(
-            CustomMouseEvent.MOUSE_DOUBLE_CLICKED,
-            event -> {
-                final EventTarget eventTarget = event.getTarget();
-                if (eventTarget instanceof DragAndDropListCell) {
-                    DragAndDropListCell target =
-                        (DragAndDropListCell) eventTarget;
-                    
-                    if (target.getItem() == null || !(target.getItem() instanceof ExerciseSet)) {
-                        System.out.println("is null or not instance");
-                        return;
-                    }
-                    
-                    try {
-                        editExerciseSet((ExerciseSet) target.getItem());
-                        
-                    } catch (IOException e) {
-                        System.out.println(
-                            "Error in ExerciseSetListController exerciseSetListView "
-                            + "MOUSE_DOUBLE_CLICKED handler: " + e.getMessage()
-                        );
-                    }
-                }
-            }
-        );
-    }
-    */
+    
     @FXML
     private void newExerciseSet() throws Exception {
         String resource = EXERCISE_SET_EDITOR_PATH;
@@ -185,6 +152,26 @@ public class ExerciseSetListController {
             }
         );
 
+        showEditorWindow(root);
+    }
+    
+    @FXML
+    private void newExerciseSetsFromTemplate() throws IOException {
+        String resource = EXERCISE_SET_TEMPLATE_CALCULATOR_PATH;
+        FXMLLoader loader = new FXMLLoader(getClass().getResource(resource));
+        Parent root = loader.load();
+
+        ExerciseSetTemplateCalculatorController controller = loader.getController();
+        controller.exerciseSetListProperty().addListener(
+            (obs, oldValue, newValue) -> {
+                if (newValue != null) {
+                    newValue.forEach(
+                        value -> System.out.println(value)
+                    );
+                }
+            }
+        );
+        
         showEditorWindow(root);
     }
     
@@ -237,6 +224,7 @@ public class ExerciseSetListController {
         
         Scene scene = new Scene(parent);
         stage.setScene(scene);
+        stage.setResizable(false);
         stage.showAndWait();
     }
 }

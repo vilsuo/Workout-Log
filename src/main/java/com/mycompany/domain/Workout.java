@@ -119,18 +119,9 @@ public class Workout implements Comparable<Workout> {
     
     @Override
     public int compareTo(Workout other) {
-        /*
-        if (date.get().before(other.getDate())) {
-            return -1;
-            
-        } 
-        return orderNumber.get() - other.orderNumber.get();
-        */
-        
         if (date.get().equals(other.getDate())) {
             return orderNumber.get() - other.orderNumber.get();
         }
-        
         return date.get().before(other.getDate()) ? -1 : 1;
     }
     

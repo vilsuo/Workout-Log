@@ -33,7 +33,8 @@
                     <maxWidth>
                         <Double fx:constant="MAX_VALUE" />
                     </maxWidth>
-                 </Button>
+                </Button>
+                
                 <Button text="Remove" onAction="#removeWorkout" fx:id="removeButton" HBox.hgrow="ALWAYS">
                     <maxWidth>
                         <Double fx:constant="MAX_VALUE" />
