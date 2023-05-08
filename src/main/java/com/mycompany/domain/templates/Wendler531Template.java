@@ -10,43 +10,14 @@ import javafx.collections.ObservableList;
 
 public final class Wendler531Template {
     
-    //private static final ManagerImpl manager = new ManagerImpl(App.DATABASE_PATH);
-    
-    private final static int TRAINING_ONE_REPETITION_MAX = 90;
-    
-    /*
-    public static Exercise createExercise(Workout workout, ExerciseInfo exerciseInfo, 
-            double oneRepetitionMax, double weeklyIncrement, int weekNumber) throws SQLException {
-        
-        int exerciseOrderNumber = workout.getExerciseList().size() + 1;
-        int exerciseId = manager.createExercise(workout.getId(), exerciseInfo.getId(), exerciseOrderNumber);
-        Exercise exercise = new Exercise(exerciseId, exerciseInfo, exerciseOrderNumber);
-        
-        double trainingOneRepetitionMax =
-            (oneRepetitionMax * TRAINING_ONE_REPETITION_MAX / 100.0)
-            + (weekNumber - 1) * weeklyIncrement;
-        
-        for (int setNumber = 1; setNumber <= 3; ++setNumber) {
-            int repetitions = calculateNumberOfWorkingRepetitions(weekNumber, setNumber);
-            int percentage = calculatePercentage(weekNumber, setNumber);
-            double workingWeight = calculateWorkingWeight(percentage, trainingOneRepetitionMax);
-
-            int exerciseSetId = manager.createExerciseSet(1, repetitions, workingWeight, setNumber);
-            ExerciseSet exerciseSet = new ExerciseSet(exerciseSetId, 1, repetitions, workingWeight, setNumber);
-
-            manager.addExerciseSetToExercise(exerciseId, exerciseSetId);
-            exercise.addExerciseSet(exerciseSet);
-        }
-        return exercise;
-    }
-    */
+    private final static int TRAINING_ONE_REPETITION_MAX_PERCENT = 90;
     
     public static ObservableList<ExerciseSet> createExerciseSetList(
             double oneRepetitionMax, int weekNumber) {
         
         List<ExerciseSet> exerciseSetList = new ArrayList<>();
         double trainingOneRepetitionMax =
-            (oneRepetitionMax * TRAINING_ONE_REPETITION_MAX / 100.0);
+            (oneRepetitionMax * TRAINING_ONE_REPETITION_MAX_PERCENT / 100.0);
         
         for (int setNumber = 1; setNumber <= 3; ++setNumber) {
             int repetitions = calculateNumberOfWorkingRepetitions(weekNumber, setNumber);

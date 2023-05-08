@@ -33,6 +33,7 @@ public class ExerciseSetListController {
     private final ManagerImpl manager = new ManagerImpl(App.DATABASE_PATH);
     private final String EXERCISE_SET_EDITOR_PATH =
         "/fxml/ExerciseSetEditor.fxml";
+    
     private final String EXERCISE_SET_TEMPLATE_CALCULATOR_PATH =
         "/fxml/ExerciseSetTemplateCalculator.fxml";
     
@@ -41,7 +42,6 @@ public class ExerciseSetListController {
     @FXML private ListView<ExerciseSet> exerciseSetListView;
     @FXML private ListView exerciseHistoryListView;
     
-    //@FXML private Button editButton;
     @FXML private Button removeButton;
     
     private final ObjectProperty<Exercise> exercise =
@@ -166,7 +166,9 @@ public class ExerciseSetListController {
             (obs, oldValue, newValue) -> {
                 if (newValue != null) {
                     newValue.forEach(
-                        value -> System.out.println(value)
+                        exerciseSet -> {
+                            exerciseSetListView.getItems().add(exerciseSet);
+                        }
                     );
                 }
             }

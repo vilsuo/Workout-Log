@@ -13,8 +13,8 @@ import javafx.scene.Parent;
 
 /*
 TODO
-- WorkoutListView
-    - smolov jr / wendler531 templates
+- ExerciseSetTemplateCalculator
+    - add cycleNumber TextField? to wendler531 option
 
 - category workout pie chart (exercises inside one category)
 */

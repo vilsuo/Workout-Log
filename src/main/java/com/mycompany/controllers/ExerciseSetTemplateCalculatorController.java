@@ -7,6 +7,9 @@ import com.mycompany.domain.templates.TrainingProgram;
 import com.mycompany.domain.templates.Wendler531Template;
 import com.mycompany.utilities.InputValidator;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.SimpleListProperty;
 import javafx.collections.FXCollections;
@@ -14,11 +17,8 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.TextField;
-import javafx.scene.layout.VBox;
 
 public class ExerciseSetTemplateCalculatorController {
-    
-    @FXML private VBox root;
     
     @FXML private ComboBox templateComboBox;
     
@@ -29,29 +29,47 @@ public class ExerciseSetTemplateCalculatorController {
     @FXML private TextField oneRepetitionMaxTextField;
     @FXML private Button addButton;
     
-    private ListProperty<ExerciseSet> exerciseSetList =
+    private final ListProperty<ExerciseSet> exerciseSetList =
         new SimpleListProperty<>();
     
     public ListProperty<ExerciseSet> exerciseSetListProperty() {
         return exerciseSetList;
     }
+    
+    private Map<TrainingProgram, List<String>> tPWeekCBValuesMap = new HashMap<>();
 
     public void initialize() {
-        setUpListeners();
         setUpComboBoxValues();
+        setUpListeners();
     }
     
     private void setUpComboBoxValues() {
         templateComboBox.getItems().setAll(
-            Arrays.asList(TrainingProgram.WENDLER_531, TrainingProgram.SMOLOV_JR)
+            Arrays.asList(
+                TrainingProgram.WENDLER_531,
+                TrainingProgram.SMOLOV_JR
+            )
         );
         templateComboBox.getSelectionModel().select(0);
         
+        // Wendler531 cycle is 4 weeks, while SmolovJr only 3 weeks
+        tPWeekCBValuesMap.put(
+            TrainingProgram.WENDLER_531, Arrays.asList("1", "2", "3", "4")
+        );
+        tPWeekCBValuesMap.put(
+            TrainingProgram.SMOLOV_JR, Arrays.asList("1", "2", "3")
+        );
+        
         weekComboBox.getItems().setAll(
-            FXCollections.observableList(Arrays.asList("1", "2", "3", "4"))
+            FXCollections.observableList(
+                tPWeekCBValuesMap.get(
+                    TrainingProgram.WENDLER_531
+                )
+            )
         );
         weekComboBox.getSelectionModel().select(0);
         
+        // Wendler531 and SmolovJr both have 4 weekly training days
         dayComboBox.getItems().setAll(
             FXCollections.observableList(Arrays.asList("1", "2", "3", "4"))
         );
@@ -76,13 +94,18 @@ public class ExerciseSetTemplateCalculatorController {
             }
         );
         
-        
         // In the Wendler531 training program, the day number only affects which
         // exercise is selected.
         templateComboBox.getSelectionModel().selectedItemProperty().addListener(
             (obs, oldValue, newValue) -> {
                 if (newValue != null) {
                     TrainingProgram selectedTp = (TrainingProgram) newValue;
+                    
+                    weekComboBox.getItems().setAll(
+                        tPWeekCBValuesMap.get(selectedTp)
+                    );
+                    weekComboBox.getSelectionModel().select(0);
+                    
                     boolean isWendler = selectedTp == TrainingProgram.WENDLER_531;
                     
                     dayComboBox.setDisable(isWendler);
@@ -113,7 +136,7 @@ public class ExerciseSetTemplateCalculatorController {
             setSmolovJR(oneRepetitionMax, weekNumber);
         }
         
-        //close();
+        close();
     }
     
     private void setWendler531(double oneRepetitionMax, int weekNumber) {
@@ -141,6 +164,6 @@ public class ExerciseSetTemplateCalculatorController {
     }
     
     private void close() {
-        root.getScene().getWindow().hide();
+        addButton.getScene().getWindow().hide();
     }
 }

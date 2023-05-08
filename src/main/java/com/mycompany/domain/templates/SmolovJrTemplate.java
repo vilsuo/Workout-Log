@@ -14,7 +14,7 @@ public final class SmolovJrTemplate {
         
         List<ExerciseSet> exerciseSetList = new ArrayList<>();
         
-        int workingSets = calculateNumberOfWorkingRepetitions(dayNumber);
+        int workingSets = calculateNumberOfWorkingSets(dayNumber);
         int repetitions = calculateNumberOfWorkingRepetitions(dayNumber);
         
         int percentage = calculatePercentage(dayNumber);
