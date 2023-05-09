@@ -5,6 +5,7 @@ import com.mycompany.application.App;
 import com.mycompany.dao.ManagerImpl;
 import com.mycompany.domain.Workout;
 import java.sql.Date;
+import java.sql.SQLException;
 import java.util.List;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -57,7 +58,7 @@ public class WorkoutCopyingContextMenu extends ContextMenu {
                                     dateList.add(dateToCopyTo);
                                     workoutListView.getItems().add(copiedWorkout);
                                     
-                                } catch (Exception e) {
+                                } catch (SQLException e) {
                                     System.out.println(
                                         "Error in WorkoutCopyingContextMenu MenuItemEvent: "
                                         + e.getMessage()
@@ -68,7 +69,7 @@ public class WorkoutCopyingContextMenu extends ContextMenu {
                         getItems().add(menuItem);
                     }
                     
-                } catch (Exception e) {
+                } catch (SQLException e) {
                     System.out.println(
                         "Error in WorkoutContextMenu setOnShowing: "
                         + e.getMessage()

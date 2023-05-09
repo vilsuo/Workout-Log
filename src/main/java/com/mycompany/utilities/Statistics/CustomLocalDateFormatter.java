@@ -8,14 +8,14 @@ import java.util.List;
 public final class CustomLocalDateFormatter {
     
     public static String formatLocalDate(LocalDate localDate, String choice) {
-        if (choice.equals("Week")) {
-            
-            return new StatisticsWeek(localDate).formatted();
-            
-        } else if (choice.equals("Month")) {
-            return new StatisticsMonth(localDate).formatted();
+        switch (choice) {
+            case "Week":
+                return new StatisticsWeek(localDate).formatted();
+            case "Month":
+                return new StatisticsMonth(localDate).formatted();
+            default:
+                throw new IllegalArgumentException("Invalid choice: " + choice);
         }
-        return null;
     }
     
     public static List<String> getFormattedLocalDatesBetween(LocalDate startLocalDate, LocalDate endLocalDate, String choice) {
@@ -33,7 +33,7 @@ public final class CustomLocalDateFormatter {
                 endSp = new StatisticsMonth(endLocalDate);
                 break;
             default:
-                return null;
+                throw new IllegalArgumentException("Invalid choice: " + choice);
         }
         
         while (startSp.isBeforeOrInTheSamePeriodAs(endSp)) {

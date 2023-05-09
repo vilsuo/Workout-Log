@@ -2,6 +2,7 @@
 package com.mycompany.utilities;
 
 public final class InputValidator {
+    
     public static boolean isNonNegativeInteger(String str) {
         String regex = "[0-9]+";
         return str.matches(regex);

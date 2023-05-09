@@ -42,37 +42,48 @@ public final class Wendler531Template {
     
     
     /**
-     * @param week      integer in the set [1, 4]
-     * @param setNumber integer in the set [1, 3]
+     * @param weekNumber    integer in the set [1, 4]
+     * @param setNumber     integer in the set [1, 3]
      * @return 
      */
-    private static int calculatePercentage(int week, int setNumber) {
-        if (week < 4) {
-            return 50 + 5 * week + 10 * setNumber;
+    private static int calculatePercentage(int weekNumber, int setNumber) {
+        if (setNumber < 1 || setNumber > 3) {
+            throw new IllegalArgumentException("Invalid setNumber: " + setNumber);
         }
         
-        // week == 4
-        return 30 + 10 * setNumber;
+        if (0 < weekNumber && weekNumber < 4) {
+            return 50 + 5 * weekNumber + 10 * setNumber;
+            
+        } else if (weekNumber == 4) {
+            return 30 + 10 * setNumber;
+            
+        } else {
+            throw new IllegalArgumentException("Invalid weekNumber: " + weekNumber);
+        }
     }
     
     /**
-     * @param week      integer in the set [1, 4]
-     * @param setNumber integer in the set [1, 3]
+     * @param weekNumber    integer in the set [1, 4]
+     * @param setNumber     integer in the set [1, 3]
      * @return 
      */
-    private static int calculateNumberOfWorkingRepetitions(int week, int setNumber) {
-        switch (week) {
+    private static int calculateNumberOfWorkingRepetitions(int weekNumber, int setNumber) {
+        switch (weekNumber) {
             case 1:
                 return 5;
             case 2:
                 return 3;
             case 3:
-                // new setNumber: 1, 2, 3
-                // return value:  5, 3, 1
+                if (setNumber < 1 || setNumber > 3) {
+                    throw new IllegalArgumentException("Invalid setNumber: " + setNumber);
+                }
+                // setNumber:    1, 2, 3
+                // return value: 5, 3, 1
                 return 7 - 2 * setNumber;
-            default:
-                // week == 4
+            case 4:
                 return 5;
+            default:
+                throw new IllegalArgumentException("Invalid weekNumber: " + weekNumber);
         }
     }
     

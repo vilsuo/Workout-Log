@@ -1,6 +1,7 @@
 package com.mycompany.application;
 
 import com.mycompany.events.DoubleClickEventDispatcher;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -37,8 +38,9 @@ public class App extends Application {
             
             primaryStage.setScene(scene);
             primaryStage.show();
-        } catch(Exception e) {
-            e.printStackTrace();
+            
+        } catch(IOException e) {
+            System.out.println("Error in App.start(): " + e.getMessage());
         }
     }
     

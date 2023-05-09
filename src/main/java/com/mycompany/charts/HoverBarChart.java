@@ -27,16 +27,6 @@ public class HoverBarChart<X, Y> extends BarChart<X, Y> {
         for (int i = 0; i < series.getData().size(); i++) {
             XYChart.Data<X, Y> dataPoint = series.getData().get(i);
             
-            /*
-            series.nodeProperty().addListener(
-                (obs, oldNode, newNode) -> {
-                    if (newNode != null) {
-                        System.out.println("in series node listener");
-                    }
-                }
-            );
-            */
-            
             dataPoint.getNode().setOnMouseEntered(event -> select(dataPoint));
             dataPoint.getNode().setOnMouseExited(event -> deselect(dataPoint));
         }

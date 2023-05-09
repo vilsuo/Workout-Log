@@ -13,9 +13,12 @@ import java.sql.Date;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 import javafx.beans.binding.Bindings;
 import javafx.collections.FXCollections;
@@ -23,6 +26,7 @@ import javafx.collections.ObservableList;
 import javafx.collections.ObservableMap;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
+import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.Button;
@@ -61,7 +65,7 @@ public class ExerciseHistoryController {
     
     @FXML private LineChart progressionLineChart;
     
-    private Map<String, Boolean> selectedMaximumRepetitionCountsMap = new HashMap<>();
+    private final Map<String, Boolean> selectedMaximumRepetitionCountsMap = new HashMap<>();
     
     private ObservableMap<String, Map<String, Integer>> exerciseInfoMap;
     
@@ -99,7 +103,7 @@ public class ExerciseHistoryController {
         try {
             return manager.getAllExerciseInfos();
             
-        } catch (Exception e) {
+        } catch (SQLException e) {
             System.out.println(
                 "Error in ExerciseHistoryController.loadExerciseInfoList(): "
                 + e.getMessage()
@@ -193,8 +197,6 @@ public class ExerciseHistoryController {
         
         setUpHistoryListView(workoutList, exerciseInfo);
         setUpRecordsTableView(workoutList, exerciseInfo);
-        
-        progressionLineChart.getData().clear();
         setUpProgressionLineChart(workoutList, exerciseInfo);
     }
     
@@ -291,11 +293,14 @@ public class ExerciseHistoryController {
     }
     
     private void setUpProgressionLineChart(final List<Workout> workoutList, final ExerciseInfo exerciseInfo) {
+        progressionLineChart.getData().clear();
+        
+        final Set<String> progressionLineChartCategoriesSet = new LinkedHashSet<>();
         for (String maximumRepetitionCount : selectedMaximumRepetitionCountsMap.keySet()) {
             // check if repetition count is selected
             if (selectedMaximumRepetitionCountsMap.get(maximumRepetitionCount)) {
                 Map<Date, Double> progressionMap = calculateProgression(
-                    workoutList, exerciseInfo, Integer.valueOf(maximumRepetitionCount)
+                    workoutList, exerciseInfo, Integer.parseInt(maximumRepetitionCount)
                 );
 
                 XYChart.Series series = new XYChart.Series<>();
@@ -305,13 +310,34 @@ public class ExerciseHistoryController {
                         series.getData().add(
                             new XYChart.Data<>(date.toString(), progressionMap.get(date))
                         );
+                        progressionLineChartCategoriesSet.add(date.toString());
                     }
                 );
+                
                 progressionLineChart.getData().add(series);
             }
         }
+        
+        // sort x-axis values
+        final ObservableList<String> progressionLineChartCategoriesList =
+            FXCollections.observableArrayList(progressionLineChartCategoriesSet);
+        
+        Collections.sort(progressionLineChartCategoriesList);
+        
+        CategoryAxis  progressionLineChartXAxis = ((CategoryAxis) progressionLineChart.getXAxis());
+        progressionLineChartXAxis.setCategories(progressionLineChartCategoriesList);
+        
+        // to show category labels
+        progressionLineChartXAxis.setAutoRanging(true);
     }
     
+    /**
+     * 
+     * @param workoutList list must be sorted by date increasing
+     * @param exerciseInfo
+     * @param maximumRepetitionCountrising
+     * @return 
+     */
     private Map<Date, Double> calculateProgression(final List<Workout> workoutList,
             final ExerciseInfo exerciseInfo, int maximumRepetitionCount) {
         

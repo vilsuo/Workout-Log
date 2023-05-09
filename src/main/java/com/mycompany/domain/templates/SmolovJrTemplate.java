@@ -36,20 +36,55 @@ public final class SmolovJrTemplate {
         return FXCollections.observableList(exerciseSetList);
     }
     
+    /**
+     * 
+     * @param dayNumber integer in the set [1-4]
+     * @return          1 -> 70, 2 -> 75, 3 -> 80, 4 -> 85
+     */
     private static int calculatePercentage(int dayNumber ){
+        if (dayNumber < 1 || dayNumber > 4) {
+            throw new IllegalArgumentException("Invalid dayNumber: " + dayNumber);
+        }
         return 70 + 5 * (dayNumber - 1);
     }
     
-    // day:          1, 2, 3, 4,  5, 6, 7, 8,...
-    // working sets: 6, 7, 8, 10, 6, 7, 8, 10,...
+    /**
+     * 
+     * @param dayNumber integer in the set [1-4]
+     * @return          1 -> 6, 2 -> 7, 3 -> 8, 4 -> 10
+     */
     private static int calculateNumberOfWorkingSets(int dayNumber) {
-        return 6 + ((dayNumber - 1) % 4) + ((dayNumber % 4 == 0) ? 1 : 0);
+        switch (dayNumber) {
+            case 1:
+                return 6;
+            case 2:
+                return 7;
+            case 3:
+                return 8;
+            case 4:
+                return 10;
+            default:
+                throw new IllegalArgumentException("Invalid dayNumber: " + dayNumber);
+        }
+        
+        // cyclic
+        //return 6 + ((dayNumber - 1) % 4) + ((dayNumber % 4 == 0) ? 1 : 0);
     }
     
-    // day:         1, 2, 3, 4, 5, 6, 7, 8,...
-    // repetitions: 6, 5, 4, 3, 6, 5, 4, 3,...
+    /**
+     * 
+     * @param dayNumber integer in the set [1-4]
+     * @return          1 -> 6, 2 -> 5, 3 -> 4, 4 -> 3
+     */
     private static int calculateNumberOfWorkingRepetitions(int dayNumber) {
-        return 6 - ((dayNumber - 1) % 4);
+        if (dayNumber < 1 || dayNumber > 4) {
+            throw new IllegalArgumentException("Invalid dayNumber: " + dayNumber);
+        }
+        
+        return 7 - dayNumber;
+        
+        // cyclic
+        //return 6 - ((dayNumber - 1) % 4);
     }
     
     private static double calculateWorkingWeight(double percentage, double oneRepMax, double extra) {

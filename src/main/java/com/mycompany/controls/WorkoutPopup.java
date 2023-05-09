@@ -5,6 +5,7 @@ import com.mycompany.application.App;
 import com.mycompany.dao.ManagerImpl;
 import com.mycompany.domain.Workout;
 import java.sql.Date;
+import java.sql.SQLException;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.Node;
@@ -30,7 +31,7 @@ public class WorkoutPopup extends Popup {
                 show(node, x, y);
             }
 
-        } catch (Exception e) {
+        } catch (SQLException e) {
             System.out.println(
                 "Error in WorkoutPopup.display: "
                 + e.getMessage()

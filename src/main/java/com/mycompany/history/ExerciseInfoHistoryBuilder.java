@@ -25,7 +25,6 @@ public final class ExerciseInfoHistoryBuilder {
             final List<Workout> workoutList, final ExerciseInfo exerciseInfo) {
         
         ObservableList<String> obsList = FXCollections.observableArrayList();
-        
         for (Workout workout : workoutList) {
             boolean dateAdded = false;
             
@@ -53,7 +52,6 @@ public final class ExerciseInfoHistoryBuilder {
             }
         }
         FXCollections.reverse(obsList);
-        
         return obsList;
     }
 }
