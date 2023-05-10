@@ -40,12 +40,7 @@ import javafx.scene.layout.HBox;
 
 /*
 TODO
-- add option to add more lines to graph
-- add minRepCount textfield
-
-- make sure the min rep count label has an integer value
-
-- implement total volume/total sets charts
+- rename maximum repcounts to minimum
 
 */
 public class ExerciseHistoryController {
@@ -65,7 +60,7 @@ public class ExerciseHistoryController {
     
     @FXML private LineChart progressionLineChart;
     
-    private final Map<String, Boolean> selectedMaximumRepetitionCountsMap = new HashMap<>();
+    private final Map<Integer, Boolean> selectedMaximumRepetitionCountsMap = new HashMap<>();
     
     private ObservableMap<String, Map<String, Integer>> exerciseInfoMap;
     
@@ -127,7 +122,7 @@ public class ExerciseHistoryController {
             final CheckBox maximumRepetitionCountCheckBox = new CheckBox(str);
             maximumRepetitionCountCheckBox.selectedProperty().addListener(
                 (obs, oldValue, newValue) -> {
-                    selectedMaximumRepetitionCountsMap.put(str, newValue);
+                    selectedMaximumRepetitionCountsMap.put(Integer.valueOf(str), newValue);
                 }
             );
             hb.getChildren().add(maximumRepetitionCountCheckBox);
@@ -296,11 +291,14 @@ public class ExerciseHistoryController {
         progressionLineChart.getData().clear();
         
         final Set<String> progressionLineChartCategoriesSet = new LinkedHashSet<>();
-        for (String maximumRepetitionCount : selectedMaximumRepetitionCountsMap.keySet()) {
+        List<Integer> sortedSelectedMaximumRepetitionCountsList =
+                selectedMaximumRepetitionCountsMap.keySet().stream().sorted().collect(Collectors.toList());
+        
+        for (int maximumRepetitionCount : sortedSelectedMaximumRepetitionCountsList) {
             // check if repetition count is selected
             if (selectedMaximumRepetitionCountsMap.get(maximumRepetitionCount)) {
                 Map<Date, Double> progressionMap = calculateProgression(
-                    workoutList, exerciseInfo, Integer.parseInt(maximumRepetitionCount)
+                    workoutList, exerciseInfo, maximumRepetitionCount
                 );
 
                 XYChart.Series series = new XYChart.Series<>();

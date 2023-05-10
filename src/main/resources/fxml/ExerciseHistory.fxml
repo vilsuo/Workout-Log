@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import com.mycompany.charts.HighLightLineChart?>
 <?import java.lang.Double?>
 <?import javafx.collections.FXCollections?>
 <?import javafx.scene.control.cell.PropertyValueFactory?>
@@ -44,7 +45,12 @@
             </children>
         </HBox>
         
-        <ScrollPane fx:id="maximumRepetitionCountScrollPane" vbarPolicy="NEVER" />
+        <HBox spacing="10" alignment="CENTER">
+            <children>
+                <Label text="Minimum reptition counts to plot" />
+                <ScrollPane fx:id="maximumRepetitionCountScrollPane" vbarPolicy="NEVER" />
+            </children>
+        </HBox>
         
         <VBox spacing="10" VBox.vgrow="ALWAYS">
             <children>
@@ -104,7 +110,7 @@
                                         </Tab>
                                         
                                         <Tab text="Progression">
-                                            <LineChart fx:id="progressionLineChart" animated="false" title="Progression for rep counts">
+                                            <HighLightLineChart fx:id="progressionLineChart" animated="false" title="Progression for rep counts">
                                                 <xAxis>
                                                     <CategoryAxis side="BOTTOM" animated="false" />
                                                 </xAxis>
@@ -114,7 +120,7 @@
                                                 <maxWidth>
                                                     <Double fx:constant="MAX_VALUE" />
                                                 </maxWidth>
-                                            </LineChart>
+                                            </HighLightLineChart>
                                         </Tab>
                                     </tabs>
                                 </TabPane>
