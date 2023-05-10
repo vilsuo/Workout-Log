@@ -7,6 +7,8 @@
 - edit workouts/exercises by double left clicking
 - create exercise sets based on popular workout programs [Wendler 5/3/1](https://www.lift.net/workout-routines/wendler-5-3-1/) and [Smolov Jr](https://www.smolovjr.com/smolov-squat-program/)
 
+[workout-preview!](readme-images/workout-preview.png)
+
 ### Calender
 - see monthly distribution of workouts
 - move between workouts by left-clicking a calendar cell with existing workout
