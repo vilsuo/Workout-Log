@@ -4,8 +4,8 @@
 ## Features
 ### Workout editor
 - create/delete workouts and exercises
-![new-exercise-preview]/(readme-images/new-exercise-preview.png)
-![new-exercise-set-preview]/(readme-images/new-exercise-set-preview.png)
+![new-exercise-preview](readme-images/new-exercise-preview.png)
+![new-exercise-set-preview](readme-images/new-exercise-set-preview.png)
 - edit workouts/exercises by double left clicking
 - create exercise sets based on popular workout programs [Wendler 5/3/1](https://www.lift.net/workout-routines/wendler-5-3-1/) and [Smolov Jr](https://www.smolovjr.com/smolov-squat-program/)
 ![new-exercise-set-from-template-preview](readme-images/new-exercise-set-from-template-preview.png)
