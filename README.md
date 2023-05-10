@@ -26,9 +26,9 @@
 ### Category statistics
 See variuos charts:
 - weekly/monthly bar charts with with total sets and exercises by exercise category
-[!category-statistics-bar-chart](readme-images/category-statistics-bar-chart.png)
+![category-statistics-bar-chart](readme-images/category-statistics-bar-chart.png)
 - pie chart with total sets and exercises by exercises category 
-[!category-statistics-pie-chart](readme-images/category-statistics-pie-chart.png)
+![category-statistics-pie-chart](readme-images/category-statistics-pie-chart.png)
 
 ### Exercise History
 - view exercise history list
