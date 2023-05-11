@@ -1,5 +1,5 @@
 # Workout-Log
-
+Workout Log desktop application. Saves data to database. User interface coded with JavaFX.
 
 ## Features
 ### Workout editor
